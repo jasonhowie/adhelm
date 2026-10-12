@@ -1,0 +1,16 @@
+{
+  "mutateOperations": [
+    {
+      "adGroupOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/adGroups/7722",
+          "cpcBidMicros": "2250000"
+        },
+        "updateMask": "cpcBidMicros"
+      }
+    }
+  ],
+  "partialFailure": false,
+  "validateOnly": false,
+  "responseContentType": "RESOURCE_NAME_ONLY"
+}

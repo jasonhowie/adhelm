@@ -1,0 +1,138 @@
+{
+  "mutateOperations": [
+    {
+      "campaignBudgetOperation": {
+        "create": {
+          "resourceName": "customers/1234567890/campaignBudgets/-1",
+          "explicitlyShared": false,
+          "period": "CUSTOM_PERIOD",
+          "deliveryMethod": "STANDARD",
+          "totalAmountMicros": "250000000"
+        }
+      }
+    },
+    {
+      "campaignOperation": {
+        "create": {
+          "resourceName": "customers/1234567890/campaigns/-2",
+          "name": "Customer Search campaign",
+          "advertisingChannelType": "SEARCH",
+          "status": "PAUSED",
+          "campaignBudget": "customers/1234567890/campaignBudgets/-1",
+          "startDateTime": "2030-03-01 00:00:00",
+          "endDateTime": "2030-03-31 23:59:59",
+          "networkSettings": {
+            "targetGoogleSearch": true,
+            "targetSearchNetwork": false,
+            "targetContentNetwork": false,
+            "targetPartnerSearchNetwork": false,
+            "targetYoutube": false,
+            "targetGoogleTvNetwork": false
+          },
+          "targetSpend": {}
+        }
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "create": {
+          "campaign": "customers/1234567890/campaigns/-2",
+          "status": "PAUSED",
+          "negative": false,
+          "location": {
+            "geoTargetConstant": "geoTargetConstants/2840"
+          }
+        }
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "create": {
+          "campaign": "customers/1234567890/campaigns/-2",
+          "status": "PAUSED",
+          "negative": false,
+          "language": {
+            "languageConstant": "languageConstants/1000"
+          }
+        }
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "create": {
+          "campaign": "customers/1234567890/campaigns/-2",
+          "status": "PAUSED",
+          "negative": false,
+          "adSchedule": {
+            "dayOfWeek": "MONDAY",
+            "startHour": 9,
+            "startMinute": "ZERO",
+            "endHour": 17,
+            "endMinute": "ZERO"
+          }
+        }
+      }
+    },
+    {
+      "adGroupOperation": {
+        "create": {
+          "resourceName": "customers/1234567890/adGroups/-3",
+          "name": "Customer Search ad group",
+          "campaign": "customers/1234567890/campaigns/-2",
+          "type": "SEARCH_STANDARD",
+          "status": "PAUSED"
+        }
+      }
+    },
+    {
+      "adGroupCriterionOperation": {
+        "create": {
+          "adGroup": "customers/1234567890/adGroups/-3",
+          "status": "PAUSED",
+          "negative": false,
+          "keyword": {
+            "text": "customer software",
+            "matchType": "PHRASE"
+          }
+        }
+      }
+    },
+    {
+      "adGroupAdOperation": {
+        "create": {
+          "adGroup": "customers/1234567890/adGroups/-3",
+          "status": "PAUSED",
+          "ad": {
+            "finalUrls": [
+              "https://example.test/demo?utm_source=google"
+            ],
+            "responsiveSearchAd": {
+              "headlines": [
+                {
+                  "text": "Customer headline"
+                },
+                {
+                  "text": "Customer proof"
+                },
+                {
+                  "text": "Learn more"
+                }
+              ],
+              "descriptions": [
+                {
+                  "text": "Customer supplied description"
+                },
+                {
+                  "text": "A second approved description"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "partialFailure": false,
+  "validateOnly": false,
+  "responseContentType": "RESOURCE_NAME_ONLY"
+}

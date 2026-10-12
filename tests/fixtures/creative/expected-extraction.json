@@ -1,0 +1,1401 @@
+{
+  "results": {
+    "image-banner-40x10.webp": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "analyzer_name": "adhelm-local-image",
+        "analyzer_version": "1",
+        "aspect_ratio": "4:1",
+        "aspect_ratio_class": "LANDSCAPE_WIDE",
+        "byte_size": 46,
+        "colorfulness_basis_points": 1292,
+        "content_digest": "0a5f6d860c1eb287ef838092d33b8530cbbb1ac8e5df2f995a4157d0836fa085",
+        "contrast_basis_points": 7924,
+        "exif_orientation": null,
+        "exif_orientation_status": "NOT_PRESENT",
+        "extracted_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "extractor_name": "adhelm-local-image-structure",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "height_px": 10,
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "image_features_id": "image-features:sha256:7687254e5581561fa2ee256d8f97fc25d413511fe5ce65442eaf3462f54a836a",
+        "layout_cells": [
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 0
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 500,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 0
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 0
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 0
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 1
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 500,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 1
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 1
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 1
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 2
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 500,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 2
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 2
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 2
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 3
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 666,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 9764,
+            "row": 3
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 3
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1843,
+            "row": 3
+          }
+        ],
+        "layout_grid_columns": 4,
+        "layout_grid_rows": 4,
+        "layout_measured_in": "STORED_PIXEL_ORIENTATION",
+        "layout_status": "EXTRACTED",
+        "logo_presence_status": "NOT_EVALUATED_NO_LOCAL_DETECTOR",
+        "mean_lightness_basis_points": 5813,
+        "mean_saturation_basis_points": 4367,
+        "mime_type": "image/webp",
+        "palette": [
+          {
+            "hex": "#103010",
+            "proportion_basis_points": 5000
+          },
+          {
+            "hex": "#F0F0F0",
+            "proportion_basis_points": 5000
+          }
+        ],
+        "parameters_digest": "6f45391579edfcf6a6716b6f789003c5e17d16140c74a61eee73bad841f67b3b",
+        "pixel_data_status": "NOT_RETAINED",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "schema_version": 1,
+        "text_heuristic_version": "1",
+        "text_presence": "TEXT_UNLIKELY",
+        "text_presence_basis_points": 0,
+        "width_px": 40
+      }
+    },
+    "image-gradient-36x24.jpeg": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "analyzer_name": "adhelm-local-image",
+        "analyzer_version": "1",
+        "aspect_ratio": "3:2",
+        "aspect_ratio_class": "LANDSCAPE",
+        "byte_size": 829,
+        "colorfulness_basis_points": 5805,
+        "content_digest": "38646a9299327d7ee7bd60dee986c45d3a7e27d3423b4fc29645b3148d4a50e5",
+        "contrast_basis_points": 8184,
+        "exif_orientation": null,
+        "exif_orientation_status": "NOT_PRESENT",
+        "extracted_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "extractor_name": "adhelm-local-image-structure",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "height_px": 24,
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "image_features_id": "image-features:sha256:05152a52729483f19b852e9dea5ef78170cb9a358108273317c68c2700bec92e",
+        "layout_cells": [
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 601,
+            "mean_luminance_basis_points": 1633,
+            "row": 0
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 611,
+            "mean_luminance_basis_points": 3760,
+            "row": 0
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 618,
+            "mean_luminance_basis_points": 5873,
+            "row": 0
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 591,
+            "mean_luminance_basis_points": 7982,
+            "row": 0
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 601,
+            "mean_luminance_basis_points": 1633,
+            "row": 1
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 611,
+            "mean_luminance_basis_points": 3760,
+            "row": 1
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 618,
+            "mean_luminance_basis_points": 5873,
+            "row": 1
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 591,
+            "mean_luminance_basis_points": 7982,
+            "row": 1
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 601,
+            "mean_luminance_basis_points": 1633,
+            "row": 2
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 611,
+            "mean_luminance_basis_points": 3760,
+            "row": 2
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 618,
+            "mean_luminance_basis_points": 5873,
+            "row": 2
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 591,
+            "mean_luminance_basis_points": 7982,
+            "row": 2
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 601,
+            "mean_luminance_basis_points": 1633,
+            "row": 3
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 611,
+            "mean_luminance_basis_points": 3760,
+            "row": 3
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 618,
+            "mean_luminance_basis_points": 5873,
+            "row": 3
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 591,
+            "mean_luminance_basis_points": 7982,
+            "row": 3
+          }
+        ],
+        "layout_grid_columns": 4,
+        "layout_grid_rows": 4,
+        "layout_measured_in": "STORED_PIXEL_ORIENTATION",
+        "layout_status": "EXTRACTED",
+        "logo_presence_status": "NOT_EVALUATED_NO_LOCAL_DETECTOR",
+        "mean_lightness_basis_points": 4830,
+        "mean_saturation_basis_points": 6128,
+        "mime_type": "image/jpeg",
+        "palette": [
+          {
+            "hex": "#1010F0",
+            "proportion_basis_points": 1389
+          },
+          {
+            "hex": "#3030D0",
+            "proportion_basis_points": 1389
+          },
+          {
+            "hex": "#5050B0",
+            "proportion_basis_points": 1111
+          },
+          {
+            "hex": "#707090",
+            "proportion_basis_points": 1389
+          },
+          {
+            "hex": "#909070",
+            "proportion_basis_points": 1111
+          },
+          {
+            "hex": "#B0B050",
+            "proportion_basis_points": 1389
+          },
+          {
+            "hex": "#D0D030",
+            "proportion_basis_points": 1111
+          },
+          {
+            "hex": "#F0F010",
+            "proportion_basis_points": 1111
+          }
+        ],
+        "parameters_digest": "6f45391579edfcf6a6716b6f789003c5e17d16140c74a61eee73bad841f67b3b",
+        "pixel_data_status": "NOT_RETAINED",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "schema_version": 1,
+        "text_heuristic_version": "1",
+        "text_presence": "TEXT_UNLIKELY",
+        "text_presence_basis_points": 0,
+        "width_px": 36
+      }
+    },
+    "image-quadrants-32x32.png": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "analyzer_name": "adhelm-local-image",
+        "analyzer_version": "1",
+        "aspect_ratio": "1:1",
+        "aspect_ratio_class": "SQUARE",
+        "byte_size": 116,
+        "colorfulness_basis_points": 6239,
+        "content_digest": "1193f1d73ffe15f5d7be3c6607ec9f8c92c28205e7d8f6c64648dc0b33e91fc8",
+        "contrast_basis_points": 10000,
+        "exif_orientation": null,
+        "exif_orientation_status": "NOT_PRESENT",
+        "extracted_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "extractor_name": "adhelm-local-image-structure",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "height_px": 32,
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "image_features_id": "image-features:sha256:76d9a331ad9307f9b752eb5d137fba07b27bfcb6acfcd30302806b80d054921b",
+        "layout_cells": [
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 0
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 625,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 0
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 0,
+            "row": 0
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 0,
+            "row": 0
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 625,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 1
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 1250,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 1
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 0,
+            "row": 1
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 0,
+            "row": 1
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1686,
+            "row": 2
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1686,
+            "row": 2
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 549,
+            "row": 2
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 549,
+            "row": 2
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1686,
+            "row": 3
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 1686,
+            "row": 3
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 549,
+            "row": 3
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 549,
+            "row": 3
+          }
+        ],
+        "layout_grid_columns": 4,
+        "layout_grid_rows": 4,
+        "layout_measured_in": "STORED_PIXEL_ORIENTATION",
+        "layout_status": "EXTRACTED",
+        "logo_presence_status": "NOT_EVALUATED_NO_LOCAL_DETECTOR",
+        "mean_lightness_basis_points": 3070,
+        "mean_saturation_basis_points": 5000,
+        "mime_type": "image/png",
+        "palette": [
+          {
+            "hex": "#101010",
+            "proportion_basis_points": 2500
+          },
+          {
+            "hex": "#1010D0",
+            "proportion_basis_points": 2500
+          },
+          {
+            "hex": "#D01010",
+            "proportion_basis_points": 2500
+          },
+          {
+            "hex": "#F0F0F0",
+            "proportion_basis_points": 2500
+          }
+        ],
+        "parameters_digest": "6f45391579edfcf6a6716b6f789003c5e17d16140c74a61eee73bad841f67b3b",
+        "pixel_data_status": "NOT_RETAINED",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "schema_version": 1,
+        "text_heuristic_version": "1",
+        "text_presence": "TEXT_UNLIKELY",
+        "text_presence_basis_points": 0,
+        "width_px": 32
+      }
+    },
+    "image-solid-16x16.png": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "analyzer_name": "adhelm-local-image",
+        "analyzer_version": "1",
+        "aspect_ratio": "1:1",
+        "aspect_ratio_class": "SQUARE",
+        "byte_size": 83,
+        "colorfulness_basis_points": 1616,
+        "content_digest": "4f3a0ac9822197d786c6b4941619b351c95c61e22406d7c7ffce94c73278a762",
+        "contrast_basis_points": 0,
+        "exif_orientation": null,
+        "exif_orientation_status": "NOT_PRESENT",
+        "extracted_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "extractor_name": "adhelm-local-image-structure",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "height_px": 16,
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "image_features_id": "image-features:sha256:16b4912656ebe7393d99ccafa81b3c6d91e5ba962b52fa3b15415581cdd16d25",
+        "layout_cells": [
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 0
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 0
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 0
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 0
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 1
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 1
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 1
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 1
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 2
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 2
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 2
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 2
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 3
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 3
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 3
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 3843,
+            "row": 3
+          }
+        ],
+        "layout_grid_columns": 4,
+        "layout_grid_rows": 4,
+        "layout_measured_in": "STORED_PIXEL_ORIENTATION",
+        "layout_status": "EXTRACTED",
+        "logo_presence_status": "NOT_EVALUATED_NO_LOCAL_DETECTOR",
+        "mean_lightness_basis_points": 3864,
+        "mean_saturation_basis_points": 7500,
+        "mime_type": "image/png",
+        "palette": [
+          {
+            "hex": "#3070D0",
+            "proportion_basis_points": 10000
+          }
+        ],
+        "parameters_digest": "6f45391579edfcf6a6716b6f789003c5e17d16140c74a61eee73bad841f67b3b",
+        "pixel_data_status": "NOT_RETAINED",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "schema_version": 1,
+        "text_heuristic_version": "1",
+        "text_presence": "TEXT_UNLIKELY",
+        "text_presence_basis_points": 0,
+        "width_px": 16
+      }
+    },
+    "image-text-band-64x64.png": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "analyzer_name": "adhelm-local-image",
+        "analyzer_version": "1",
+        "aspect_ratio": "1:1",
+        "aspect_ratio_class": "SQUARE",
+        "byte_size": 147,
+        "colorfulness_basis_points": 0,
+        "content_digest": "fa55942831218faf129c970b2f9367800226da6df4ba30c2283834843e69f966",
+        "contrast_basis_points": 9373,
+        "exif_orientation": null,
+        "exif_orientation_status": "NOT_PRESENT",
+        "extracted_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "extractor_name": "adhelm-local-image-structure",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "height_px": 64,
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "image_features_id": "image-features:sha256:c8de18681e4aae6c02da4114a24afa683c15fbdbe5237c6babf401140602c3c5",
+        "layout_cells": [
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 0
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 0
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 0
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 0
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 1
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 1
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 1
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 1
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 117,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 2
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 156,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 2
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 117,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 2
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 2
+          },
+          {
+            "column": 0,
+            "edge_density_basis_points": 3266,
+            "luminance_stddev_basis_points": 4213,
+            "mean_luminance_basis_points": 7363,
+            "row": 3
+          },
+          {
+            "column": 1,
+            "edge_density_basis_points": 4032,
+            "luminance_stddev_basis_points": 4537,
+            "mean_luminance_basis_points": 6485,
+            "row": 3
+          },
+          {
+            "column": 2,
+            "edge_density_basis_points": 2782,
+            "luminance_stddev_basis_points": 4213,
+            "mean_luminance_basis_points": 7363,
+            "row": 3
+          },
+          {
+            "column": 3,
+            "edge_density_basis_points": 0,
+            "luminance_stddev_basis_points": 0,
+            "mean_luminance_basis_points": 10000,
+            "row": 3
+          }
+        ],
+        "layout_grid_columns": 4,
+        "layout_grid_rows": 4,
+        "layout_measured_in": "STORED_PIXEL_ORIENTATION",
+        "layout_status": "EXTRACTED",
+        "logo_presence_status": "NOT_EVALUATED_NO_LOCAL_DETECTOR",
+        "mean_lightness_basis_points": 9451,
+        "mean_saturation_basis_points": 0,
+        "mime_type": "image/png",
+        "palette": [
+          {
+            "hex": "#101010",
+            "proportion_basis_points": 586
+          },
+          {
+            "hex": "#F0F0F0",
+            "proportion_basis_points": 9414
+          }
+        ],
+        "parameters_digest": "6f45391579edfcf6a6716b6f789003c5e17d16140c74a61eee73bad841f67b3b",
+        "pixel_data_status": "NOT_RETAINED",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "schema_version": 1,
+        "text_heuristic_version": "1",
+        "text_presence": "TEXT_LIKELY",
+        "text_presence_basis_points": 4032,
+        "width_px": 64
+      }
+    },
+    "image-tiny-2x2.png": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "analyzer_name": "adhelm-local-image",
+        "analyzer_version": "1",
+        "aspect_ratio": "1:1",
+        "aspect_ratio_class": "SQUARE",
+        "byte_size": 79,
+        "colorfulness_basis_points": 9354,
+        "content_digest": "f53bc9a627b5f1694c5cc76b04d9b906842b2e2b9ccffd36ad3c767ccea87c1f",
+        "contrast_basis_points": 9278,
+        "exif_orientation": null,
+        "exif_orientation_status": "NOT_PRESENT",
+        "extracted_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "extractor_name": "adhelm-local-image-structure",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "height_px": 2,
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "image_features_id": "image-features:sha256:4d42a0971a1540f43e213d9876c1ec2d0ba4643b1f90e567fa82f75a5f0ef5ce",
+        "layout_cells": [],
+        "layout_grid_columns": 4,
+        "layout_grid_rows": 4,
+        "layout_measured_in": "STORED_PIXEL_ORIENTATION",
+        "layout_status": "NOT_EVALUATED_IMAGE_TOO_SMALL",
+        "logo_presence_status": "NOT_EVALUATED_NO_LOCAL_DETECTOR",
+        "mean_lightness_basis_points": 5000,
+        "mean_saturation_basis_points": 7500,
+        "mime_type": "image/png",
+        "palette": [
+          {
+            "hex": "#1010F0",
+            "proportion_basis_points": 2500
+          },
+          {
+            "hex": "#10F010",
+            "proportion_basis_points": 2500
+          },
+          {
+            "hex": "#F01010",
+            "proportion_basis_points": 2500
+          },
+          {
+            "hex": "#F0F0F0",
+            "proportion_basis_points": 2500
+          }
+        ],
+        "parameters_digest": "6f45391579edfcf6a6716b6f789003c5e17d16140c74a61eee73bad841f67b3b",
+        "pixel_data_status": "NOT_RETAINED",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "schema_version": 1,
+        "text_heuristic_version": "1",
+        "text_presence": "NOT_EVALUATED",
+        "text_presence_basis_points": null,
+        "width_px": 2
+      }
+    },
+    "image-truncated.png": {
+      "code": "INVALID_CREATIVE_IMAGE",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-bad-box-size.mp4": {
+      "code": "VIDEO_CONTAINER_MALFORMED",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-constant-rate.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 1,
+        "audio_track_status": "DECLARED_PRESENT",
+        "byte_size": 752,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "adc5c799acfa7398eb6d18b7b8bae9ace90404538fcab0620855f8fd2d8aea81",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 2000,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 60,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": 30000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_SAMPLE_DESCRIPTION",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 1920,
+        "video_metadata_id": "video-container:sha256:02c3005106aa22df600603972ae9db4eca6c978524313baee8b6d36615b9c79a",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 1080
+      }
+    },
+    "video-mp4-large-size-moov.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 1,
+        "audio_track_status": "DECLARED_PRESENT",
+        "byte_size": 744,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "90e9aab72632462ca5ba0984ba0235a3d23a492a4850bfb9c20064590e06fb7e",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 2000,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 60,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": 30000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_SAMPLE_DESCRIPTION",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 1920,
+        "video_metadata_id": "video-container:sha256:a79df2ef1ff3656d5eb729378f7bfe3ef5f94643a9a4883ceabdd2a6ca30a4da",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 1080
+      }
+    },
+    "video-mp4-many-boxes.mp4": {
+      "code": "VIDEO_CONTAINER_TOO_COMPLEX",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-no-movie.mp4": {
+      "code": "VIDEO_CONTAINER_MALFORMED",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-oversize-claim.mp4": {
+      "code": "VIDEO_CONTAINER_TRUNCATED",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-size-zero-inner-box.mp4": {
+      "code": "VIDEO_CONTAINER_MALFORMED",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-track-header-dimensions.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 405,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "f5d543025b55fb49f116921ec3711450cf6b51e4eb4c2eb2b38e88fcc26b0e14",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 1000,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 24,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": 24000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_TRACK_HEADER",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 360,
+        "video_metadata_id": "video-container:sha256:c83eca795b7e8c8f677231a9eec6afe07b04191482304347219c9081d2606d1b",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 640
+      }
+    },
+    "video-mp4-truncated-duration.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 463,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "cbb38982b19cd45aed58ecc6389b128b176e9576e360eb9e01cc29ba1308b0dc",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 1999,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 60,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": 30000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 90000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_SAMPLE_DESCRIPTION",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 1920,
+        "video_metadata_id": "video-container:sha256:eefbfb309459bf8d88a9ea9febf31ea3e64952dfffc8198048aa5cb2a69ccd06",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 1080
+      }
+    },
+    "video-mp4-truncated.mp4": {
+      "code": "VIDEO_CONTAINER_TRUNCATED",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-mp4-two-video-tracks.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 786,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "af2c20d1a1d5329ac465a03ecca6184c4af9cc2e52ddee27b3b6d44b60f5cbe7",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 2000,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 60,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": 30000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_SAMPLE_DESCRIPTION",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 360,
+        "video_metadata_id": "video-container:sha256:21293817fe82b9884cd53c1d69800af1455f369a84626b13691f3029aa066037",
+        "video_track_count": 2,
+        "video_track_selection_status": "FIRST_DECLARED_OF_MULTIPLE",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 640
+      }
+    },
+    "video-mp4-unknown-duration.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 463,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "1d46663da93834ea80a1855074139a39fa92499b43768c8bd724793446f7ca46",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": null,
+        "duration_status": "NOT_DOCUMENTED_IN_CONTAINER",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 60,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": 30000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_SAMPLE_DESCRIPTION",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 1920,
+        "video_metadata_id": "video-container:sha256:f59f4a61b3de8bff9a094a47ec3270639db9f8dc9715471df01419fa5232f949",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 1080
+      }
+    },
+    "video-mp4-variable-rate.mp4": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 471,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "isom",
+        "container_kind": "ISO_BMFF",
+        "content_digest": "8145bce004f512d969e17d2851ef1247e4f3d32651658f957dd7c64df4ada301",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 3500,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": 30,
+        "frame_count_status": "EXTRACTED",
+        "frame_rate_milli": null,
+        "frame_rate_status": "VARIABLE_NOT_CONSTANT",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "TICKS_PER_SECOND",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "ISO_BMFF_SAMPLE_DESCRIPTION",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 1920,
+        "video_metadata_id": "video-container:sha256:f252a38e435ca91b1605f95b73765a28c93ab96ee16699d2747ff8effb1383d9",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 1080
+      }
+    },
+    "video-unsupported.bin": {
+      "code": "UNSUPPORTED_VIDEO_CONTAINER",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-webm-constant-rate.webm": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 1,
+        "audio_track_status": "DECLARED_PRESENT",
+        "byte_size": 126,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "webm",
+        "container_kind": "MATROSKA",
+        "content_digest": "bfb7b87b153c3f804446e6d12c0ea10bfdfc30c9768f33f66a6ed5a963d46d0d",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 3000,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": null,
+        "frame_count_status": "NOT_DERIVABLE_FROM_CONTAINER",
+        "frame_rate_milli": 30000,
+        "frame_rate_status": "EXTRACTED",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "NANOSECONDS_PER_TICK",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "MATROSKA_TRACK_VIDEO",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 720,
+        "video_metadata_id": "video-container:sha256:84461398fc99743511ebbc4ec924e92aa6ee095ba84e99cc30ff2e6e64a34b94",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 1280
+      }
+    },
+    "video-webm-default-timescale.webm": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 91,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "webm",
+        "container_kind": "MATROSKA",
+        "content_digest": "4a51c9798ecdfcaf1e1815a731834c54dfd985fb478a955c4c7e97dbcae1d60a",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": 3000,
+        "duration_status": "EXTRACTED",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": null,
+        "frame_count_status": "NOT_DERIVABLE_FROM_CONTAINER",
+        "frame_rate_milli": null,
+        "frame_rate_status": "NOT_DOCUMENTED_IN_CONTAINER",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000000,
+        "timescale_status": "DEFAULTED_BY_SPECIFICATION",
+        "timescale_unit": "NANOSECONDS_PER_TICK",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "MATROSKA_TRACK_VIDEO",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 360,
+        "video_metadata_id": "video-container:sha256:83c3a089df43a6c3deb9221fd1d945991e68ac92b48e2827cd0dc77699bd5a7f",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 640
+      }
+    },
+    "video-webm-oversize-element.webm": {
+      "code": "VIDEO_CONTAINER_TRUNCATED",
+      "exit_code": 2,
+      "outcome": "REFUSED"
+    },
+    "video-webm-video-only.webm": {
+      "outcome": "EXTRACTED",
+      "record": {
+        "audio_analysis_status": "NOT_ANALYZED_NO_AUDIO_EXTRACTION",
+        "audio_track_count": 0,
+        "audio_track_status": "DECLARED_ABSENT",
+        "byte_size": 91,
+        "component_performance_status": "NOT_INFERRED",
+        "container_brand": "matroska",
+        "container_kind": "MATROSKA",
+        "content_digest": "fd4f5fb064759023dcf33e02460d55d6370a226bc1fa67cd5f87d4baca54fb13",
+        "decoded_frame_status": "NOT_DECODED_NO_LOCAL_DECODER",
+        "duration_ms": null,
+        "duration_status": "NOT_DOCUMENTED_IN_CONTAINER",
+        "extractor_name": "adhelm-local-video-container",
+        "extractor_version": "1",
+        "face_presence_status": "NOT_EVALUATED_NO_BIOMETRIC_INFERENCE",
+        "frame_count": null,
+        "frame_count_status": "NOT_DERIVABLE_FROM_CONTAINER",
+        "frame_rate_milli": null,
+        "frame_rate_status": "NOT_DOCUMENTED_IN_CONTAINER",
+        "identity_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "media_bytes_status": "NOT_RETAINED",
+        "motion_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "on_visual_text_status": "NOT_EXTRACTED_NO_LOCAL_OCR",
+        "palette_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "parameters_digest": "73c4dc1225e1cc3010841c462350516c14160c1f69cbe1e106f1be906d768e75",
+        "protected_trait_inference_status": "NOT_EVALUATED_PROHIBITED",
+        "provenance": "LOCAL_EXTRACTED",
+        "scene_status": "NOT_ANALYZED_NO_VIDEO_DECODE",
+        "schema_version": 1,
+        "timescale": 1000000,
+        "timescale_status": "EXTRACTED",
+        "timescale_unit": "NANOSECONDS_PER_TICK",
+        "transcript_status": "NOT_EXTRACTED_NO_LOCAL_TRANSCRIPTION",
+        "video_dimensions_source": "MATROSKA_TRACK_VIDEO",
+        "video_dimensions_status": "EXTRACTED",
+        "video_height_px": 640,
+        "video_metadata_id": "video-container:sha256:1469d21b7c99e9bcb84ae8b0b3a7c9538454c098ceacd3e211993c1e467cf911",
+        "video_track_count": 1,
+        "video_track_selection_status": "SINGLE_VIDEO_TRACK",
+        "video_track_status": "EXTRACTED",
+        "video_width_px": 640
+      }
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,34 @@
+name: Offline conformance
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  offline:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.32"
+      - run: uv sync --frozen --python 3.12.13
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest -n 2 --dist=loadfile --cov=adhelm --cov-report=term-missing
+      - run: uv build
+      - run: uv run python scripts/check_repository.py
+  native-macos-offline:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.32"
+      - run: uv sync --frozen --python 3.12.13
+      # Builds an exact source archive and runs only offline/fake-host tests.
+      # This job never installs a service, enrolls keys, or invokes OS approval.
+      - run: uv run python scripts/validate_native_approval.py --output "${{ runner.temp }}/adhelm-native-validation"

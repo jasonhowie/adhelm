@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "profile_kind": "OPENAI_ADS_ACCOUNT_KEY",
+  "provider": "openai_ads",
+  "provider_scope_status": "NOT_DOCUMENTED",
+  "profile_id": "openai-read",
+  "account_ref": "replace_with_native_account_id",
+  "purpose": "READ",
+  "currency": "USD",
+  "timezone": "UTC",
+  "credential_source": "OS_STORE",
+  "credential_ref": "openai-read-key"
+}

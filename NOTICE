@@ -1,0 +1,10 @@
+AdHelm
+Copyright 2026 The AdHelm authors
+
+This product is licensed under the Apache License, Version 2.0; see the LICENSE
+file. Section 6 of that license grants no permission to use the AdHelm name or
+marks except to describe the origin of the work, and a redistribution must not
+imply endorsement by the AdHelm authors.
+
+AdHelm bundles no third-party code. The packages it installs as dependencies
+keep their own licenses.

@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "project_license": "Apache-2.0",
+  "packages": [
+    {
+      "name": "annotated-doc",
+      "version": "0.0.5",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.0",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.7.22",
+      "license": "MPL-2.0",
+      "basis": "TROVE_CLASSIFIER",
+      "note": "MPL-2.0 is file-level copyleft. AdHelm installs certifi unmodified and does not bundle it."
+    },
+    {
+      "name": "cffi",
+      "version": "2.1.1",
+      "license": "MIT-0",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6",
+      "license": "BSD-3-Clause",
+      "basis": "LICENSE_FILE"
+    },
+    {
+      "name": "cryptography",
+      "version": "50.0.1",
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "google-auth",
+      "version": "2.57.1",
+      "license": "Apache-2.0",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0",
+      "license": "MIT",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9",
+      "license": "BSD-3-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1",
+      "license": "BSD-3-Clause",
+      "basis": "LICENSE_FILE"
+    },
+    {
+      "name": "idna",
+      "version": "3.19",
+      "license": "BSD-3-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "jaraco-classes",
+      "version": "3.4.0",
+      "license": "MIT",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "jaraco-context",
+      "version": "6.1.2",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "jaraco-functools",
+      "version": "4.6.0",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "jeepney",
+      "version": "0.9.0",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "keyring",
+      "version": "25.7.0",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "markdown-it-py",
+      "version": "4.2.0",
+      "license": "MIT",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "mdurl",
+      "version": "0.1.2",
+      "license": "MIT",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "more-itertools",
+      "version": "11.1.0",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "pillow",
+      "version": "12.3.0",
+      "license": "MIT-CMU",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "portalocker",
+      "version": "3.2.0",
+      "license": "BSD-3-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "pyasn1",
+      "version": "0.6.4",
+      "license": "BSD-2-Clause",
+      "basis": "LICENSE_FILE"
+    },
+    {
+      "name": "pyasn1-modules",
+      "version": "0.4.2",
+      "license": "BSD-2-Clause",
+      "basis": "LICENSE_FILE"
+    },
+    {
+      "name": "pycparser",
+      "version": "3.0",
+      "license": "BSD-3-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.5",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "pydantic-core",
+      "version": "2.46.5",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "pygments",
+      "version": "2.21.0",
+      "license": "BSD-2-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "pywin32",
+      "version": "312",
+      "license": "Python-2.0",
+      "basis": "TROVE_CLASSIFIER",
+      "note": "Windows only. Declared as PSF; the scanner reads that classifier as Python-2.0. The wheel also ships license texts for LGPL-2.1 (adodbapi), BSD-3-Clause, MIT and a permissive Scintilla notice. AdHelm neither bundles nor imports pywin32; users install it from PyPI under its own terms."
+    },
+    {
+      "name": "pywin32-ctypes",
+      "version": "0.2.3",
+      "license": "BSD-3-Clause",
+      "basis": "LICENSE_FILE"
+    },
+    {
+      "name": "rfc8785",
+      "version": "0.1.4",
+      "license": "Apache-2.0",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "rich",
+      "version": "15.0.0",
+      "license": "MIT",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "secretstorage",
+      "version": "3.5.0",
+      "license": "BSD-3-Clause",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "shellingham",
+      "version": "1.5.4",
+      "license": "ISC",
+      "basis": "TROVE_CLASSIFIER"
+    },
+    {
+      "name": "typer",
+      "version": "0.27.2",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "typing-extensions",
+      "version": "4.16.0",
+      "license": "PSF-2.0",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.4",
+      "license": "MIT",
+      "basis": "PEP_639_METADATA"
+    },
+    {
+      "name": "tzdata",
+      "version": "2026.3",
+      "license": "Apache-2.0",
+      "basis": "LICENSE_FILE"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "mutateOperations": [
+    {
+      "campaignOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/campaigns/5511",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/campaignCriteria/5511~9000",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/campaignCriteria/5511~9001",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/campaignCriteria/5511~9002",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    },
+    {
+      "adGroupOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/adGroups/7722",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    },
+    {
+      "adGroupCriterionOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/adGroupCriteria/7722~8000",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    },
+    {
+      "adGroupAdOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/adGroupAds/7722~6601",
+          "status": "ENABLED"
+        },
+        "updateMask": "status"
+      }
+    }
+  ],
+  "partialFailure": false,
+  "validateOnly": false,
+  "responseContentType": "RESOURCE_NAME_ONLY"
+}

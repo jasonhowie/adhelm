@@ -1,0 +1,3 @@
+# Checked-in vectors, fixtures and reviewed sources are compared and hashed byte for
+# byte, so every checkout (including Windows with core.autocrlf) must keep LF.
+* text=auto eol=lf

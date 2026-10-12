@@ -1,0 +1,44 @@
+{
+  "mutateOperations": [
+    {
+      "campaignCriterionOperation": {
+        "remove": "customers/1234567890/campaignCriteria/5511~9000"
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "create": {
+          "campaign": "customers/1234567890/campaigns/5511",
+          "status": "PAUSED",
+          "negative": false,
+          "adSchedule": {
+            "dayOfWeek": "SATURDAY",
+            "startHour": 10,
+            "startMinute": "ZERO",
+            "endHour": 14,
+            "endMinute": "THIRTY"
+          }
+        }
+      }
+    },
+    {
+      "campaignCriterionOperation": {
+        "create": {
+          "campaign": "customers/1234567890/campaigns/5511",
+          "status": "PAUSED",
+          "negative": false,
+          "adSchedule": {
+            "dayOfWeek": "SUNDAY",
+            "startHour": 9,
+            "startMinute": "FIFTEEN",
+            "endHour": 17,
+            "endMinute": "ZERO"
+          }
+        }
+      }
+    }
+  ],
+  "partialFailure": false,
+  "validateOnly": false,
+  "responseContentType": "RESOURCE_NAME_ONLY"
+}

@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a change or an addition.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        AdHelm 0.1.0 is read-only. Every remote write is refused at runtime, and a
+        request to enable writes is out of scope for it. Read the
+        [release definition](https://github.com/jasonhowie/adhelm/blob/main/docs/release-0.1.0.md)
+        before you file.
+
+        Never paste a credential, token, account identifier or raw provider response.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what stops you?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before you submit
+      options:
+        - label: I removed every credential, token, account identifier and raw provider response from this request.
+          required: true

@@ -1,0 +1,95 @@
+[
+  {
+    "method": "POST",
+    "multipart": {
+      "content_disposition": "form-data; name=\"file\"; filename=\"creative.png\"",
+      "part_byte_length": 77,
+      "part_media_type": "image/png"
+    },
+    "path": "/v1/upload"
+  },
+  {
+    "body": {
+      "bidding_type": "clicks",
+      "budget": {
+        "lifetime_spend_limit_micros": 25000000
+      },
+      "end_time": 1790856000,
+      "name": "September launch",
+      "start_time": 1788264800,
+      "status": "paused",
+      "targeting": {
+        "locations": {
+          "include": [
+            {
+              "id": "2000043"
+            },
+            {
+              "id": "3000194"
+            }
+          ]
+        }
+      }
+    },
+    "method": "POST",
+    "path": "/v1/campaigns"
+  },
+  {
+    "body": {
+      "bidding_config": {
+        "billing_event_type": "click",
+        "max_bid_micros": 60000
+      },
+      "campaign_id": "cmpn_101",
+      "name": "US group 0",
+      "status": "paused"
+    },
+    "method": "POST",
+    "path": "/v1/ad_groups"
+  },
+  {
+    "body": {
+      "bidding_config": {
+        "billing_event_type": "click",
+        "max_bid_micros": 60001
+      },
+      "campaign_id": "cmpn_101",
+      "name": "US group 1",
+      "status": "paused"
+    },
+    "method": "POST",
+    "path": "/v1/ad_groups"
+  },
+  {
+    "body": {
+      "ad_group_id": "adgrp_301",
+      "creative": {
+        "body": "Bring tasks and documents together 00.",
+        "file_id": "file_901",
+        "target_url": "https://example.test/demo?utm_source=ads",
+        "title": "Plan work faster 00",
+        "type": "chat_card"
+      },
+      "name": "Planner card 0 0",
+      "status": "paused"
+    },
+    "method": "POST",
+    "path": "/v1/ads"
+  },
+  {
+    "body": {
+      "ad_group_id": "adgrp_302",
+      "creative": {
+        "body": "Bring tasks and documents together 10.",
+        "file_id": "file_901",
+        "target_url": "https://example.test/demo?utm_source=ads",
+        "title": "Plan work faster 10",
+        "type": "chat_card"
+      },
+      "name": "Planner card 1 0",
+      "status": "paused"
+    },
+    "method": "POST",
+    "path": "/v1/ads"
+  }
+]

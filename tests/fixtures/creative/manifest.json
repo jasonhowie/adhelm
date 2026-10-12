@@ -1,0 +1,105 @@
+{
+  "fixtures": {
+    "image-banner-40x10.webp": {
+      "byte_size": 46,
+      "content_digest": "0a5f6d860c1eb287ef838092d33b8530cbbb1ac8e5df2f995a4157d0836fa085"
+    },
+    "image-gradient-36x24.jpeg": {
+      "byte_size": 829,
+      "content_digest": "38646a9299327d7ee7bd60dee986c45d3a7e27d3423b4fc29645b3148d4a50e5"
+    },
+    "image-quadrants-32x32.png": {
+      "byte_size": 116,
+      "content_digest": "1193f1d73ffe15f5d7be3c6607ec9f8c92c28205e7d8f6c64648dc0b33e91fc8"
+    },
+    "image-solid-16x16.png": {
+      "byte_size": 83,
+      "content_digest": "4f3a0ac9822197d786c6b4941619b351c95c61e22406d7c7ffce94c73278a762"
+    },
+    "image-text-band-64x64.png": {
+      "byte_size": 147,
+      "content_digest": "fa55942831218faf129c970b2f9367800226da6df4ba30c2283834843e69f966"
+    },
+    "image-tiny-2x2.png": {
+      "byte_size": 79,
+      "content_digest": "f53bc9a627b5f1694c5cc76b04d9b906842b2e2b9ccffd36ad3c767ccea87c1f"
+    },
+    "image-truncated.png": {
+      "byte_size": 48,
+      "content_digest": "2d6da3de13648a8952fc9b8c4c36e6879367e5b511653bfdec148558d4ca3df3"
+    },
+    "video-mp4-bad-box-size.mp4": {
+      "byte_size": 32,
+      "content_digest": "2c6c91be89f579bc30e10959daefb17269d143b9fb541be1e7ed6e1746714f34"
+    },
+    "video-mp4-constant-rate.mp4": {
+      "byte_size": 752,
+      "content_digest": "adc5c799acfa7398eb6d18b7b8bae9ace90404538fcab0620855f8fd2d8aea81"
+    },
+    "video-mp4-large-size-moov.mp4": {
+      "byte_size": 744,
+      "content_digest": "90e9aab72632462ca5ba0984ba0235a3d23a492a4850bfb9c20064590e06fb7e"
+    },
+    "video-mp4-many-boxes.mp4": {
+      "byte_size": 33624,
+      "content_digest": "a3dfd500d1459fd3a3ba5826e0ba1a973707bb459624c675183eb0b09c7c46db"
+    },
+    "video-mp4-no-movie.mp4": {
+      "byte_size": 48,
+      "content_digest": "301709964dfa78a57438c7f2577a5481b6e992c10d53f8c0857ac4cdae57736e"
+    },
+    "video-mp4-oversize-claim.mp4": {
+      "byte_size": 140,
+      "content_digest": "be90669ea74b7783509ef1a442af0685ccb579c6bcc821125c6b7f41fa518395"
+    },
+    "video-mp4-size-zero-inner-box.mp4": {
+      "byte_size": 463,
+      "content_digest": "bc6a795c50d86b9f4fb9e0b18afa1dd1b4e0f883cc6f2e8153082170acb4b546"
+    },
+    "video-mp4-track-header-dimensions.mp4": {
+      "byte_size": 405,
+      "content_digest": "f5d543025b55fb49f116921ec3711450cf6b51e4eb4c2eb2b38e88fcc26b0e14"
+    },
+    "video-mp4-truncated-duration.mp4": {
+      "byte_size": 463,
+      "content_digest": "cbb38982b19cd45aed58ecc6389b128b176e9576e360eb9e01cc29ba1308b0dc"
+    },
+    "video-mp4-truncated.mp4": {
+      "byte_size": 88,
+      "content_digest": "e28a8860ea961004631ae2dace22314e016d83bc2a1614eec70d75df3254d965"
+    },
+    "video-mp4-two-video-tracks.mp4": {
+      "byte_size": 786,
+      "content_digest": "af2c20d1a1d5329ac465a03ecca6184c4af9cc2e52ddee27b3b6d44b60f5cbe7"
+    },
+    "video-mp4-unknown-duration.mp4": {
+      "byte_size": 463,
+      "content_digest": "1d46663da93834ea80a1855074139a39fa92499b43768c8bd724793446f7ca46"
+    },
+    "video-mp4-variable-rate.mp4": {
+      "byte_size": 471,
+      "content_digest": "8145bce004f512d969e17d2851ef1247e4f3d32651658f957dd7c64df4ada301"
+    },
+    "video-unsupported.bin": {
+      "byte_size": 32,
+      "content_digest": "c58b8048c1472a8fe9e4fa16f94b38c20338df195e164bf2e719d95ed092c463"
+    },
+    "video-webm-constant-rate.webm": {
+      "byte_size": 126,
+      "content_digest": "bfb7b87b153c3f804446e6d12c0ea10bfdfc30c9768f33f66a6ed5a963d46d0d"
+    },
+    "video-webm-default-timescale.webm": {
+      "byte_size": 91,
+      "content_digest": "4a51c9798ecdfcaf1e1815a731834c54dfd985fb478a955c4c7e97dbcae1d60a"
+    },
+    "video-webm-oversize-element.webm": {
+      "byte_size": 59,
+      "content_digest": "68c28f970beda6c2b01def8dd3d37ca3b419298f7336ef023eb86c4f2d495f92"
+    },
+    "video-webm-video-only.webm": {
+      "byte_size": 91,
+      "content_digest": "fd4f5fb064759023dcf33e02460d55d6370a226bc1fa67cd5f87d4baca54fb13"
+    }
+  },
+  "schema_version": 1
+}

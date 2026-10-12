@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "host_ref": "host:local-review",
+  "signing_key_ref": "key:local-receipt",
+  "mach_service_name": "com.aptsonic.adhelm.approvalhost",
+  "client_bundle_identifier": "com.aptsonic.adhelm.client",
+  "client_team_identifier": "ABCDE12345",
+  "host_bundle_identifier": "com.aptsonic.adhelm.host",
+  "host_team_identifier": "ABCDE12345",
+  "signing_key_application_tag_hex": "00616263ff",
+  "signing_key_access_group": "ABCDE12345.com.aptsonic.adhelm.host",
+  "key_storage": "KEYCHAIN_P256",
+  "provenance_service": "com.aptsonic.adhelm.provenance",
+  "provenance_account": "approval-host-v1",
+  "maximum_challenge_bytes": 65536,
+  "maximum_challenge_lifetime_seconds": 300,
+  "maximum_issued_at_skew_seconds": 60,
+  "maximum_subplans": 6,
+  "maximum_policy_items": 64
+}

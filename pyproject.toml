@@ -1,0 +1,120 @@
+[build-system]
+requires = ["hatchling>=1.27,<2", "hatch-fancy-pypi-readme>=25.1,<26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adhelm"
+version = "0.1.0"
+description = "Local, read-only CLI for AI agents to audit and report on your ad and analytics accounts"
+dynamic = ["readme"]
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "The AdHelm authors" }]
+keywords = ["advertising", "analytics", "audit", "cli", "agents", "google-ads", "meta-ads", "ga4"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Information Technology",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Office/Business",
+  "Typing :: Typed",
+]
+dependencies = [
+  "typer>=0.16,<1",
+  "pydantic>=2.11,<3",
+  "httpx>=0.28,<1",
+  "keyring>=25,<26",
+  "portalocker>=3,<4",
+  "rfc8785>=0.1.4,<1",
+  "cryptography>=50,<51",
+  "pillow>=11,<13",
+  "tzdata>=2025.2",
+  "google-auth>=2.40,<3",
+]
+
+[project.urls]
+Homepage = "https://aptsonic.com/adhelm"
+Source = "https://github.com/jasonhowie/adhelm"
+Issues = "https://github.com/jasonhowie/adhelm/issues"
+Changelog = "https://github.com/jasonhowie/adhelm/blob/main/CHANGELOG.md"
+
+[project.scripts]
+adhelm = "adhelm.cli:main"
+
+# PyPI renders the long description away from the repository, so a relative link such as
+# docs/setup/ga4.md would 404 there. Every relative markdown link in README.md is rewritten to
+# the file at this release's tag. Keep the version in the replacement equal to `version`
+# above: tests/test_release_artifacts.py and `scripts/release_artifacts.py verify` fail if not.
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\]\((?!https?://|#|mailto:)(?:\./)?([^)\s]+)\)'
+replacement = '](https://github.com/jasonhowie/adhelm/blob/v0.1.0/\1)'
+
+# The build backend and its dependencies are pinned exactly for `uv build`, so a third party
+# rebuilding a release tag installs the same tooling the release run did. The ranges in
+# [build-system] stay broad for other builders. To move the pins, remove this list, run
+# `uv build -v` and read the `Installing build requirements` line, write those versions
+# back here as exact pins, run `uv lock`, and update the test that compares the pins to
+# the lock in the same change. With the list in force that line only shows the pinned set.
+[tool.uv]
+build-constraint-dependencies = [
+  "hatchling==1.32.4",
+  "hatch-fancy-pypi-readme==25.1.0",
+  "packaging==26.3",
+  "pathspec==1.1.1",
+  "pluggy==1.6.0",
+  "tomlkit==0.15.1",
+  "trove-classifiers==2026.9.21.13",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<10",
+    "pytest-cov>=6,<8",
+    "ruff>=0.12,<1",
+    "mypy>=1.16,<2",
+    "pip-audit>=2.9,<3",
+    "pytest-xdist>=3.8,<4",
+]
+
+# The wheel is built from the sdist, so the sdist carries exactly what the wheel needs:
+# the package, the bundled skills, the committed pilot records, the README the long
+# description is made from and the license files.
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/skills", "/docs/pilots", "/README.md"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/adhelm"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"skills" = "adhelm/bundled_skills"
+"docs/pilots" = "adhelm/pilot_record_files"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["adhelm"]
+mypy_path = "src"

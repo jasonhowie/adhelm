@@ -1,0 +1,575 @@
+{
+  "compiler_review_line_derivation": {
+    "provider": "google_ads",
+    "redacted_review": {
+      "account_currency": "USD",
+      "account_ref": "google_ads.account.1234567890",
+      "account_timezone": "America/Chicago",
+      "campaign_duration_days": 31,
+      "campaign_handle": "campaign",
+      "campaign_total_budget": {
+        "currency": "USD",
+        "minor_units": 25000
+      },
+      "component_level_attribution": "NOT_AVAILABLE_FROM_PROVIDER",
+      "creative_content_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "creative_version_id": "creative:sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "execution_status": "OFFLINE_CANDIDATE_NOT_EXECUTABLE",
+      "initial_state": "PAUSED",
+      "keyword_count": 1,
+      "location_count": 1,
+      "objective": "SEARCH_TRAFFIC"
+    },
+    "review_lines": [
+      "Provider google_ads compiled candidate review",
+      "account currency: USD",
+      "account ref: google_ads.account.1234567890",
+      "account timezone: America/Chicago",
+      "campaign duration days: 31",
+      "campaign handle: campaign",
+      "campaign total budget: 25000 minor units USD",
+      "component level attribution: NOT_AVAILABLE_FROM_PROVIDER",
+      "execution status: OFFLINE_CANDIDATE_NOT_EXECUTABLE",
+      "initial state: PAUSED",
+      "keyword count: 1",
+      "location count: 1",
+      "objective: SEARCH_TRAFFIC"
+    ]
+  },
+  "configuration_digest": "f6edfa8c1f3ecc98fd4adb23af03ec79f76030671fdd1ad05302a9283fdb66cd",
+  "host_configuration": {
+    "host_ref": "host:adhelm-macos-approval-v1",
+    "maximum_challenge_bytes": 65536,
+    "maximum_challenge_lifetime_seconds": 300,
+    "maximum_issued_at_skew_seconds": 60,
+    "maximum_policy_items": 64,
+    "maximum_subplans": 6,
+    "signing_key_ref": "key:approval-test-v1"
+  },
+  "notice": "Synthetic canonical bytes only. No signature, private key, public key, host identity, enrollment, authorization, or provider evidence.",
+  "plan": {
+    "expires_at": "2030-01-01T01:00:00Z",
+    "plan_id": "composite-vector-plan",
+    "profile_ref": "workspace-ledger-1",
+    "schema_version": 1,
+    "stop_on_non_verified": true,
+    "subplans": [
+      {
+        "account": {
+          "account_ref": "google_ads.alias",
+          "auth_profile_ref": "google_ads.edit-profile",
+          "client_application_ref": "google_ads.client",
+          "principal_ref": "google_ads.principal",
+          "scopes": [
+            "ads.write"
+          ],
+          "stable_account_id": "google_ads.stable.1"
+        },
+        "after": {
+          "fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "revision": "r2"
+        },
+        "before": {
+          "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "revision": "r1"
+        },
+        "capability_version": "cap-v1",
+        "egress": [
+          {
+            "host": "googleads.googleapis.com",
+            "purpose": "planned campaign operation"
+          }
+        ],
+        "expected_child_egress_count": 3,
+        "expires_at": "2030-01-01T01:00:00Z",
+        "field_changes": [],
+        "max_spend": {
+          "currency": "USD",
+          "minor_units": 25000
+        },
+        "operation": "CREATE",
+        "provider": "google_ads",
+        "provider_api_version": "v1",
+        "recovery_actions": [
+          "PAUSE"
+        ],
+        "subplan_id": "google_ads-create"
+      },
+      {
+        "account": {
+          "account_ref": "meta_ads.alias",
+          "auth_profile_ref": "meta_ads.edit-profile",
+          "client_application_ref": "meta_ads.client",
+          "principal_ref": "meta_ads.principal",
+          "scopes": [
+            "ads.write"
+          ],
+          "stable_account_id": "meta_ads.stable.1"
+        },
+        "after": {
+          "fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "revision": "r2"
+        },
+        "before": {
+          "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "revision": "r1"
+        },
+        "capability_version": "cap-v1",
+        "egress": [
+          {
+            "host": "graph.facebook.com",
+            "purpose": "planned campaign operation"
+          }
+        ],
+        "expires_at": "2030-01-01T01:00:00Z",
+        "field_changes": [],
+        "max_spend": {
+          "currency": "USD",
+          "minor_units": 5000
+        },
+        "operation": "CREATE",
+        "provider": "meta_ads",
+        "provider_api_version": "v1",
+        "recovery_actions": [
+          "PAUSE"
+        ],
+        "subplan_id": "meta_ads-create"
+      },
+      {
+        "account": {
+          "account_ref": "linkedin_ads.alias",
+          "auth_profile_ref": "linkedin_ads.edit-profile",
+          "client_application_ref": "linkedin_ads.client",
+          "principal_ref": "linkedin_ads.principal",
+          "scopes": [
+            "ads.write"
+          ],
+          "stable_account_id": "linkedin_ads.stable.1"
+        },
+        "after": {
+          "fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "revision": "r2"
+        },
+        "before": {
+          "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "revision": "r1"
+        },
+        "capability_version": "cap-v1",
+        "egress": [
+          {
+            "host": "api.linkedin.com",
+            "purpose": "planned campaign operation"
+          }
+        ],
+        "expires_at": "2030-01-01T01:00:00Z",
+        "field_changes": [],
+        "max_spend": {
+          "currency": "EUR",
+          "minor_units": 1000
+        },
+        "operation": "CREATE",
+        "provider": "linkedin_ads",
+        "provider_api_version": "v1",
+        "recovery_actions": [
+          "PAUSE"
+        ],
+        "subplan_id": "linkedin_ads-create"
+      },
+      {
+        "account": {
+          "account_ref": "openai_ads.alias",
+          "auth_profile_ref": "openai_ads.edit-profile",
+          "client_application_ref": "openai_ads.client",
+          "principal_ref": "openai_ads.principal",
+          "scopes": [
+            "ads.write"
+          ],
+          "stable_account_id": "openai_ads.stable.1"
+        },
+        "after": {
+          "fingerprint": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "revision": "r2"
+        },
+        "before": {
+          "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "revision": "r1"
+        },
+        "capability_version": "cap-v1",
+        "egress": [
+          {
+            "host": "api.openai.com",
+            "purpose": "planned campaign operation"
+          }
+        ],
+        "expires_at": "2030-01-01T01:00:00Z",
+        "field_changes": [],
+        "max_spend": {
+          "currency": "USD",
+          "minor_units": 0
+        },
+        "operation": "PAUSE",
+        "provider": "openai_ads",
+        "provider_api_version": "v1",
+        "recovery_actions": [
+          "PAUSE"
+        ],
+        "subplan_id": "openai_ads-pause"
+      }
+    ]
+  },
+  "plan_digest": "56cc25a18b1b6097e1de65d3051458c087adc037caa306263db182578429a504",
+  "schema_version": 1,
+  "subplan_digests": [
+    "fc7400bd717e36198e872e377099351df87534189793cbddc6afd5b477832408",
+    "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8",
+    "14f1208870b9550af33e6828b3bbb0c0f9ed87a8cfe7db270bb33a1bb19c789d",
+    "cf72c79088334d1dabffb4231a8697efe0c70e37582727363a3cc6f82bba1738"
+  ],
+  "vector_kind": "COMPOSITE_EXECUTION_PLAN_APPROVAL_V1",
+  "vectors": [
+    {
+      "challenge": {
+        "expires_at": "2030-01-01T00:04:00Z",
+        "grantor_ref": "customer-grantor-1",
+        "issued_at": "2030-01-01T00:00:00Z",
+        "kind": "COMPOSITE_EXECUTION_PLAN",
+        "nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+        "schema_version": 1,
+        "subject": {
+          "expires_at": "2030-01-01T01:00:00Z",
+          "operations": [
+            "CREATE",
+            "PAUSE"
+          ],
+          "plan_digest": "56cc25a18b1b6097e1de65d3051458c087adc037caa306263db182578429a504",
+          "review_lines": [
+            "Maximum incremental spend 1000 minor units EUR",
+            "Maximum incremental spend 25000 minor units USD",
+            "Provider google_ads operation CREATE",
+            "Planned provider requests 3",
+            "Egress hosts googleads.googleapis.com",
+            "Recovery actions PAUSE",
+            "Provider API v1 capability cap-v1"
+          ],
+          "spend_bounds_by_currency": [
+            {
+              "currency": "EUR",
+              "maximum_minor_units": 1000
+            },
+            {
+              "currency": "USD",
+              "maximum_minor_units": 25000
+            }
+          ],
+          "subplan_digests": [
+            "fc7400bd717e36198e872e377099351df87534189793cbddc6afd5b477832408",
+            "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8",
+            "14f1208870b9550af33e6828b3bbb0c0f9ed87a8cfe7db270bb33a1bb19c789d",
+            "cf72c79088334d1dabffb4231a8697efe0c70e37582727363a3cc6f82bba1738"
+          ],
+          "subplans": [
+            {
+              "expected_child_egress_count": 3,
+              "operation": "CREATE",
+              "provider": "google_ads",
+              "resource_ref": "opaque:sha256:920bfc362047038a3e5a4e321778007a6af9809db676dc8dc4df99873ef3020e",
+              "spend_bound": {
+                "currency": "USD",
+                "minor_units": 25000
+              },
+              "subplan_digest": "fc7400bd717e36198e872e377099351df87534189793cbddc6afd5b477832408"
+            },
+            {
+              "expected_child_egress_count": 1,
+              "operation": "CREATE",
+              "provider": "meta_ads",
+              "resource_ref": "opaque:sha256:022b0ea7b0c493a9e8823f4d39e960561ef1b506a4c03e3cb18515992268a057",
+              "spend_bound": {
+                "currency": "USD",
+                "minor_units": 5000
+              },
+              "subplan_digest": "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8"
+            },
+            {
+              "expected_child_egress_count": 1,
+              "operation": "CREATE",
+              "provider": "linkedin_ads",
+              "resource_ref": "opaque:sha256:6367a60d7dd966cab18787f1bbed66141dfa84ca21ddefc73fd3ac74748a8609",
+              "spend_bound": {
+                "currency": "EUR",
+                "minor_units": 1000
+              },
+              "subplan_digest": "14f1208870b9550af33e6828b3bbb0c0f9ed87a8cfe7db270bb33a1bb19c789d"
+            },
+            {
+              "expected_child_egress_count": 1,
+              "operation": "PAUSE",
+              "provider": "openai_ads",
+              "resource_ref": "opaque:sha256:4b5db05b39ad354d52b9543b3b293fd3ddcf83dc6f3306eae2666261122e30d1",
+              "spend_bound": {
+                "spend_capability": "NOT_SPEND_CAPABLE"
+              },
+              "subplan_digest": "cf72c79088334d1dabffb4231a8697efe0c70e37582727363a3cc6f82bba1738"
+            }
+          ]
+        }
+      },
+      "challenge_digest": "38cea1d0edb8494809ff2e65ff676766cc644058fe1f7291ff31435d194e8177",
+      "kind": "COMPOSITE_EXECUTION_PLAN",
+      "receipt_id": "approval-receipt:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "receipt_issued_at": "2030-01-01T00:00:01.000Z",
+      "receipt_signing_domain_bytes_b64url": "YWRoZWxtLm1hY29zLWFwcHJvdmFsLWhvc3QucmVjZWlwdC52MQBDT01QT1NJVEVfRVhFQ1VUSU9OX1BMQU4AeyJhY3Rpb25fZGlnZXN0IjoiZDZjMGUwYmViZWY4ZDRiZTE0YmRiZDVmYTk2NTlkNGM3NWJiZDI4MDk0OGVmMTQ3NTQ2ZTE1YTIwNDcwODI0OCIsImF1dGhlbnRpY2F0aW9uX21vZGUiOiJERVZJQ0VfT1dORVJfQVVUSEVOVElDQVRJT04iLCJjaGFsbGVuZ2VfZGlnZXN0IjoiMzhjZWExZDBlZGI4NDk0ODA5ZmYyZTY1ZmY2NzY3NjZjYzY0NDA1OGZlMWY3MjkxZmYzMTQzNWQxOTRlODE3NyIsImNoYWxsZW5nZV9ub25jZSI6IkFBRUNBd1FGQmdjSUNRb0xEQTBPRHhBUkVoTVVGUllYR0JrYUd4d2RIaDgiLCJleHBpcmVzX2F0IjoiMjAzMC0wMS0wMVQwMDowNDowMFoiLCJncmFudG9yX3JlZiI6ImN1c3RvbWVyLWdyYW50b3ItMSIsImhvc3RfcmVmIjoiaG9zdDphZGhlbG0tbWFjb3MtYXBwcm92YWwtdjEiLCJpc3N1ZWRfYXQiOiIyMDMwLTAxLTAxVDAwOjAwOjAxLjAwMFoiLCJrZXlfcmVmIjoia2V5OmFwcHJvdmFsLXRlc3QtdjEiLCJwbGFuX2RpZ2VzdCI6IjU2Y2MyNWExOGIxYjYwOTdlMWRlNjVkMzA1MTQ1OGMwODdhZGMwMzdjYWEzMDYyNjNkYjE4MjU3ODQyOWE1MDQiLCJyZWNlaXB0X2lkIjoiYXBwcm92YWwtcmVjZWlwdDpBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIiwicmVjZWlwdF9raW5kIjoiQ09NUE9TSVRFX0VYRUNVVElPTl9QTEFOIiwicmV2aWV3X2RpZ2VzdCI6IjEyMjg0OWJjNDcxZDFlOTdiNmIwNDQ5ZWRkYjVkNzUyYzFlZTk2ZGFjZWQ4YWM5Njc5N2VkYjkyNTBiYzE2MWMiLCJzY2hlbWFfdmVyc2lvbiI6MSwic2lnbmF0dXJlX2FsZ29yaXRobSI6IkVDRFNBX1AyNTZfU0hBMjU2X1g5XzYyIiwic3VicGxhbl9kaWdlc3RzIjpbImZjNzQwMGJkNzE3ZTM2MTk4ZTg3MmUzNzcwOTkzNTFkZjg3NTM0MTg5NzkzY2JkZGM2YWZkNWI0Nzc4MzI0MDgiLCI1OWU5YjEzZmYwN2ZiYWY4ZWZiZjgzYTUxZThiM2ZmYjIwMjViMGE5OTA2NGUyMjNjMDY2OGE3Zjg1YjRlMmY4IiwiMTRmMTIwODg3MGI5NTUwYWYzM2U2ODI4YjNiYmIwYzBmOWVkODdhOGNmZTdkYjI3MGJiMzNhMWJiMTljNzg5ZCIsImNmNzJjNzkwODgzMzRkMWRhYmZmYjQyMzFhODY5N2VmZTBjNzBlMzc1ODI3MjczNjNhM2NjNmY4MmJiYTE3MzgiXX0",
+      "review_digest": "122849bc471d1e97b6b0449eddb5d752c1ee96daced8ac96797edb9250bc161c",
+      "review_facts": {
+        "approval_kind": "COMPOSITE_EXECUTION_PLAN",
+        "challenge_digest": "38cea1d0edb8494809ff2e65ff676766cc644058fe1f7291ff31435d194e8177",
+        "challenge_expires_at": "2030-01-01T00:04:00Z",
+        "challenge_nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+        "composite_execution": {
+          "binding_kind": "COMPOSITE_EXECUTION_PLAN",
+          "subject": {
+            "expires_at": "2030-01-01T01:00:00Z",
+            "operations": [
+              "CREATE",
+              "PAUSE"
+            ],
+            "plan_digest": "56cc25a18b1b6097e1de65d3051458c087adc037caa306263db182578429a504",
+            "review_lines": [
+              "Maximum incremental spend 1000 minor units EUR",
+              "Maximum incremental spend 25000 minor units USD",
+              "Provider google_ads operation CREATE",
+              "Planned provider requests 3",
+              "Egress hosts googleads.googleapis.com",
+              "Recovery actions PAUSE",
+              "Provider API v1 capability cap-v1"
+            ],
+            "spend_bounds_by_currency": [
+              {
+                "currency": "EUR",
+                "maximum_minor_units": 1000
+              },
+              {
+                "currency": "USD",
+                "maximum_minor_units": 25000
+              }
+            ],
+            "subplan_digests": [
+              "fc7400bd717e36198e872e377099351df87534189793cbddc6afd5b477832408",
+              "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8",
+              "14f1208870b9550af33e6828b3bbb0c0f9ed87a8cfe7db270bb33a1bb19c789d",
+              "cf72c79088334d1dabffb4231a8697efe0c70e37582727363a3cc6f82bba1738"
+            ],
+            "subplans": [
+              {
+                "expected_child_egress_count": 3,
+                "operation": "CREATE",
+                "provider": "google_ads",
+                "resource_ref": "opaque:sha256:920bfc362047038a3e5a4e321778007a6af9809db676dc8dc4df99873ef3020e",
+                "spend_bound": {
+                  "currency": "USD",
+                  "minor_units": 25000
+                },
+                "subplan_digest": "fc7400bd717e36198e872e377099351df87534189793cbddc6afd5b477832408"
+              },
+              {
+                "expected_child_egress_count": 1,
+                "operation": "CREATE",
+                "provider": "meta_ads",
+                "resource_ref": "opaque:sha256:022b0ea7b0c493a9e8823f4d39e960561ef1b506a4c03e3cb18515992268a057",
+                "spend_bound": {
+                  "currency": "USD",
+                  "minor_units": 5000
+                },
+                "subplan_digest": "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8"
+              },
+              {
+                "expected_child_egress_count": 1,
+                "operation": "CREATE",
+                "provider": "linkedin_ads",
+                "resource_ref": "opaque:sha256:6367a60d7dd966cab18787f1bbed66141dfa84ca21ddefc73fd3ac74748a8609",
+                "spend_bound": {
+                  "currency": "EUR",
+                  "minor_units": 1000
+                },
+                "subplan_digest": "14f1208870b9550af33e6828b3bbb0c0f9ed87a8cfe7db270bb33a1bb19c789d"
+              },
+              {
+                "expected_child_egress_count": 1,
+                "operation": "PAUSE",
+                "provider": "openai_ads",
+                "resource_ref": "opaque:sha256:4b5db05b39ad354d52b9543b3b293fd3ddcf83dc6f3306eae2666261122e30d1",
+                "spend_bound": {
+                  "spend_capability": "NOT_SPEND_CAPABLE"
+                },
+                "subplan_digest": "cf72c79088334d1dabffb4231a8697efe0c70e37582727363a3cc6f82bba1738"
+              }
+            ]
+          },
+          "subject_digest": "d6c0e0bebef8d4be14bdbd5fa9659d4c75bbd280948ef147546e15a204708248"
+        },
+        "grantor_ref": "customer-grantor-1"
+      },
+      "review_lines": [
+        "Provider google_ads operation CREATE",
+        "Planned provider requests 3",
+        "Egress hosts googleads.googleapis.com",
+        "Recovery actions PAUSE",
+        "Provider API v1 capability cap-v1"
+      ],
+      "unsigned_receipt": {
+        "action_digest": "d6c0e0bebef8d4be14bdbd5fa9659d4c75bbd280948ef147546e15a204708248",
+        "authentication_mode": "DEVICE_OWNER_AUTHENTICATION",
+        "challenge_digest": "38cea1d0edb8494809ff2e65ff676766cc644058fe1f7291ff31435d194e8177",
+        "challenge_nonce": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+        "expires_at": "2030-01-01T00:04:00Z",
+        "grantor_ref": "customer-grantor-1",
+        "host_ref": "host:adhelm-macos-approval-v1",
+        "issued_at": "2030-01-01T00:00:01.000Z",
+        "key_ref": "key:approval-test-v1",
+        "plan_digest": "56cc25a18b1b6097e1de65d3051458c087adc037caa306263db182578429a504",
+        "receipt_id": "approval-receipt:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "receipt_kind": "COMPOSITE_EXECUTION_PLAN",
+        "review_digest": "122849bc471d1e97b6b0449eddb5d752c1ee96daced8ac96797edb9250bc161c",
+        "schema_version": 1,
+        "signature_algorithm": "ECDSA_P256_SHA256_X9_62",
+        "subplan_digests": [
+          "fc7400bd717e36198e872e377099351df87534189793cbddc6afd5b477832408",
+          "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8",
+          "14f1208870b9550af33e6828b3bbb0c0f9ed87a8cfe7db270bb33a1bb19c789d",
+          "cf72c79088334d1dabffb4231a8697efe0c70e37582727363a3cc6f82bba1738"
+        ]
+      },
+      "unsigned_receipt_digest": "ce0c59433bfcebb505d5b9ffdc2c0ea01bcde9751b5c05bc25b4c46bff21ce4d"
+    },
+    {
+      "attempts": [
+        {
+          "attempt_subject_digest": "244947554f0f3adfd8b2797a2d70f43fa9a13551a9e32cb3d14c0510cd726421",
+          "started_record_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+          "subplan_digest": "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8"
+        }
+      ],
+      "challenge": {
+        "expires_at": "2030-01-01T00:04:00Z",
+        "grantor_ref": "customer-grantor-1",
+        "issued_at": "2030-01-01T00:00:00Z",
+        "kind": "ATTEMPT_RECOVERY",
+        "nonce": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+        "schema_version": 1,
+        "subject": {
+          "authorized_operation": "RECOVER",
+          "operations": [
+            "CREATE"
+          ],
+          "plan_digest": "f7df322ee4154aeb1ecce031035308d70897681c27dfe2d4978fef8e083ee291",
+          "review_lines": [
+            "Authorized operation RECOVER (attempt of CREATE)",
+            "This records the observed state and applies no provider change",
+            "Maximum incremental spend NOT_SPEND_CAPABLE",
+            "One unresolved attempt has no journaled result",
+            "Recording the observed state settles and attributes nothing",
+            "This grant releases only the exact attempt below"
+          ],
+          "source_plan_digest": "56cc25a18b1b6097e1de65d3051458c087adc037caa306263db182578429a504",
+          "source_plan_expires_at": "2030-01-01T01:00:00Z",
+          "spend_bounds_by_currency": [],
+          "subplan_digests": [
+            "244947554f0f3adfd8b2797a2d70f43fa9a13551a9e32cb3d14c0510cd726421"
+          ],
+          "subplans": [
+            {
+              "attempt_subject_digest": "244947554f0f3adfd8b2797a2d70f43fa9a13551a9e32cb3d14c0510cd726421",
+              "expected_child_egress_count": 1,
+              "operation": "CREATE",
+              "provider": "meta_ads",
+              "resource_ref": "opaque:sha256:022b0ea7b0c493a9e8823f4d39e960561ef1b506a4c03e3cb18515992268a057",
+              "spend_bound": {
+                "spend_capability": "NOT_SPEND_CAPABLE"
+              },
+              "started_record_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+              "subplan_digest": "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8"
+            }
+          ]
+        }
+      },
+      "challenge_digest": "cd029c6c0e2712332c1ff2818db05c782f3457df551b397788e836795052a57d",
+      "kind": "ATTEMPT_RECOVERY",
+      "receipt_id": "approval-receipt:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+      "receipt_issued_at": "2030-01-01T00:00:01.000Z",
+      "receipt_signing_domain_bytes_b64url": "YWRoZWxtLm1hY29zLWFwcHJvdmFsLWhvc3QucmVjZWlwdC52MQBBVFRFTVBUX1JFQ09WRVJZAHsiYWN0aW9uX2RpZ2VzdCI6IjhlZTE3MTkxMjgyYTg5YzIyMDg0YzhlM2NlMjQwZWUxNzE0MjA1ZDk3ZDc1NGQxNTNjYzMxNzE3NmEyZDMwYjMiLCJhdXRoZW50aWNhdGlvbl9tb2RlIjoiREVWSUNFX09XTkVSX0FVVEhFTlRJQ0FUSU9OIiwiY2hhbGxlbmdlX2RpZ2VzdCI6ImNkMDI5YzZjMGUyNzEyMzMyYzFmZjI4MThkYjA1Yzc4MmYzNDU3ZGY1NTFiMzk3Nzg4ZTgzNjc5NTA1MmE1N2QiLCJjaGFsbGVuZ2Vfbm9uY2UiOiJJQ0VpSXlRbEppY29LU29yTEMwdUx6QXhNak0wTlRZM09EazZPenc5UGo4IiwiZXhwaXJlc19hdCI6IjIwMzAtMDEtMDFUMDA6MDQ6MDBaIiwiZ3JhbnRvcl9yZWYiOiJjdXN0b21lci1ncmFudG9yLTEiLCJob3N0X3JlZiI6Imhvc3Q6YWRoZWxtLW1hY29zLWFwcHJvdmFsLXYxIiwiaXNzdWVkX2F0IjoiMjAzMC0wMS0wMVQwMDowMDowMS4wMDBaIiwia2V5X3JlZiI6ImtleTphcHByb3ZhbC10ZXN0LXYxIiwicGxhbl9kaWdlc3QiOiJmN2RmMzIyZWU0MTU0YWViMWVjY2UwMzEwMzUzMDhkNzA4OTc2ODFjMjdkZmUyZDQ5NzhmZWY4ZTA4M2VlMjkxIiwicmVjZWlwdF9pZCI6ImFwcHJvdmFsLXJlY2VpcHQ6QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQiIsInJlY2VpcHRfa2luZCI6IkFUVEVNUFRfUkVDT1ZFUlkiLCJyZXZpZXdfZGlnZXN0IjoiNmFiOGRiMjgwODc3YmFlMjhhYTBiZjQ4YjY0ZDNhMmIwMTQ5MjU1YmJhMDNlMzg4YWJhZDFlMTMyZmExZWE3NiIsInNjaGVtYV92ZXJzaW9uIjoxLCJzaWduYXR1cmVfYWxnb3JpdGhtIjoiRUNEU0FfUDI1Nl9TSEEyNTZfWDlfNjIiLCJzdWJwbGFuX2RpZ2VzdHMiOlsiMjQ0OTQ3NTU0ZjBmM2FkZmQ4YjI3OTdhMmQ3MGY0M2ZhOWExMzU1MWE5ZTMyY2IzZDE0YzA1MTBjZDcyNjQyMSJdfQ",
+      "review_digest": "6ab8db280877bae28aa0bf48b64d3a2b0149255bba03e388abad1e132fa1ea76",
+      "review_facts": {
+        "approval_kind": "ATTEMPT_RECOVERY",
+        "challenge_digest": "cd029c6c0e2712332c1ff2818db05c782f3457df551b397788e836795052a57d",
+        "challenge_expires_at": "2030-01-01T00:04:00Z",
+        "challenge_nonce": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+        "composite_execution": {
+          "binding_kind": "ATTEMPT_RECOVERY",
+          "subject": {
+            "authorized_operation": "RECOVER",
+            "operations": [
+              "CREATE"
+            ],
+            "plan_digest": "f7df322ee4154aeb1ecce031035308d70897681c27dfe2d4978fef8e083ee291",
+            "review_lines": [
+              "Authorized operation RECOVER (attempt of CREATE)",
+              "This records the observed state and applies no provider change",
+              "Maximum incremental spend NOT_SPEND_CAPABLE",
+              "One unresolved attempt has no journaled result",
+              "Recording the observed state settles and attributes nothing",
+              "This grant releases only the exact attempt below"
+            ],
+            "source_plan_digest": "56cc25a18b1b6097e1de65d3051458c087adc037caa306263db182578429a504",
+            "source_plan_expires_at": "2030-01-01T01:00:00Z",
+            "spend_bounds_by_currency": [],
+            "subplan_digests": [
+              "244947554f0f3adfd8b2797a2d70f43fa9a13551a9e32cb3d14c0510cd726421"
+            ],
+            "subplans": [
+              {
+                "attempt_subject_digest": "244947554f0f3adfd8b2797a2d70f43fa9a13551a9e32cb3d14c0510cd726421",
+                "expected_child_egress_count": 1,
+                "operation": "CREATE",
+                "provider": "meta_ads",
+                "resource_ref": "opaque:sha256:022b0ea7b0c493a9e8823f4d39e960561ef1b506a4c03e3cb18515992268a057",
+                "spend_bound": {
+                  "spend_capability": "NOT_SPEND_CAPABLE"
+                },
+                "started_record_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+                "subplan_digest": "59e9b13ff07fbaf8efbf83a51e8b3ffb2025b0a99064e223c0668a7f85b4e2f8"
+              }
+            ]
+          },
+          "subject_digest": "8ee17191282a89c22084c8e3ce240ee1714205d97d754d153cc317176a2d30b3"
+        },
+        "grantor_ref": "customer-grantor-1"
+      },
+      "review_lines": [
+        "One unresolved attempt has no journaled result",
+        "Recording the observed state settles and attributes nothing",
+        "This grant releases only the exact attempt below"
+      ],
+      "unsigned_receipt": {
+        "action_digest": "8ee17191282a89c22084c8e3ce240ee1714205d97d754d153cc317176a2d30b3",
+        "authentication_mode": "DEVICE_OWNER_AUTHENTICATION",
+        "challenge_digest": "cd029c6c0e2712332c1ff2818db05c782f3457df551b397788e836795052a57d",
+        "challenge_nonce": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+        "expires_at": "2030-01-01T00:04:00Z",
+        "grantor_ref": "customer-grantor-1",
+        "host_ref": "host:adhelm-macos-approval-v1",
+        "issued_at": "2030-01-01T00:00:01.000Z",
+        "key_ref": "key:approval-test-v1",
+        "plan_digest": "f7df322ee4154aeb1ecce031035308d70897681c27dfe2d4978fef8e083ee291",
+        "receipt_id": "approval-receipt:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "receipt_kind": "ATTEMPT_RECOVERY",
+        "review_digest": "6ab8db280877bae28aa0bf48b64d3a2b0149255bba03e388abad1e132fa1ea76",
+        "schema_version": 1,
+        "signature_algorithm": "ECDSA_P256_SHA256_X9_62",
+        "subplan_digests": [
+          "244947554f0f3adfd8b2797a2d70f43fa9a13551a9e32cb3d14c0510cd726421"
+        ]
+      },
+      "unsigned_receipt_digest": "07b74d2fa587619fb32bab7181c27e6f77f11042885fac30d6033c54dc941ea4"
+    }
+  ]
+}

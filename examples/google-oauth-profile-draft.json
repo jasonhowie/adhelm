@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "profile_id": "ga4-read-example",
+  "provider": "ga4",
+  "account_ref": "123456789",
+  "client_ref": "123456-example.apps.googleusercontent.com",
+  "scopes": ["https://www.googleapis.com/auth/analytics.readonly"],
+  "purpose": "READ",
+  "currency": "USD",
+  "timezone": "America/Chicago",
+  "credential_ref": "ga4-read-example-oauth"
+}

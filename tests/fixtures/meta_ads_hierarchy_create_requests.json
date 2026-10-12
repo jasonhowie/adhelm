@@ -1,0 +1,56 @@
+[
+  {
+    "method": "POST",
+    "multipart": {
+      "content_disposition": "form-data; name=\"filename\"; filename=\"creative.png\"",
+      "part_byte_length": 77,
+      "part_media_type": "image/png"
+    },
+    "path": "/v26.0/act_12345/adimages"
+  },
+  {
+    "form": {
+      "buying_type": "AUCTION",
+      "lifetime_budget": "25000",
+      "name": "September launch",
+      "objective": "OUTCOME_TRAFFIC",
+      "special_ad_categories": "[]",
+      "start_time": "2026-10-01T00:00:00+00:00",
+      "status": "PAUSED",
+      "stop_time": "2026-10-31T00:00:00+00:00"
+    },
+    "method": "POST",
+    "path": "/v26.0/act_12345/campaigns"
+  },
+  {
+    "form": {
+      "bid_strategy": "LOWEST_COST_WITHOUT_CAP",
+      "billing_event": "IMPRESSIONS",
+      "campaign_id": "700000000000001",
+      "name": "US Facebook Feed",
+      "optimization_goal": "LINK_CLICKS",
+      "status": "PAUSED",
+      "targeting": "{\"facebook_positions\":[\"feed\"],\"geo_locations\":{\"countries\":[\"US\"]},\"publisher_platforms\":[\"facebook\"]}"
+    },
+    "method": "POST",
+    "path": "/v26.0/act_12345/adsets"
+  },
+  {
+    "form": {
+      "name": "September single image",
+      "object_story_spec": "{\"link_data\":{\"call_to_action\":{\"type\":\"LEARN_MORE\"},\"image_hash\":\"b5f5f9a1f3f4f5c6d7e8f90011223344\",\"link\":\"https://example.test/demo?utm_source=meta\",\"message\":\"Bring tasks and documents together.\",\"name\":\"Plan work faster\"},\"page_id\":\"998877665544332211\"}"
+    },
+    "method": "POST",
+    "path": "/v26.0/act_12345/adcreatives"
+  },
+  {
+    "form": {
+      "adset_id": "700000000000002",
+      "creative": "{\"creative_id\":\"700000000000003\"}",
+      "name": "September single image",
+      "status": "PAUSED"
+    },
+    "method": "POST",
+    "path": "/v26.0/act_12345/ads"
+  }
+]

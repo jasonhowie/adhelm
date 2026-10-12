@@ -1,0 +1,16 @@
+{
+  "mutateOperations": [
+    {
+      "campaignBudgetOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/campaignBudgets/3311",
+          "totalAmountMicros": "500000000"
+        },
+        "updateMask": "totalAmountMicros"
+      }
+    }
+  ],
+  "partialFailure": false,
+  "validateOnly": false,
+  "responseContentType": "RESOURCE_NAME_ONLY"
+}

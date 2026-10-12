@@ -1,0 +1,197 @@
+name: Release
+# Every push and pull request builds the sdist and wheel once, installs the wheel on three
+# platforms and checks it, without publishing: that is the dry run. Only a push of a v* tag in
+# jasonhowie/adhelm continues to attestation, PyPI trusted publishing and the GitHub release.
+on:
+  push:
+    branches: ["**"]
+    tags: ["v[0-9]*"]
+  pull_request:
+permissions: {}
+defaults:
+  run:
+    shell: bash
+env:
+  UV_VERSION: "0.11.32"
+  UV_PYTHON: "3.12.13"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      # Actions are pinned to commit hashes: this workflow signs and uploads release artifacts.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+      - id: version
+        run: echo "version=$(uv run --no-project python scripts/release_artifacts.py version)" >> "$GITHUB_OUTPUT"
+      - name: Clear the runtime dependency licenses for Apache-2.0
+        run: |
+          uv sync --frozen
+          uv run python scripts/audit_dependency_licenses.py --scope runtime --output "$RUNNER_TEMP/license-inventory.json"
+          uv run python scripts/check_dependency_licenses.py --inventory "$RUNNER_TEMP/license-inventory.json"
+      - name: Scan the locked runtime dependencies for known vulnerabilities
+        # This step asks the advisory database over the network, so it can fail for an advisory
+        # published after the lock was written. It fails the job before anything is uploaded.
+        run: |
+          uv export --locked --no-dev --no-emit-project --format requirements-txt --quiet --output-file "$RUNNER_TEMP/runtime-requirements.txt"
+          uv run pip-audit --strict --require-hashes --disable-pip --requirement "$RUNNER_TEMP/runtime-requirements.txt"
+      - name: Build the sdist and wheel
+        run: |
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          uv build --out-dir dist
+          uv build --out-dir "$RUNNER_TEMP/rebuild"
+          for artifact in dist/*.whl dist/*.tar.gz; do
+            cmp "$artifact" "$RUNNER_TEMP/rebuild/$(basename "$artifact")"
+          done
+      - name: Check the artifacts
+        run: uv run --no-project python scripts/release_artifacts.py verify --dist dist
+      - name: Check that the tag is v plus the package version
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: uv run --no-project python scripts/release_artifacts.py verify --dist dist --tag "$TAG"
+      - name: Write the SBOM and checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          sbom="release-metadata/adhelm-${VERSION}.cdx.json"
+          mkdir release-metadata
+          # uv stamps a random serial number and the current time, so the export is bound to the
+          # commit, the uv.lock digest and SOURCE_DATE_EPOCH; a second export must be identical.
+          uv export --locked --no-dev --format cyclonedx1.5 --quiet --output-file "$sbom"
+          uv run --no-project python scripts/release_artifacts.py normalise-sbom --sbom "$sbom"
+          uv run --no-project python scripts/release_artifacts.py verify-sbom --sbom "$sbom"
+          uv export --locked --no-dev --format cyclonedx1.5 --quiet --output-file "$RUNNER_TEMP/second.cdx.json"
+          uv run --no-project python scripts/release_artifacts.py normalise-sbom --sbom "$RUNNER_TEMP/second.cdx.json"
+          cmp "$sbom" "$RUNNER_TEMP/second.cdx.json"
+          mkdir release
+          cp dist/*.whl dist/*.tar.gz "$sbom" release/
+          uv run --no-project python scripts/release_artifacts.py write-checksums --dir release
+          mv release/SHA256SUMS release-metadata/SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-metadata
+          path: release-metadata/
+          if-no-files-found: error
+  smoke:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "*"
+          merge-multiple: true
+          path: release
+      - name: Check the downloaded files against the build job's checksums
+        run: uv run --no-project python scripts/release_artifacts.py check-checksums --dir release
+      - name: Install the wheel into a fresh environment and smoke-test it
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          uv venv "$RUNNER_TEMP/smoke-env"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            interpreter="$RUNNER_TEMP/smoke-env/Scripts/python.exe"
+          else
+            interpreter="$RUNNER_TEMP/smoke-env/bin/python"
+          fi
+          uv pip install --python "$interpreter" "release/adhelm-${VERSION}-py3-none-any.whl"
+          cd "$RUNNER_TEMP"
+          "$interpreter" "$GITHUB_WORKSPACE/scripts/smoke_installed_wheel.py" --expected-version "$VERSION"
+  attest:
+    # The condition below also guards the publish and github-release jobs: a tag in this
+    # repository only, never a branch or a pull request.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'jasonhowie/adhelm'
+    needs: [build, smoke]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "*"
+          merge-multiple: true
+          path: release
+      - run: cd release && sha256sum --check --strict SHA256SUMS
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: release/SHA256SUMS
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'jasonhowie/adhelm'
+    needs: [build, attest]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/adhelm/${{ needs.build.outputs.version }}/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "*"
+          merge-multiple: true
+          path: release
+      - name: Publish exactly the checked wheel and sdist
+        run: |
+          cd release && sha256sum --check --strict SHA256SUMS && cd ..
+          mkdir publish
+          cp release/*.whl release/*.tar.gz publish/
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: publish/
+  github-release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.repository == 'jasonhowie/adhelm'
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "*"
+          merge-multiple: true
+          path: release
+      - name: Create the GitHub release from the published files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          cd release && sha256sum --check --strict SHA256SUMS && cd ..
+          prerelease=()
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then prerelease=(--prerelease); fi
+          gh release create "$TAG" release/* "${prerelease[@]}" --verify-tag --title "AdHelm $VERSION" \
+            --notes "Read-only release. CHANGELOG.md states the scope, provider labels and known limitations. Check the files against SHA256SUMS, or with gh attestation verify."

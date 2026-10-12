@@ -1,0 +1,51 @@
+# Configuration for gitleaks (https://github.com/gitleaks/gitleaks), the secret scanner the
+# public export runs over the whole tree before it is pushed. The default rules apply in full.
+#
+# The only exceptions are the exact values below. Each one makes the generic-api-key rule
+# fire on text that merely sits next to the word "key", "token" or "secret"; none is a
+# credential. A value that is not listed, or a different rule, still fails the scan.
+title = "AdHelm"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Identifiers and enum names, not values: key-storage kinds, CryptoKit types, argument bindings and prose"
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = [
+  '''^KEYCHAIN_P256$''',
+  '''^\.keychainP256$''',
+  '''^P256\.Signing\.PrivateKey$''',
+  '''^M36UltraKeys$''',
+  '''^ci_enabled=True$''',
+  '''^max_rows=decision\.max_rows$''',
+  '''^maximum=_MAX_SECRET_BYTES$''',
+  '''^maximum_bytes=256$''',
+  '''^observation\.1$''',
+  '''^receipt/signature/durable$''',
+]
+
+[[allowlists]]
+description = "Synthetic references and canaries that the tests plant to prove they never reach an output"
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = [
+  '''^generated-approval-v1$''',
+  '''^independent-ga4-primary$''',
+  '''^m52-execution-integration$''',
+  '''^pilot-fixture-secret-7731$''',
+  '''^private-key-54f3dc19$''',
+]
+
+[[allowlists]]
+description = "A synthetic Keychain access group (placeholder team ID plus the product identifier root) that a native test uses, not a key"
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = ['''^ABCDE12345\.com\.aptsonic\.adhelm$''']
+
+[[allowlists]]
+description = "A SHA-256 digest that a test pins, not a key"
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = ['''^10c559ca56b934c84fd4a25c520fa90b81e1330687f63f034867910ef649305e$''']

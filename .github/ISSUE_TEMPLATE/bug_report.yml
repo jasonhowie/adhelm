@@ -1,0 +1,85 @@
+name: Bug report
+description: Report something that does not work as documented.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Read this first.
+
+        **Never paste a credential, token, account or property identifier,
+        customer data or raw provider response.** Redact anything of that kind from
+        every field below.
+
+        If you believe the bug is a security vulnerability, do not file it here.
+        Report it privately as described in the
+        [security policy](https://github.com/jasonhowie/adhelm/blob/main/SECURITY.md).
+  - type: input
+    id: version
+    attributes:
+      label: AdHelm version
+      description: The output of `adhelm version`.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      description: The provider the command was working with.
+      options:
+        - Google Ads
+        - Meta Ads
+        - LinkedIn Ads
+        - TikTok Ads
+        - Reddit Ads
+        - OpenAI Ads
+        - GA4
+        - GTM
+        - More than one provider
+        - No provider (a local command)
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - macOS
+        - Linux
+        - Windows
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Redacted `adhelm doctor` output
+      description: |
+        Paste the output of `adhelm doctor`. It is designed to be safe to share,
+        but read it and remove anything that identifies you or an account first.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The command you ran, with any account identifiers removed, and what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before you submit
+      options:
+        - label: I removed every credential, token, account identifier and raw provider response from this report.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

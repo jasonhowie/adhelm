@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "release_state": "IMPLEMENTING",
+  "source_commit": "f53f49cdf03539a3d58396ea1580dfa1d9da50cd",
+  "validated_at": "2026-09-05T13:28:22.286835Z",
+  "lock_sha256": "c3cd49657254cc8658a3c7abc781dccc7b4f17bd1d9f83d80b71d971f0fb32a9",
+  "sha256": "f3f095ae1e02fd4b84ee485c4da990df48c5ea1eb74b8bb00096c63d1fe73186",
+  "scope": "LOCK_GRAPH_AND_VERSION_MATCHED_INSTALLED_METADATA",
+  "summary": {
+    "all_lock_scope_counts": {
+      "development_reachable": 40,
+      "runtime_reachable": 38,
+      "unreachable_locked": 0
+    },
+    "installed_status_counts": {
+      "NOT_INSTALLED_REVIEW_REQUIRED": 5,
+      "VERSION_MATCHED": 65
+    },
+    "legal_compatibility_decision": "NOT_MADE",
+    "matched_license_evidence_counts": {
+      "expression_provenance": {
+        "EXACT_TROVE_CLASSIFIER_MAPPING": 20,
+        "NONE": 9,
+        "PEP_639_LICENSE_EXPRESSION": 36
+      },
+      "license_file_status": {
+        "HASHED": 59,
+        "PARTIAL_REVIEW_REQUIRED": 6
+      },
+      "metadata_expression_status": {
+        "NOT_PRESENT": 29,
+        "VALID": 36
+      }
+    },
+    "review_required_package_count": 70,
+    "selected_package_count": 70
+  },
+  "decision": "REVIEW_REQUIRED_NO_LEGAL_COMPATIBILITY_DECISION",
+  "reproducible": true,
+  "release_artifact_license_scan": false,
+  "evidence_path": "/private/tmp/adhelm-reviewed-m21/dependency-license-inventory.json",
+  "repeat_path": "/private/tmp/adhelm-reviewed-m21/dependency-license-inventory-repeat.json",
+  "scanner": "scripts/audit_dependency_licenses.py",
+  "network_access": false,
+  "provider_or_credential_access": false,
+  "limitations": [
+    "Version-matched installed metadata is not cryptographic installed-wheel provenance.",
+    "All 70 packages require review; no legal compatibility decision was made.",
+    "Five platform/development packages were absent from this host.",
+    "Six installed packages have partial license-file evidence.",
+    "This is not a release-artifact license scan or release approval."
+  ]
+}

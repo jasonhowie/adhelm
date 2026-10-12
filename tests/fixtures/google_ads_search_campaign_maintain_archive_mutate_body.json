@@ -1,0 +1,16 @@
+{
+  "mutateOperations": [
+    {
+      "campaignOperation": {
+        "update": {
+          "resourceName": "customers/1234567890/campaigns/5511",
+          "status": "REMOVED"
+        },
+        "updateMask": "status"
+      }
+    }
+  ],
+  "partialFailure": false,
+  "validateOnly": false,
+  "responseContentType": "RESOURCE_NAME_ONLY"
+}
