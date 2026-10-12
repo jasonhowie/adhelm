@@ -172,12 +172,16 @@ class Profile(StrictModel):
     timezone: Annotated[str, Field(min_length=1, max_length=80)] = "UTC"
     credential_source: Literal["OS_STORE", "EXPLICIT_CI", "OS_OAUTH_GOOGLE"] = "OS_STORE"
     credential_ref: SafeRef
-    secondary_credential_ref: SafeRef | None = None
     login_customer_ref: str | None = Field(default=None, pattern=r"^[0-9]{10}$")
 
     @model_validator(mode="before")
     @classmethod
     def explicit_google_ads_edit_expectations(cls, value: Any) -> Any:
+        if isinstance(value, dict) and "secondary_credential_ref" in value:
+            # AdHelm 0.1.0 wrote this field on every profile (null, or the name of a Google
+            # Ads developer-token entry). Google retired developer tokens on 2026-09-09: the
+            # value is dropped on load, never read and never written back.
+            value = {k: v for k, v in value.items() if k != "secondary_credential_ref"}
         if (
             isinstance(value, dict)
             and value.get("provider") == "google_ads"
@@ -195,24 +199,10 @@ class Profile(StrictModel):
 
     @model_validator(mode="after")
     def provider_specific_auth_metadata(self) -> "Profile":
-        references = tuple(
-            reference
-            for reference in (self.credential_ref, self.secondary_credential_ref)
-            if reference is not None
-        )
-        if any(is_reserved_credential_reference(reference) for reference in references):
+        if is_reserved_credential_reference(self.credential_ref):
             raise ValueError("Internal key references cannot be provider credentials")
-        if (
-            self.secondary_credential_ref is not None
-            and self.secondary_credential_ref.casefold() == self.credential_ref.casefold()
-        ):
-            raise ValueError("Primary and secondary credentials require distinct references")
-        if self.provider != "google_ads" and (
-            self.secondary_credential_ref is not None or self.login_customer_ref is not None
-        ):
-            raise ValueError(
-                "Developer-token and manager-login references apply only to Google Ads"
-            )
+        if self.provider != "google_ads" and self.login_customer_ref is not None:
+            raise ValueError("Manager-login references apply only to Google Ads")
         if self.credential_source == "OS_OAUTH_GOOGLE":
             expected_scope = GOOGLE_OAUTH_PROFILE_SCOPE_BY_PROVIDER_PURPOSE.get(
                 (self.provider, self.purpose)
@@ -223,10 +213,6 @@ class Profile(StrictModel):
                 raise ValueError("Google OAuth profiles require a supported installed client ID")
             if not is_google_oauth_operational_principal_ref(self.principal_ref):
                 raise ValueError("Google OAuth profiles require a derived OIDC principal reference")
-            if self.provider == "google_ads" and self.secondary_credential_ref is None:
-                raise ValueError(
-                    "Google OAuth Google Ads profiles require a developer-token reference"
-                )
             if self.provider == "google_ads" and self.purpose == "EDIT" and self.currency is None:
                 raise ValueError("Google Ads EDIT requires the declared account currency")
             if self.provider in {"ga4", "ga4_admin"} and self.currency is None:

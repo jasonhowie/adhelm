@@ -1,5 +1,7 @@
 # Google Ads v25 read wire: independent review
 
+> Note (2026-10-12): Google retired Google Ads developer tokens on 2026-09-09, and AdHelm no longer stores or sends one (G1). The developer-token text below is a historical record of the state when it was written.
+
 This review covers the fixed generic Google Ads v25 read wire in
 `src/adhelm/providers/google_ads.py` and the independent fake-only cases in
 `tests/test_google_ads_read_wire_ultra_review.py`. It used `httpx.MockTransport`

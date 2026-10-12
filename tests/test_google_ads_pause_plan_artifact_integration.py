@@ -17,8 +17,6 @@ import pytest
 from test_google_ads_campaign_state import _campaign_response, _identity_response
 from test_google_ads_pause_credentials import (
     _ACCESS,
-    _DEVELOPER,
-    _GENERIC_SERVICE,
     _grant,
     _MemoryStore,
     _profile,
@@ -69,7 +67,7 @@ class _Runtime:
 def _installed_at(
     monkeypatch: pytest.MonkeyPatch, base: datetime
 ) -> tuple[Profile, list[datetime]]:
-    """Install the existing fake OAuth/developer slots on a chosen local clock.
+    """Install the existing fake OAuth slot on a chosen local clock.
 
     The shared fixture pins a far-future instant, but a retained plan must be
     recorded at or after its completed observation. Planning therefore runs on
@@ -90,8 +88,6 @@ def _installed_at(
         client_secret="m56-google-client-secret",
         expected_slot=slot,
     )
-    assert profile.secondary_credential_ref is not None
-    store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = _DEVELOPER
     return profile, current
 
 
@@ -111,7 +107,7 @@ def _planner(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> _Planner:
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         body = json.loads(request.content)
         current[0] += timedelta(seconds=1)
         if "FROM customer" in body["query"]:
@@ -224,7 +220,7 @@ def _render(runtime: _Runtime, destination: Path, formats: list[str], *, expecte
 def _assert_only_planning_reads(runtime: _Runtime) -> None:
     assert runtime.paths == ["customer", "campaign"]
     history = b"".join(path.read_bytes() for path in runtime.root.rglob("*.jsonl"))
-    for forbidden in (_ACCESS.encode(), _DEVELOPER.encode(), b"APPLY_STARTED"):
+    for forbidden in (_ACCESS.encode(), b"APPLY_STARTED"):
         assert forbidden not in history
 
 
@@ -254,7 +250,6 @@ def test_three_redacted_formats_render_from_an_actually_planned_record(
         assert "UNRELEASED" in contents
         for forbidden in (
             _ACCESS,
-            _DEVELOPER,
             "m56-google-ads-refresh-token",
             "m56-google-client-secret",
             runtime.profile_id,
@@ -346,7 +341,7 @@ def test_saved_rule_generates_files_inline_during_configured_planning(
     for item in generated["artifacts"]:
         contents = Path(item["path"]).read_text()
         assert data["plan_digest"] in contents
-        for forbidden in (_ACCESS, _DEVELOPER, planner.profile_id, "credential-binding:sha256:"):
+        for forbidden in (_ACCESS, planner.profile_id, "credential-binding:sha256:"):
             assert forbidden not in contents
     assert len(list(destination.iterdir())) == 2
     _assert_only_planning_reads(_Runtime(planner.root, "", planner.paths, planner.profile_id))

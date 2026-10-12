@@ -337,7 +337,7 @@ def test_oauth_status_and_source_aware_local_remove_use_the_sealed_bundle_servic
     status = credential_setup.credential_status(configuration, profile.profile_id)
     assert len(status) == 1
     assert status[0].state == "PRESENT"
-    removed = credential_setup.local_remove(configuration, profile.profile_id, "PRIMARY")
+    removed = credential_setup.local_remove(configuration, profile.profile_id)
     assert removed.operation == "LOCAL_REMOVE_ONLY"
     assert removed.state == "LOCAL_REMOVED"
     status_after_remove = credential_setup.credential_status(configuration, profile.profile_id)
@@ -382,9 +382,7 @@ def test_generic_local_remove_cannot_delete_oauth_bundle_from_same_reference(
     )
     generic_configuration = _configuration(generic_profile)
 
-    removed = credential_setup.local_remove(
-        generic_configuration, generic_profile.profile_id, "PRIMARY"
-    )
+    removed = credential_setup.local_remove(generic_configuration, generic_profile.profile_id)
     assert removed.state == "LOCAL_REMOVED"
     assert (
         oauth_credentials.resolve_google_oauth_access_token(oauth_profile)

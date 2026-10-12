@@ -1,5 +1,7 @@
 # Google OAuth workflow ultra review
 
+> Note (2026-10-12): Google retired Google Ads developer tokens on 2026-09-09, and AdHelm no longer stores or sends one (G1). The developer-token text below is a historical record of the state when it was written.
+
 This independent review covers the local configuration transaction, draft and
 private-client intake, enrollment/reconnect workflow, CLI registration, and
 the protected install-slot boundary. It uses only fake stores, synthetic

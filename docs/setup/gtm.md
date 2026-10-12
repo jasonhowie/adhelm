@@ -25,7 +25,9 @@ documentation under [Sources](#sources), with the date each page was fetched.
 You need a Google Cloud project that you control, one OAuth client in it, and a Google
 user with access to the container. If you already created the client for
 [Google Ads](google_ads.md#create-the-developer-app) or [GA4](ga4.md#create-the-developer-app),
-reuse it and only add the scope below under **Data Access**.
+reuse it and only add the scope below under **Data Access**. The Google Ads access level
+shown on that project's Overview page applies to the Google Ads API only; the Tag Manager
+API has the quota described under [Access tiers and limits](#access-tiers-and-limits).
 
 1. Select or create a Google Cloud project and enable the **Tag Manager API**. Google's
    authorization page points to a setup tool that creates the project and enables the
@@ -107,7 +109,7 @@ writes into a Desktop client download.
 
 Create the profile draft. It holds no secret and no Google subject. `account_ref` is the
 numeric account ID; `credential_ref` is a local name that must differ from any other
-profile's. A GTM draft takes no currency, developer token or manager account.
+profile's. A GTM draft takes no currency or manager account.
 
 ```json guide:file=gtm-draft.json
 {
@@ -145,7 +147,6 @@ adhelm auth google-oauth enroll --input gtm-draft.json --client-config client_se
     "provider": "gtm",
     "purpose": "READ",
     "operation": "ENROLL",
-    "secondary_credential_status": "NOT_APPLICABLE",
     "resource_access_verified": false,
     "execution_authority": false
   }
@@ -166,7 +167,7 @@ adhelm auth google-oauth status --profile gtm-read
     "provider": "gtm",
     "local_state": "READY",
     "granted_scopes": ["openid", "https://www.googleapis.com/auth/tagmanager.readonly"],
-    "developer_token_slot_state": "NOT_REQUIRED",
+    "cloud_project_access_level": "NOT_OBSERVABLE",
     "provider_authentication_verified": false
   }
 }

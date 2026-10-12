@@ -262,7 +262,7 @@ def configured_google_ads_edit_session(
 
     The optional digest is private composition protection.  A malformed value
     fails before protected storage; a valid but stale value fails before the
-    OAuth/developer-token slots or any v25 request.
+    OAuth slot or any v25 request.
     """
 
     root = _checked_directory(directory)
@@ -418,9 +418,7 @@ def _continuity_marker(
             snapshot.client_ref.encode("ascii"),
             snapshot.api_scope.encode("ascii"),
             snapshot.credential_ref.encode("ascii"),
-            snapshot.secondary_credential_ref.encode("ascii"),
             snapshot._bearer_token.encode("ascii"),
-            snapshot._developer_token.encode("ascii"),
             _utc_time(snapshot._access_token_expires_at).isoformat().encode("ascii"),
         )
         return hmac.new(key, b"\x00".join(segments), hashlib.sha256).digest()
@@ -434,7 +432,6 @@ def _headers_from_snapshot(
     try:
         headers = {
             "authorization": f"Bearer {snapshot._bearer_token}",
-            "developer-token": snapshot._developer_token,
         }
         if target.login_customer_client_ref is not None:
             headers["login-customer-id"] = target.login_customer_client_ref

@@ -189,7 +189,7 @@ class GoogleAdsCampaignPauseGuardedAdapter:
     """Factory-issued fixed-route adapter consumed only by ``SafetyKernel``.
 
     It exposes the ordinary guarded-adapter protocol but cannot be configured
-    with a bearer, developer token, URL, HTTP client, raw acknowledgement, or
+    with a bearer, URL, HTTP client, raw acknowledgement, or
     caller clock.
     """
 
@@ -667,7 +667,7 @@ def _configured_google_ads_campaign_pause_adapter(
     """Yield one configured fixed-route Google Ads PAUSE adapter.
 
     The composition uses only the action's closed EDIT profile reference and
-    exact configuration digest.  It has no public bearer, developer-token, URL,
+    exact configuration digest.  It has no public bearer, URL,
     or clock input and does not mutate until a safety-kernel permit reaches
     ``apply_guarded``.
     """

@@ -18,7 +18,7 @@ from adhelm.google_oauth_workflow import (
     reconnect_google_oauth,
 )
 from adhelm.models import StrictModel
-from adhelm.providers.google_ads import GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_NOT_DOCUMENTED
+from adhelm.providers.google_ads import GOOGLE_ADS_CLOUD_PROJECT_ACCESS_NOT_OBSERVABLE
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -58,17 +58,11 @@ class _StatusOutput(StrictModel):
     )
     identity_reverified_on_refresh: Literal[True] = True
     primary_slot_present: bool
-    developer_token_slot_required: bool
-    # The typed diagnostic for a credential store that could not answer. It is
-    # never `ABSENT` in that case, because an unanswered store and an
-    # incomplete enrolment are different facts with different next actions.
-    developer_token_slot_state: Literal[
-        "PRESENT", "ABSENT", "UNKNOWN_STORE_FAILURE", "NOT_REQUIRED"
-    ]
-    developer_token_slot_present: bool | None
-    developer_token_slot_next_action: Annotated[str, Field(min_length=1, max_length=300)] | None
-    developer_token_access_level: Literal["NOT_DOCUMENTED_LOCALLY"] = (
-        GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_NOT_DOCUMENTED
+    # Google retired developer tokens on 2026-09-09. API access belongs to the
+    # Cloud project that owns the OAuth client, and no reviewed read returns its
+    # Test/Explorer/Basic/Standard level, so it is reported as not observable.
+    cloud_project_access_level: Literal["NOT_OBSERVABLE"] = (
+        GOOGLE_ADS_CLOUD_PROJECT_ACCESS_NOT_OBSERVABLE
     )
     revocation_guidance: Annotated[list[str], Field(min_length=1, max_length=8)]
     credential_source: Literal["OS_OAUTH_GOOGLE"] = "OS_OAUTH_GOOGLE"
@@ -76,22 +70,6 @@ class _StatusOutput(StrictModel):
     remote_revocation_verified: Literal[False] = False
     resource_access_verified: Literal[False] = False
     execution_authority: Literal[False] = False
-
-
-# Actionable next steps for the two developer-token states that need one. A
-# settled `PRESENT`, `ABSENT`, or `NOT_REQUIRED` needs none.
-_DEVELOPER_TOKEN_NEXT_ACTION: dict[str, str] = {
-    "UNKNOWN_STORE_FAILURE": (
-        "The local credential store did not answer for the developer-token reference, so "
-        "its presence is unknown and is not reported as absent. Unlock the OS credential "
-        "store in a local session and read this status again."
-    ),
-    "ABSENT": (
-        "No developer token is stored for this profile. Store one with "
-        "`adhelm auth store` against the profile's secondary credential reference before any "
-        "Google Ads read."
-    ),
-}
 
 
 def _status_data(value: object) -> dict[str, Any]:
@@ -117,12 +95,6 @@ def _status_data(value: object) -> dict[str, Any]:
         refresh_token_expired=value.refresh_token_expired,
         identity_last_verified_not_after=value.identity_last_verified_not_after,
         primary_slot_present=value.primary_slot_present,
-        developer_token_slot_required=value.developer_token_slot_required,
-        developer_token_slot_state=value.developer_token_slot_state,
-        developer_token_slot_present=value.developer_token_slot_present,
-        developer_token_slot_next_action=_DEVELOPER_TOKEN_NEXT_ACTION.get(
-            value.developer_token_slot_state
-        ),
         revocation_guidance=list(google_oauth_revocation_guidance(value.provider)),
     ).model_dump(mode="json")
 
@@ -197,13 +169,6 @@ def status(
         maximum = load_configuration(directory).output.max_output_bytes
         result = google_oauth_status(directory, profile_id)
         data = _status_data(result)
-        # A store that could not be questioned leaves one declared fact
-        # unread, so the envelope says so rather than reporting a clean OK.
-        outcome = (
-            "INCOMPLETE_COVERAGE"
-            if data["developer_token_slot_state"] == "UNKNOWN_STORE_FAILURE"
-            else "OK"
-        )
-        emit(command, data, outcome=outcome, maximum_bytes=maximum)
+        emit(command, data, maximum_bytes=maximum)
 
     guarded(command, work)

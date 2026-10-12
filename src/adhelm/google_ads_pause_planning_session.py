@@ -873,7 +873,6 @@ def _headers_from_snapshot(
     try:
         headers = {
             "authorization": f"Bearer {snapshot._bearer_token}",
-            "developer-token": snapshot._developer_token,
         }
         if target.login_customer_client_ref is not None:
             headers["login-customer-id"] = target.login_customer_client_ref

@@ -19,7 +19,6 @@ from guide_fakes import (
     ADWORDS,
     ANALYTICS_READONLY,
     CLIENT_ID,
-    DEVELOPER_TOKEN,
     FAKES,
     LINKEDIN_CLIENT_ID,
     LINKEDIN_CLIENT_SECRET,
@@ -500,7 +499,7 @@ def test_the_fake_flags_a_method_that_is_not_a_read(method: str) -> None:
     response = client(fake).request(
         method,
         "https://googleads.googleapis.com/v25/customers/1234567890/campaigns/1",
-        headers={"authorization": f"Bearer {token}", "developer-token": DEVELOPER_TOKEN},
+        headers={"authorization": f"Bearer {token}"},
     )
     assert response.status_code == 403
     assert fake.problems() == [
@@ -541,26 +540,27 @@ def test_the_fake_refuses_a_token_granted_for_another_scope() -> None:
     assert response.status_code == 403
 
 
-def test_the_fake_refuses_google_ads_without_the_developer_token_the_user_stored() -> None:
+def test_the_google_ads_fake_flags_and_refuses_a_developer_token_header() -> None:
+    """Google retired developer tokens on 2026-09-09; AdHelm must never send one."""
     fake = google_ads()
     token = grant(fake, ADWORDS)
     url = "https://googleads.googleapis.com/v25/customers/1234567890/googleAds:search"
-    headers = {"authorization": f"Bearer {token}", "developer-token": "not-the-stored-one"}
     body = {"query": "SELECT customer.currency_code FROM customer"}
-    assert client(fake).post(url, headers=headers, json=body).status_code == 401
-    # Nothing was stored yet: even the right value is refused until the prompt is answered.
-    headers["developer-token"] = DEVELOPER_TOKEN
-    assert client(fake).post(url, headers=headers, json=body).status_code == 401
-    # Once the prompt has been answered with it, that value is the one accepted.
-    assert fake._prompt() == DEVELOPER_TOKEN
-    response = client(fake).post(url, headers=headers, json=body)
-    assert response.status_code == 200
-    assert fake.problems() == []
+    sent = client(fake).post(
+        url, headers={"authorization": f"Bearer {token}", "developer-token": "any"}, json=body
+    )
+    assert sent.status_code == 400
+    assert fake.problems() == [
+        "a developer-token header to googleads.googleapis.com"
+        "/v25/customers/1234567890/googleAds:search"
+    ]
+    clean = client(fake).post(url, headers={"authorization": f"Bearer {token}"}, json=body)
+    assert clean.status_code == 200
 
 
-def test_the_fake_secret_prompt_answers_in_order_and_refuses_an_unexpected_prompt() -> None:
+def test_a_google_ads_guide_has_no_secret_prompt_to_answer() -> None:
     fake = google_ads()
-    assert fake._prompt() == DEVELOPER_TOKEN
+    assert fake.prompt_answers == []
     with pytest.raises(AdhelmError, match="unexpected secret") as raised:
         fake._prompt()
     assert raised.value.code == "FAKE_PROMPT_EXHAUSTED"

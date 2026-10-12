@@ -45,7 +45,6 @@ _ACCESS = "ultra-google-ads-access-token"
 _REFRESHED_ACCESS = "ultra-google-ads-refreshed-access-token"
 _REFRESH = "ultra-google-ads-refresh-token"
 _CLIENT_SECRET = "ultra-google-ads-client-secret"
-_DEVELOPER = "ultra-google-ads-developer-token"
 _GENERIC_SERVICE = "ultra-google-ads-generic-service"
 
 
@@ -106,7 +105,6 @@ def _profile(**updates: object) -> Profile:
         "timezone": "UTC",
         "credential_source": "OS_OAUTH_GOOGLE",
         "credential_ref": "google-ads-pause-ultra-oauth",
-        "secondary_credential_ref": "google-ads-pause-ultra-developer",
         "login_customer_ref": _LOGIN,
     }
     data.update(updates)
@@ -165,8 +163,6 @@ def _configured(
         client_secret=_CLIENT_SECRET,
         expected_slot=slot,
     )
-    assert profile.secondary_credential_ref is not None
-    store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = _DEVELOPER
     store.reads.clear()
     store.writes.clear()
     locks.entries.clear()
@@ -228,7 +224,7 @@ def _install_http(
             f"https://googleads.googleapis.com/v25/customers/{_CUSTOMER}/googleAds:search"
         )
         assert request.headers["authorization"] == f"Bearer {expected_bearer}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == _LOGIN
         body = json.loads(request.content)
         assert set(body) == {"query", "searchSettings"}
@@ -295,15 +291,12 @@ def test_initial_refresh_and_binding_key_creation_are_planning_only_then_pair_is
     assert (
         fixture.store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] == "b" * 64
     )
-    assert fixture.profile.secondary_credential_ref is not None
     public = json.dumps(binding.model_dump(mode="json"), sort_keys=True)
     for private in (
         _REFRESHED_ACCESS,
-        _DEVELOPER,
         _REFRESH,
         _CLIENT_SECRET,
         fixture.profile.credential_ref,
-        fixture.profile.secondary_credential_ref,
         GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE,
         "b" * 64,
     ):
@@ -312,7 +305,7 @@ def test_initial_refresh_and_binding_key_creation_are_planning_only_then_pair_is
 
 @pytest.mark.parametrize(
     "drift",
-    ("bearer", "refresh", "developer", "binding-key", "manager"),
+    ("bearer", "refresh", "binding-key", "manager"),
 )
 def test_drift_after_identity_prevents_the_campaign_request_without_refresh(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, drift: str
@@ -321,7 +314,6 @@ def test_drift_after_identity_prevents_the_campaign_request_without_refresh(
     secrets_by_drift = {
         "bearer": "ultra-rotated-bearer-token",
         "refresh": "ultra-rotated-refresh-token",
-        "developer": "ultra-rotated-developer-token",
         "binding-key": "c" * 64,
         "manager": "1111111111",
     }
@@ -340,11 +332,6 @@ def test_drift_after_identity_prevents_the_campaign_request_without_refresh(
                 fixture.store,
                 fixture.profile.credential_ref,
                 rotated_bundle,
-            )
-        elif drift == "developer":
-            assert fixture.profile.secondary_credential_ref is not None
-            fixture.store.values[(_GENERIC_SERVICE, fixture.profile.secondary_credential_ref)] = (
-                replacement
             )
         elif drift == "binding-key":
             fixture.store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = (
@@ -421,7 +408,7 @@ def test_retention_callback_rereads_held_slots_without_reacquiring_and_blocks_pr
                 lambda _reference: pytest.fail("retention callback must not reacquire slot locks"),
             )
             recheck()
-            assert len(fixture.store.reads) == reads_before + 3
+            assert len(fixture.store.reads) == reads_before + 2
             assert len(fixture.locks.entries) == lock_entries_before
             with pytest.raises(AdhelmError) as busy:
                 session.observe_campaign("42")
@@ -476,7 +463,7 @@ def test_forward_second_no_refresh_clock_sample_at_expiry_is_credential_drift(
     assert len(fixture.store.writes) == writes_before
 
 
-@pytest.mark.parametrize("drift", ("bundle", "developer", "binding-key", "configuration"))
+@pytest.mark.parametrize("drift", ("bundle", "binding-key", "configuration"))
 def test_retention_callback_detects_drift_that_arrives_after_context_entry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, drift: str
 ) -> None:
@@ -508,11 +495,6 @@ def test_retention_callback_detects_drift_that_arrives_after_context_entry(
                     fixture.profile.credential_ref,
                     replace(bundle, access_token="ultra-retention-rotated-bearer"),
                 )
-            elif drift == "developer":
-                assert fixture.profile.secondary_credential_ref is not None
-                fixture.store.values[
-                    (_GENERIC_SERVICE, fixture.profile.secondary_credential_ref)
-                ] = "ultra-retention-rotated-developer"
             elif drift == "binding-key":
                 fixture.store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = (
                     "d" * 64
@@ -611,15 +593,12 @@ def test_actual_workflow_retains_only_the_stable_nonsecret_binding(
     action = retained.action
     assert action.execution_authority is False
     assert action.execution_binding.credential_binding_ref.startswith("credential-binding:sha256:")
-    assert fixture.profile.secondary_credential_ref is not None
     rendered = json.dumps(action.to_data(), sort_keys=True)
     for private in (
         _ACCESS,
-        _DEVELOPER,
         _REFRESH,
         _CLIENT_SECRET,
         fixture.profile.credential_ref,
-        fixture.profile.secondary_credential_ref,
         GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE,
     ):
         assert private not in rendered

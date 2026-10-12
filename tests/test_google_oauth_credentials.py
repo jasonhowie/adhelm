@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+import json
 from contextlib import nullcontext
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from adhelm import credential_setup, credentials
 from adhelm import google_oauth_credentials as oauth_credentials
-from adhelm.errors import AdhelmError
+from adhelm.config import load_configuration, save_configuration
+from adhelm.errors import AdhelmError, ExitCode
 from adhelm.google_oauth_protocol import (
     GOOGLE_OAUTH_PROFILE_SCOPE_BY_PROVIDER_PURPOSE,
     GOOGLE_OIDC_CANONICAL_ISSUER,
@@ -43,7 +46,6 @@ def _legacy_profile() -> Profile:
         currency="USD",
         timezone="UTC",
         credential_ref="legacy-google-token",
-        secondary_credential_ref="legacy-google-developer-token",
     )
 
 
@@ -86,9 +88,6 @@ def _oauth_profile(provider: str = "google_ads", *, account_ref: str | None = No
         timezone="UTC",
         credential_source="OS_OAUTH_GOOGLE",
         credential_ref=f"oauth-{provider}-primary",
-        secondary_credential_ref=(
-            "oauth-google-ads-secondary" if provider == "google_ads" else None
-        ),
     )
 
 
@@ -306,7 +305,7 @@ def test_oauth_primary_routes_to_sealed_bundle_and_source_aware_remove(
 
     assert credentials.credential(profile) == "fixture-access-token"
     assert next(iter(store.values.values())) != "fixture-access-token"
-    removed = credential_setup.local_remove(configuration, profile.profile_id, "PRIMARY")
+    removed = credential_setup.local_remove(configuration, profile.profile_id)
     assert removed.operation == "LOCAL_REMOVE_ONLY"
     assert store.values == {}
 
@@ -363,7 +362,7 @@ def test_oauth_status_and_remove_use_only_the_dedicated_bundle_service(
         credential_setup.credential_status(configuration, profile.profile_id)[0].state == "PRESENT"
     )
     assert store.get_calls == [(oauth_credentials._SERVICE, profile.credential_ref)]
-    removed = credential_setup.local_remove(configuration, profile.profile_id, "PRIMARY")
+    removed = credential_setup.local_remove(configuration, profile.profile_id)
     assert removed.state == "LOCAL_REMOVED"
     assert store.values == {}
     assert (
@@ -624,23 +623,22 @@ def test_malformed_or_forged_profile_blocks_before_refresh_dispatch(
     assert invalid_profile.value.code == "GOOGLE_OAUTH_CREDENTIAL_INVALID"
 
 
-def test_google_ads_oauth_secondary_stays_static_and_primary_setup_is_rejected(
+def test_google_ads_oauth_primary_setup_is_rejected_and_there_is_no_secondary(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    store = _MemoryStore(
-        values={("adhelm", "oauth-google-ads-secondary"): "static-developer-token"}
-    )
+    store = _MemoryStore()
     _fake_local_bundle_store(monkeypatch, store)
     profile = _oauth_profile()
     configuration = _oauth_configuration(profile)
-    assert credentials.credential(profile, secondary=True) == "static-developer-token"
+    with pytest.raises(TypeError):
+        credentials.credential(profile, secondary=True)  # type: ignore[call-arg]
     monkeypatch.setattr(
         credential_setup,
         "prompt_secret_from_terminal",
         lambda: pytest.fail("OAuth primary must not open the generic secret prompt"),
     )
     with pytest.raises(AdhelmError) as failure:
-        credential_setup.store_interactive(configuration, profile.profile_id, "PRIMARY")
+        credential_setup.store_interactive(configuration, profile.profile_id)
     assert failure.value.code == "GOOGLE_OAUTH_INTERACTIVE_SETUP_UNSUPPORTED"
 
 
@@ -662,3 +660,57 @@ def test_oauth_slot_aliases_static_os_store_refs_before_any_store_read(
     with pytest.raises(AdhelmError) as failure:
         credential_setup.credential_status(configuration, oauth_profile.profile_id)
     assert failure.value.code == "CREDENTIAL_REFERENCE_ALIAS"
+
+
+def test_a_config_written_by_0_1_0_loads_and_the_retired_field_is_not_written_back(
+    tmp_path: Path,
+) -> None:
+    """0.1.0 wrote `secondary_credential_ref` (null, or a token entry name) on every profile."""
+    for retired in (None, "google-ads-read-developer-token"):
+        profile = _oauth_profile().model_dump(mode="json")
+        profile["secondary_credential_ref"] = retired
+        directory = tmp_path / f"retired-{retired}"
+        directory.mkdir()
+        (directory / "config.json").write_text(
+            json.dumps({"profiles": [profile]}), encoding="utf-8"
+        )
+        loaded = load_configuration(directory)
+        assert [p.profile_id for p in loaded.profiles] == [profile["profile_id"]]
+        assert "secondary_credential_ref" not in loaded.profiles[0].model_dump()
+        save_configuration(directory, loaded, replace=True)
+        assert "secondary_credential_ref" not in (directory / "config.json").read_text()
+
+
+def test_a_grant_sealed_against_an_older_profile_form_asks_for_a_reconnect(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A 0.1.0 bundle is bound to a profile digest that no longer exists: say so, specifically."""
+    store = _MemoryStore()
+    _fake_local_bundle_store(monkeypatch, store)
+    profile = _oauth_profile("ga4", account_ref="12345")
+    configuration = _oauth_configuration(profile)
+    monkeypatch.setattr(oauth_credentials, "_utc_now", lambda: datetime(2029, 1, 1, tzinfo=UTC))
+    slot = oauth_credentials.prepare_google_oauth_slot(profile.credential_ref, replace=False)
+    oauth_credentials.install_google_oauth_grant(
+        configuration,
+        profile.profile_id,
+        _oauth_grant(profile),
+        client_secret=None,
+        expected_slot=slot,
+    )
+    key = (oauth_credentials._SERVICE, profile.credential_ref)
+    bundle = oauth_credentials._decode_bundle(store.values[key])
+    store.values[key] = replace(bundle, profile_digest="0" * 64)._encoded()
+
+    with pytest.raises(AdhelmError) as raised:
+        oauth_credentials.resolve_google_oauth_access_token(profile)
+    assert raised.value.code == "GOOGLE_OAUTH_PROFILE_BINDING_STALE"
+    assert raised.value.exit_code == int(ExitCode.AUTHORIZATION)
+    assert "auth google-oauth reconnect" in raised.value.next_action
+    assert profile.profile_id in raised.value.next_action
+
+    # A genuinely different account still gets the generic refusal, not the reconnect hint.
+    store.values[key] = replace(bundle, account_ref="99999")._encoded()
+    with pytest.raises(AdhelmError) as other:
+        oauth_credentials.resolve_google_oauth_access_token(profile)
+    assert other.value.code == "GOOGLE_OAUTH_CREDENTIAL_INVALID"

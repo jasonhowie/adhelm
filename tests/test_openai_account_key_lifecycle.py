@@ -586,7 +586,6 @@ def test_local_removal_clears_the_derived_verification_record_too(
     result = credential_setup.local_remove(
         Configuration(profiles=[_profile()], output=OutputPreferences(max_output_bytes=16_384)),
         PROFILE_ID,
-        "PRIMARY",
     )
     assert result.state == "LOCAL_REMOVED"
     assert result.remote_revocation_verified is False

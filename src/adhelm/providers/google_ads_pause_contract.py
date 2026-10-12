@@ -232,7 +232,7 @@ class GoogleAdsCampaignPauseAccountBinding(StrictModel):
 
 
 class GoogleAdsCampaignPauseExecutionBinding(StrictModel):
-    """Closed declared local OAuth/developer-token association facts.
+    """Closed declared local OAuth association facts.
 
     This is deliberately a nonsecret declaration, not a token snapshot,
     credential-slot selector, session marker, current provider permission, or
@@ -241,8 +241,8 @@ class GoogleAdsCampaignPauseExecutionBinding(StrictModel):
     """
 
     schema_version: Literal[1] = 1
-    binding_kind: Literal["GOOGLE_ADS_EDIT_DECLARED_OAUTH_AND_DEVELOPER_TOKEN_ASSOCIATION"] = (
-        "GOOGLE_ADS_EDIT_DECLARED_OAUTH_AND_DEVELOPER_TOKEN_ASSOCIATION"
+    binding_kind: Literal["GOOGLE_ADS_EDIT_DECLARED_OAUTH_ASSOCIATION"] = (
+        "GOOGLE_ADS_EDIT_DECLARED_OAUTH_ASSOCIATION"
     )
     profile_ref: str
     client_application_ref: str
@@ -256,8 +256,8 @@ class GoogleAdsCampaignPauseExecutionBinding(StrictModel):
     profile_configuration_digest: str
     resolved_at: datetime
     expires_at: datetime
-    local_association_status: Literal["LOCAL_OAUTH_AND_DEVELOPER_TOKEN_ASSOCIATION_ONLY"] = (
-        "LOCAL_OAUTH_AND_DEVELOPER_TOKEN_ASSOCIATION_ONLY"
+    local_association_status: Literal["LOCAL_OAUTH_ASSOCIATION_ONLY"] = (
+        "LOCAL_OAUTH_ASSOCIATION_ONLY"
     )
     provider_write_permission: Literal["NOT_PREPROVABLE"] = "NOT_PREPROVABLE"
 

@@ -43,7 +43,6 @@ _CAMPAIGN = "42"
 _CLIENT = "m56-google-ads.apps.googleusercontent.com"
 _SUBJECT = "m56-google-ads-subject"
 _ACCESS = "m56-google-ads-access-token"
-_DEVELOPER = "m56-google-ads-developer-token"
 _GENERIC_SERVICE = "m56-generic-store"
 
 
@@ -79,7 +78,6 @@ def _profile(**updates: object) -> Profile:
         "timezone": "UTC",
         "credential_source": "OS_OAUTH_GOOGLE",
         "credential_ref": "google-ads-pause-oauth",
-        "secondary_credential_ref": "google-ads-pause-developer",
         "login_customer_ref": _LOGIN,
     }
     values.update(updates)
@@ -151,8 +149,6 @@ def _configured(
         client_secret="m56-client-secret",
         expected_slot=slot,
     )
-    assert profile.secondary_credential_ref is not None
-    store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = _DEVELOPER
     store.reads.clear()
     store.writes.clear()
     return store, profile, digest(load_configuration(root)), active_locks
@@ -209,7 +205,7 @@ def _install_http(
 
     def client() -> httpx.Client:
         def handler(request: httpx.Request) -> httpx.Response:
-            # The current no-refresh snapshot and all three protected locks,
+            # The current no-refresh snapshot and both protected locks,
             # including the outer configuration lock, must have been released
             # before the fixed resource POST reaches the transport.
             assert active_locks == set()
@@ -217,7 +213,7 @@ def _install_http(
             assert request.method == "POST"
             assert request.url.path == f"/v25/customers/{_CUSTOMER}/googleAds:search"
             assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-            assert request.headers["developer-token"] == _DEVELOPER
+            assert "developer-token" not in request.headers
             assert request.headers["login-customer-id"] == _LOGIN
             body = json.loads(request.content)
             assert body["searchSettings"] == {"returnTotalResultsCount": True}
@@ -268,7 +264,7 @@ def test_fresh_pair_exposes_only_detached_m55_facts_after_unlocked_fixed_posts(
         assert observed.observation_binding.read_finished_at == _NOW
         assert not hasattr(session, "identity")
         assert not hasattr(session, "read_campaign_state")
-        for value in (_ACCESS, _DEVELOPER, "m56-google-ads-refresh-token", "m56-client-secret"):
+        for value in (_ACCESS, "m56-google-ads-refresh-token", "m56-client-secret"):
             assert value not in repr(session)
             assert value not in repr(observed)
         with pytest.raises(TypeError):
@@ -343,14 +339,13 @@ def test_malformed_expected_digest_and_campaign_refuse_before_store_or_pair_http
     assert requests == []
 
 
-@pytest.mark.parametrize("drift", ["oauth", "developer", "binding-key", "configuration"])
+@pytest.mark.parametrize("drift", ["oauth", "binding-key", "configuration"])
 def test_pre_identity_drift_fails_before_any_fixed_resource_post(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, drift: str
 ) -> None:
     store, profile, expected, active_locks = _configured(tmp_path, monkeypatch)
     requests: list[httpx.Request] = []
     _install_http(monkeypatch, requests, active_locks)
-    assert profile.secondary_credential_ref is not None
 
     with planning_session.configured_google_ads_pause_planning_session(
         tmp_path, profile.profile_id, expected
@@ -361,10 +356,6 @@ def test_pre_identity_drift_fails_before_any_fixed_resource_post(
             )
             oauth_credentials._write_bundle(
                 store, profile.credential_ref, replace(bundle, access_token="m56-rotated-access")
-            )
-        elif drift == "developer":
-            store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = (
-                "m56-rotated-developer"
             )
         elif drift == "binding-key":
             store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "c" * 64
@@ -384,13 +375,12 @@ def test_drift_after_identity_is_mapped_and_blocks_campaign_post(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     store, profile, expected, active_locks = _configured(tmp_path, monkeypatch)
-    assert profile.secondary_credential_ref is not None
     requests: list[httpx.Request] = []
 
-    def rotate_developer() -> None:
-        store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref or "")] = "m56-rotated"
+    def rotate_binding_key() -> None:
+        store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "c" * 64
 
-    _install_http(monkeypatch, requests, active_locks, after_identity=rotate_developer)
+    _install_http(monkeypatch, requests, active_locks, after_identity=rotate_binding_key)
     with planning_session.configured_google_ads_pause_planning_session(
         tmp_path, profile.profile_id, expected
     ) as session:
@@ -452,7 +442,7 @@ def test_retention_holds_local_facts_without_callback_io_and_blocks_reads_prompt
             thread.join(timeout=1)
             assert result and result[0].code == "GOOGLE_ADS_PAUSE_PLANNING_SESSION_BUSY"
             recheck()
-            # The held callback re-reads all three protected slots through
+            # The held callback re-reads both protected slots through
             # already-acquired handles; it must not acquire new locks or send
             # a provider request.
             assert len(store.reads) > reads_before

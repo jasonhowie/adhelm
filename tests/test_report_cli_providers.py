@@ -32,7 +32,6 @@ def _profile(provider: str, account_ref: str, *, google: bool = False) -> Profil
         currency="USD",
         timezone="UTC",
         credential_ref="oauth.fixture",
-        secondary_credential_ref="developer.fixture" if google else None,
         login_customer_ref="0987654321" if google else None,
     )
 
@@ -47,9 +46,10 @@ def _wire_http(
         lambda **kwargs: actual_client(transport=httpx.MockTransport(handler), **kwargs),
     )
 
-    def credentials(*_: object, secondary: bool = False, **__: object) -> str:
-        credential_calls.append(secondary)
-        return "developer-fixture" if secondary else "oauth-fixture"
+    def credentials(*_: object, **__: object) -> str:
+        # `credential` takes no `secondary=` argument: there is no second credential.
+        credential_calls.append(False)
+        return "oauth-fixture"
 
     monkeypatch.setattr(workflows, "credential", credentials)
     monkeypatch.setattr(workflows, "export_key", lambda: b"r" * 32)
@@ -88,7 +88,7 @@ def test_google_ads_cli_report_preserves_exact_micros_and_hides_references(
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/v25/customers/1234567890/googleAds:search"
         assert request.headers["authorization"] == "Bearer oauth-fixture"
-        assert request.headers["developer-token"] == "developer-fixture"
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == "0987654321"
         gaql = json.loads(request.content)["query"]
         if "customer.currency_code" in gaql:
@@ -155,7 +155,7 @@ def test_google_ads_cli_report_preserves_exact_micros_and_hides_references(
     assert "google_ads.ad.31" not in result.stdout
     # One fixed Google read snapshots both credentials before discovery so a
     # protected OAuth refresh cannot change headers between identity/report calls.
-    assert credentials == [False, True]
+    assert credentials == [False]
 
     records = _report_records(tmp_path)
     assert len(records) == 1

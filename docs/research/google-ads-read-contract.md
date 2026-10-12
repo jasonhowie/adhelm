@@ -10,8 +10,11 @@ mutation capability.  It must not be presented as provider or UI verified.
 
 Google documents the current REST surface as Google Ads API `v25` at
 `https://googleads.googleapis.com/v25`.  Calls require an OAuth 2 access token
-in `Authorization: Bearer …` and an independent `developer-token` header.  A
-manager acting on a client account additionally sends `login-customer-id`, a
+in `Authorization: Bearer …`.  Google retired developer tokens on 2026-09-09:
+access now belongs to the Google Cloud project that owns the OAuth client, the
+`developer-token` header is ignored and will be rejected in a future major
+version, so this adapter never sends it (page last updated 2026-10-07, fetched
+2026-10-12).  A manager acting on a client account additionally sends `login-customer-id`, a
 hyphen-free manager customer ID; without it manager access can be denied.
 [Authorization and HTTP headers](https://developers.google.com/google-ads/api/rest/auth)
 [API call structure](https://developers.google.com/google-ads/api/docs/concepts/call-structure)
@@ -133,8 +136,14 @@ was made):
   for `test_account`.
 - [Responsive search ads](https://developers.google.com/google-ads/api/docs/ads/responsive-search-ads)
   for the documented minimum of three headlines and two descriptions.
-- [Developer token](https://developers.google.com/google-ads/api/docs/api-policy/developer-token)
-  for the Test/Basic/Standard access levels and their operation allowances.
+- [Developer token sunset](https://developers.google.com/google-ads/api/docs/api-policy/developer-token)
+  (fetched 2026-10-12; page last updated 2026-10-07) for project-based access,
+  the ignored header, `CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION` /
+  `ACTION_NOT_PERMITTED`, the `AUTHORIZATION_ERROR` known issue and the manager
+  account note.
+- [Access levels](https://developers.google.com/google-ads/api/docs/api-policy/access-levels)
+  (fetched 2026-10-12; page last updated 2026-09-30) for the Test/Explorer/
+  Basic/Standard levels and their operation allowances.
 - [Rate limits and quotas](https://developers.google.com/google-ads/api/docs/best-practices/quotas)
   for `RESOURCE_EXHAUSTED`.
 
@@ -272,30 +281,47 @@ refused, never read as zero; a canonical `"0"` is retained as zero.
 ### Quota and access classification
 
 `classify_google_ads_transport_error` turns one shared-transport refusal into an
-exact diagnostic from the observed HTTP status and the bounded whole-second
-`Retry-After` the transport attached. **No response body is read**, so the
-`RESOURCE_EXHAUSTED` error code Google documents in the body is not what this
-function classifies; it classifies the HTTP status that carries it, and says
-so.
+exact diagnostic from the observed HTTP status, the bounded whole-second
+`Retry-After` the transport attached, and, for a `401`/`403` only, one provider
+error-code constant. **No response text is retained.** The transport scans a
+`401`/`403` body, capped at 64 KiB, for the `errorCode` values of Google's
+failure detail and keeps a code only when it is one of the two constants in
+`GOOGLE_ADS_CLASSIFIABLE_ERROR_CODES` and exactly one of them appears; nothing
+else from the body is stored or shown. The `RESOURCE_EXHAUSTED` code Google
+documents in a `429` body is still not read: that status is classified by the
+HTTP status that carries it.
 
-- `401`/`403` → `GOOGLE_ADS_ACCESS_NOT_PERMITTED`, exit code 4, pointing at
-  `adhelm auth google-oauth status`, the separate developer token, and the
-  manager `login-customer-id` route.
+- `401`/`403` with `CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION` →
+  `GOOGLE_ADS_CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION`, exit code 4, whose next
+  action is to apply for Explorer access for the Cloud project on the Google Ads
+  API Overview page, the first level that reaches production accounts; AdHelm
+  recommends Basic, which is applied for from Explorer after brand verification.
+  It says not to use the API Center page. `ACTION_NOT_PERMITTED`, which Google
+  names as the pre-v25 form, is not in the allowlist: on v25 it is the generic
+  user-permission error, so it is the generic access error below.
+- `401`/`403` with `AUTHORIZATION_ERROR` → `GOOGLE_ADS_AUTHORIZATION_ERROR`, exit
+  code 4, citing Google's documented known issue for projects upgraded after
+  2026-09-09 and Google's workaround (apply for Explorer access with a new
+  project), and otherwise pointing at the OAuth grant and `login-customer-id`.
+  It does not guess beyond the page: the error has other causes.
+- Any other `401`/`403` → `GOOGLE_ADS_ACCESS_NOT_PERMITTED`, exit code 4,
+  pointing at `adhelm auth google-oauth status` and, where a manager account
+  routes access, the `login-customer-id` route.
 - `429` → `GOOGLE_ADS_QUOTA_EXHAUSTED`, exit code 3, disclosing the bounded
   retry hint when the provider sent one and saying so when it did not, and
-  stating that the daily operation allowance depends on the developer token's
-  access level, which no reviewed read discloses.
+  stating that the daily operation allowance depends on the Cloud project's
+  access level, which AdHelm cannot observe.
 - Any other status is returned unchanged rather than relabelled into a quota or
   credential problem it was never shown to be.
 
-### Developer-token access level
+### Cloud project access level
 
-Google documents Test, Basic and Standard developer-token access levels, and
-they constrain both the reachable environments and the daily operation
-allowance. **No reviewed v25 read returns the level in use.**
-`GoogleAdsIdentity.developer_token_access_level` is therefore always
-`NOT_DOCUMENTED_LOCALLY`, and the retained account snapshot carries
-`GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED`. Nothing in this build
+Google documents Test, Explorer, Basic and Standard access levels for the Cloud
+project that owns the OAuth client, and they constrain both the reachable
+environments and the daily operation allowance. **No reviewed v25 read returns
+the level in use.** `GoogleAdsIdentity.cloud_project_access_level` is therefore
+always `NOT_OBSERVABLE`, and the retained account snapshot carries
+`GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE`. Nothing in this build
 infers a tier, a quota, or an environment from it. `UNVERIFIED`: that no
 reviewed read returns the tier is a documentation reading, not a live
 observation.
@@ -324,7 +350,7 @@ read-only behavior:
 | Thin fixture coverage of identity mismatch, malformed identity, repeated and empty page tokens, the ten-page ceiling, the result bound, round-half-even micros, non-USD refusals, customer-local date boundaries both sides of UTC, zero versus missing metrics, and omitted versus explicit-false settings | `tests/test_google_ads_read_integrity.py` (existing tests already covered the declared total, quota and access classification, creative redaction and the developer-token disclosure) |
 | Non-USD customers are refused for reports, and for an inventory that returns any budget or bid | **Deferred.** `Money` has no per-currency exponent and `reporting.py`'s native-decimal validators are shared; pinned as an explicit `UNSUPPORTED_CURRENCY` refusal |
 | `customer.status` is not read, so a suspended or canceled customer is indistinguishable from one with no activity | **Deferred.** Needs a retained-state field, a state-shape version bump and an audit rule, which is not read-completeness of the existing surface; the audit keeps reporting `GA_POLICY_ACCOUNT_STATUS_NOT_READ` |
-| Developer-token access level, conversion actions and goals, native conversion metrics, targeting criterion values, placements, tracking templates, creative text and final-URL values | **Not read.** Reported `NOT_IN_REVIEWED_FIXED_READ` by the audit; each needs its own primary-source field review |
+| Cloud project access level, conversion actions and goals, native conversion metrics, targeting criterion values, placements, tracking templates, creative text and final-URL values | **Not read.** Reported `NOT_IN_REVIEWED_FIXED_READ` by the audit; each needs its own primary-source field review |
 | Inventory duplicates and parent links | **No change.** The shared snapshot hierarchy check already refuses duplicate resource references and missing or mistyped parents before anything becomes history |
 | Live UI reconciliation, a second independent customer, current quota values | `L01`, not offline-verifiable |
 
@@ -337,8 +363,8 @@ projections are accepted for a real customer.
 ## Safety and remaining gaps
 
 - Egress is limited to `googleads.googleapis.com` through `SafeHttpClient`.
-- Access and developer tokens are supplied separately by in-memory callbacks;
-  neither appears in models, errors, tests, exports, or research evidence.
+- The access token is supplied by an in-memory callback; it appears in no model,
+  error, test, export, or research evidence. No developer token exists.
 - Search requests set `searchSettings.returnTotalResultsCount`; responses are parsed with
   duplicate-key rejection and closed nested response schemas.  Raw responses, campaign names, creative text, and GAQL
   results are never persisted.
@@ -351,7 +377,7 @@ projections are accepted for a real customer.
   attribution, or causal metrics.
 
 Still required before a stronger claim: authorized test-account identity,
-developer-token access tier, OAuth/refresh/revocation behavior, API quota and
+Cloud project access level, OAuth/refresh/revocation behavior, API quota and
 rate-limit handling, actual field compatibility, page-boundary behavior, UI
 reconciliation, live timezone/currency/attribution/freshness behavior, and all
 write/activation/recovery workflows.
@@ -361,4 +387,4 @@ The 2026-09-09 additive reads do not change that. In particular they are
 accepts the added campaign, criterion, or ad projections for a real customer;
 no `429` or `RESOURCE_EXHAUSTED` refusal has been observed, so the
 classification above is a documentation reading applied to a fixture; and the
-developer-token access tier remains unobservable through any reviewed read.
+Cloud project access level remains unobservable through any reviewed read.

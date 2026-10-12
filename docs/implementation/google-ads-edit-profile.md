@@ -13,13 +13,13 @@ before defaults are applied. The draft's Google Ads EDIT schema branch and the
 profile's conditional schema require both fields and exclude null currency.
 Existing READ declarations retain their nullable currency and UTC default,
 including the same canonical data bytes. The account and optional manager-login
-IDs remain ten hyphen-free digits; the OAuth and developer-token references must
-be separate, nonreserved local slots.
+IDs remain ten hyphen-free digits; the OAuth credential reference must be a
+nonreserved local slot.
 
 Explicit local enrollment continues through the reviewed desktop-client flow
 and derives the OIDC principal from its verified grant. The saved result says
-`PRIMARY_OAUTH_READY_SECONDARY_UNVERIFIED`, with account access and execution
-authority false. It does not probe or validate the developer token. Reconnect
+`READY`, with account access and execution
+authority false. Reconnect
 retains the configured purpose, principal, client and scope; it does not promote
 a READ bundle to EDIT. Even with identical Google scopes, the protected bundle
 still binds its exact local profile and purpose.
@@ -34,6 +34,6 @@ store, OAuth endpoint or customer account was exercised during implementation.
 The root profile/setup/credential/workflow group passed 127 tests, including
 new omission/null, READ canonical-data continuity, credential alias, scope,
 identifier and same-scope cross-purpose bundle cases. Fake enrollment retains
-the EDIT profile while leaving developer-token and resource access unverified.
+the EDIT profile while leaving resource access unverified.
 The independent session/profile results are recorded in
 [the ultra review](google-ads-edit-observation-ultra-review.md).

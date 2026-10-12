@@ -5,7 +5,7 @@ This module makes **no provider request**.  It evaluates the retained
 `PERFORMANCE_OBSERVATION` report the caller selected, the retained
 `RESOURCE_SNAPSHOT` set one completed inventory read appended, an optional
 earlier snapshot set, and an optional local creative catalog.  Authorization,
-developer-token, quota, `RESOURCE_EXHAUSTED`, and pagination handling therefore
+Cloud-project access, quota, `RESOURCE_EXHAUSTED`, and pagination handling therefore
 stays entirely with the read adapter that produced those records; nothing here
 can leak a response body because no response is available here.
 
@@ -28,9 +28,9 @@ Four honesty bounds shape every rule:
   content: no keyword, location, headline, description, or landing page is
   read, so those dimensions are `PARTIAL` at best and are never reported as
   healthy.
-* The developer token's Test, Basic or Standard access level is not returned by
-  any reviewed read.  It is disclosed as `NOT_DOCUMENTED_LOCALLY` and never
-  assumed, so no finding here rests on an assumed quota or environment.
+* The Cloud project's Test, Explorer, Basic or Standard Google Ads API access
+  level (Google retired developer tokens on 2026-09-09) is not returned by any
+  reviewed read.  It is disclosed as `NOT_OBSERVABLE` and never assumed, so no finding here rests on an assumed quota or environment.
 * Placement, conversion actions, campaign conversion goals, native conversion
   metrics, tracking templates, report freshness, and the attribution window are
   not in the reviewed fixed reads, so their dimensions are `NOT_READ`.  That
@@ -769,15 +769,15 @@ RULES: Final[dict[str, _Rule]] = dict(
         ),
         _rule(
             _Rule(
-                rule_id="GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED",
-                finding_type="GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED",
+                rule_id="GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE",
+                finding_type="GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE",
                 dimension="POLICY",
                 severity="INFO",
                 confidence="HIGH",
                 risk="MEDIUM",
                 analytics_completeness=_NOT_ANALYTICS,
-                observation="Google documents Test, Basic and Standard developer-token access levels, and no reviewed v25 read returns the level this account was reached with. The retained read therefore discloses it as not documented locally rather than assuming a tier.",
-                suggested_action="Check the access level in the API Center of the manager account that owns the developer token; a Test token reaches test accounts only, and quotas differ by level.",
+                observation="Google documents Test, Explorer, Basic and Standard access levels for the Google Cloud project that owns the OAuth client, and no reviewed v25 read returns the level this account was reached with. The retained read therefore discloses it as not observable rather than assuming a tier.",
+                suggested_action="Check the project's access level on the Google Ads API Overview page in Cloud Console; a Test-level project reaches test accounts only, and daily operation limits differ by level.",
             )
         ),
         _rule(
@@ -1506,7 +1506,7 @@ def _account_scoped_findings(
         ("GA_TRACKING_TEMPLATE_AND_PARAMETERS_NOT_READ", True),
         ("GA_NATIVE_CONVERSION_NOT_READ", True),
         ("GA_BROWSER_NOT_APPLICABLE", True),
-        ("GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED", True),
+        ("GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE", True),
         ("GA_POLICY_TEST_ACCOUNT_DECLARED", GOOGLE_ADS_TEST_ACCOUNT_DECLARED in quality),
         ("GA_POLICY_ACCOUNT_STATUS_NOT_READ", True),
     ]
@@ -1847,7 +1847,7 @@ _RATIONALE: Final[dict[AuditDimension, str]] = {
     "TRACKING": "Conversion actions, Google tag status, tracking templates, and URL parameters are not requested by this build's fixed read.",
     "NATIVE_CONVERSION": "The fixed report request projects impressions, clicks, and cost micros only; no conversion field is requested.",
     "BROWSER_MEASUREMENT": "A local audit executes no browser and loads no page.",
-    "POLICY": "The ad policy summary approval and review statuses and the customer test-account flag are read; policy topics, customer status, and the developer token's access level are not.",
+    "POLICY": "The ad policy summary approval and review statuses and the customer test-account flag are read; policy topics, customer status, and the Cloud project's API access level are not.",
     "DRIFT": "Drift compares two retained snapshot sets for one account; it needs both to be supplied.",
 }
 _UNPROVEN_BOUNDARY_RATIONALE: Final = (
@@ -2220,7 +2220,7 @@ def _recommend(
             "GA_CREATIVE_LOCAL_BINDING_WITHOUT_RESOURCE",
             "GA_POLICY_APPROVAL_STATUS_NOT_RETURNED",
             "GA_POLICY_APPROVAL_STATUS_NOT_REVIEWED",
-            "GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED",
+            "GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE",
             "GA_POLICY_TEST_ACCOUNT_DECLARED",
         },
         reason="EVIDENCE_INSUFFICIENT",

@@ -7,6 +7,7 @@ regression drives the protected bundle through an injected transport seam.
 
 from __future__ import annotations
 
+import dataclasses
 import inspect
 import json
 from contextlib import nullcontext
@@ -40,7 +41,6 @@ runner = CliRunner()
 ACCESS_TOKEN = "fixture-access-token-value"
 REFRESH_TOKEN = "fixture-refresh-token-value"
 CLIENT_SECRET = "fixture-client-secret-value"
-DEVELOPER_TOKEN = "fixture-developer-token-value"
 NOW = datetime(2029, 1, 1, tzinfo=UTC)
 
 
@@ -74,9 +74,6 @@ def _profile(provider: str = "google_ads") -> Profile:
         timezone="UTC",
         credential_source="OS_OAUTH_GOOGLE",
         credential_ref=f"oauth-{provider}-primary",
-        secondary_credential_ref=(
-            "oauth-google-ads-secondary" if provider == "google_ads" else None
-        ),
     )
 
 
@@ -111,7 +108,6 @@ def _install(
     now: datetime = NOW,
     expires_at: datetime | None = None,
     refresh_expires_at: datetime | None = None,
-    developer_token: bool = True,
 ) -> _MemoryStore:
     backend = store if store is not None else _MemoryStore()
     monkeypatch.setattr(credentials, "_backend", lambda: backend)
@@ -131,10 +127,6 @@ def _install(
         expected_slot=slot,
         replace=True,
     )
-    if developer_token and profile.secondary_credential_ref is not None:
-        backend.set_password(
-            credentials._SERVICE, profile.secondary_credential_ref, DEVELOPER_TOKEN
-        )
     return backend
 
 
@@ -148,7 +140,7 @@ def _configured(directory: Path, profile: Profile) -> None:
 # --- the status reading -------------------------------------------------------
 
 
-def test_status_reports_masked_identity_scopes_expiry_and_the_developer_token_slot(
+def test_status_reports_masked_identity_scopes_and_expiry(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     profile = _profile()
@@ -171,46 +163,24 @@ def test_status_reports_masked_identity_scopes_expiry_and_the_developer_token_sl
     assert status.refresh_token_expires_at is None
     assert status.refresh_token_expired is None
     assert status.primary_slot_present is True
-    assert status.developer_token_slot_required is True
-    assert status.developer_token_slot_present is True
     # No verification instant is invented; only the proven upper bound.
     assert status.identity_last_verified_at is None
     assert status.identity_last_verified_not_after == status.access_token_expires_at
 
 
-def test_status_reports_a_missing_developer_token_slot_without_failing(
+def test_status_has_no_developer_token_slot_for_any_google_provider(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    profile = _profile()
-    _install(monkeypatch, profile, developer_token=False)
-    configuration = Configuration.model_validate({"profiles": [profile.model_dump(mode="json")]})
-    status = oauth_credentials.google_oauth_local_status(configuration, profile.profile_id)
-    assert status.developer_token_slot_required is True
-    assert status.developer_token_slot_state == "ABSENT"
-    assert status.developer_token_slot_present is False
-
-
-def test_a_non_google_ads_profile_requires_no_developer_token_slot(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    profile = _profile("ga4")
-    _install(monkeypatch, profile)
-    configuration = Configuration.model_validate({"profiles": [profile.model_dump(mode="json")]})
-    status = oauth_credentials.google_oauth_local_status(configuration, profile.profile_id)
-    assert status.developer_token_slot_required is False
-    assert status.developer_token_slot_state == "NOT_REQUIRED"
-    assert status.developer_token_slot_present is None
-
-
-def test_a_stored_and_an_unstored_developer_token_are_distinguishable(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    profile = _profile()
-    _install(monkeypatch, profile, developer_token=False)
-    configuration = Configuration.model_validate({"profiles": [profile.model_dump(mode="json")]})
-    absent = oauth_credentials.google_oauth_local_status(configuration, profile.profile_id)
-    assert absent.developer_token_slot_state == "ABSENT"
-    assert absent.developer_token_slot_present is False
+    """Google retired developer tokens on 2026-09-09; no slot is read or reported."""
+    for provider in ("google_ads", "ga4"):
+        profile = _profile(provider)
+        _install(monkeypatch, profile)
+        configuration = Configuration.model_validate(
+            {"profiles": [profile.model_dump(mode="json")]}
+        )
+        status = oauth_credentials.google_oauth_local_status(configuration, profile.profile_id)
+        assert not [f.name for f in dataclasses.fields(status) if "developer" in f.name]
+        assert status.local_state == "READY"
 
 
 def test_the_status_route_constructs_no_http_client(
@@ -418,7 +388,7 @@ def test_an_expired_refresh_token_fails_with_exit_four_and_echoes_no_secret(
     assert error.code == "GOOGLE_OAUTH_RECONNECT_REQUIRED"
     assert error.exit_code == int(ExitCode.AUTHORIZATION) == 4
     rendered = json.dumps({"message": error.message, "next_action": error.next_action})
-    for secret in (ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_SECRET, DEVELOPER_TOKEN):
+    for secret in (ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_SECRET):
         assert secret not in rendered
     # The refusal is durable: the bundle is blocked rather than silently retried.
     configuration = Configuration.model_validate({"profiles": [profile.model_dump(mode="json")]})
@@ -459,12 +429,9 @@ def test_the_status_command_emits_the_bounded_projection_and_echoes_no_secret(
     assert data["identity_reverified_on_refresh"] is True
     assert data["identity_last_verified_at"] is None
     assert data["identity_last_verified_status"] == "NOT_RETAINED_BOUNDED_BY_ACCESS_TOKEN_EXPIRY"
-    assert data["developer_token_access_level"] == "NOT_DOCUMENTED_LOCALLY"
-    assert data["developer_token_slot_required"] is True
-    assert data["developer_token_slot_state"] == "PRESENT"
-    assert data["developer_token_slot_present"] is True
-    assert data["developer_token_slot_next_action"] is None
-    for secret in (ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_SECRET, DEVELOPER_TOKEN, "fixture-subject"):
+    assert data["cloud_project_access_level"] == "NOT_OBSERVABLE"
+    assert not [key for key in data if "developer" in key]
+    for secret in (ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_SECRET, "fixture-subject"):
         assert secret not in result.stdout
 
 

@@ -1,5 +1,6 @@
 """Explicit fixed-host HTTP transport with bounded reads and no mutation retry."""
 
+import json
 import re
 import time
 from collections.abc import Callable
@@ -57,6 +58,52 @@ def _validate_headers(headers: dict[str, str] | None) -> None:
                 "INVALID_REQUEST_HEADERS", "Provider request headers are invalid.", exit_code=2
             )
         seen.add(name.lower())
+
+
+_ERROR_BODY_LIMIT = 65_536
+_ERROR_BODY_DEPTH = 8
+
+
+def _allowlisted_error_code(response: httpx.Response, allowed: frozenset[str]) -> str | None:
+    """Return the one allowlisted provider error code in a bounded refusal body.
+
+    Only a caller-supplied closed set of constants can ever be returned, so no
+    body text, message, or identifier is recorded.  A body that is oversized,
+    not JSON, or that names none or several of the allowed codes yields
+    ``None`` and the refusal stays classified by its HTTP status alone.
+    """
+    if not allowed:
+        return None
+    data = bytearray()
+    try:
+        for chunk in response.iter_bytes():
+            data.extend(chunk)
+            if len(data) > _ERROR_BODY_LIMIT:
+                return None
+        decoded = json.loads(bytes(data))
+    except Exception:
+        # Total on purpose: a malformed, truncated or absurdly nested body (for example
+        # sixty thousand open brackets, which raises RecursionError) is "no code".
+        return None
+    found: set[str] = set()
+
+    def walk(node: object, depth: int) -> None:
+        if depth > _ERROR_BODY_DEPTH or len(found) > 1:
+            return
+        if isinstance(node, dict):
+            code = node.get("errorCode")
+            if isinstance(code, dict):
+                found.update(
+                    value for value in code.values() if isinstance(value, str) and value in allowed
+                )
+            for value in node.values():
+                walk(value, depth + 1)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value, depth + 1)
+
+    walk(decoded, 0)
+    return next(iter(found)) if len(found) == 1 else None
 
 
 class SafeHttpClient:
@@ -203,6 +250,7 @@ class SafeHttpClient:
         form: dict[str, str] | None = None,
         mutation: bool = False,
         opaque_read_query: bytes | None = None,
+        classifiable_error_codes: frozenset[str] = frozenset(),
     ) -> httpx.Response:
         _validate_headers(headers)
         validate_data(json)
@@ -309,6 +357,9 @@ class SafeHttpClient:
                             next_action="Reauthorize locally with the required scope.",
                             status_code=status,
                             retry_after_seconds=disclosed,
+                            provider_error_code=_allowlisted_error_code(
+                                response, classifiable_error_codes
+                            ),
                         )
                     if status in {429, 502, 503, 504} and not mutation and attempt < attempts - 1:
                         # The same ASCII-digit bound as `_retry_after_seconds`:

@@ -53,7 +53,7 @@ refused with `GOOGLE_ADS_PAUSE_PLAN_NOT_RETAINED`, before any credential.
 
 Keeping both is not duplication for its own sake. `ExecutionPlanRecord`
 deliberately models only the provider-neutral plan; the customer baseline, the
-declared OAuth/developer-token association, the bounded observation interval,
+declared OAuth association, the bounded observation interval,
 and the configuration postcondition live in the M55 action, and the adapter
 needs all four to reach exactly one campaign under exactly one credential
 binding. The alternative — teaching the generic record to carry a provider
@@ -119,7 +119,7 @@ the route's own checked clock and refuses an already-expired plan with
 
 `GoogleAdsCampaignPauseGuardedAdapter` in
 `src/adhelm/providers/google_ads_pause_adapter.py` implements `GuardedAdapter`.
-It has no public bearer, developer-token, URL, HTTP-client, raw-acknowledgement,
+It has no public bearer, URL, HTTP-client, raw-acknowledgement,
 or clock input, refuses serialization, and revalidates its own members and the
 approved subplan on every call.
 
@@ -287,8 +287,8 @@ Two consequences worth stating for that reviewer:
 
 ### Credentials
 
-The developer token, OAuth bundle, and the fixed PAUSE binding key are resolved
-only through the existing three-slot protected continuity described in
+The OAuth bundle and the fixed PAUSE binding key are resolved
+only through the existing two-slot protected continuity described in
 [`google-ads-pause-credentials.md`](google-ads-pause-credentials.md). P03 adds
 no credential API and no new slot. The adapter reuses the sealed F01 planning
 session as its credential and read boundary — the same configuration
@@ -318,7 +318,7 @@ acknowledgement, under the session's retention recheck, and holds:
 - `acknowledged_resource_name` — the **only** acknowledgement content retained;
 - fixed `NOT_PREDICTED` delivery and false CAS/idempotency controls.
 
-No request body, response body, header, bearer, developer token, or provider
+No request body, response body, header, bearer, or provider
 diagnostic is retained. The record's digest is the adapter's second evidence
 reference; the first is a digest of the acknowledgement subset's own facts
 (action, plan digest, HTTP 200, the `status` field mask, one result).

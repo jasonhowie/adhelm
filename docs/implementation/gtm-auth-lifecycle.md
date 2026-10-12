@@ -12,8 +12,8 @@ was missing for GTM, what changed, and what stays open.
 
 | Item | GTM behaviour | Evidence |
 | --- | --- | --- |
-| Enrollment with the user's own app | `auth google-oauth enroll` with a `provider: "gtm"` draft: numeric account, exactly `tagmanager.readonly`, no currency, developer token or manager route | `tests/test_gtm_auth_lifecycle.py` |
-| Status | `auth google-oauth status`: local state, scopes, expiry, masked identity; `developer_token_slot_state` is `NOT_REQUIRED`; contacts no Google endpoint | same |
+| Enrollment with the user's own app | `auth google-oauth enroll` with a `provider: "gtm"` draft: numeric account, exactly `tagmanager.readonly`, no currency or manager route | `tests/test_gtm_auth_lifecycle.py` |
+| Status | `auth google-oauth status`: local state, scopes, expiry, masked identity; `cloud_project_access_level` is `NOT_OBSERVABLE`; contacts no Google endpoint | same |
 | Refresh | Automatic and shared. A near-expiry bearer is refreshed once, before the first GTM request, and the same bearer serves every request in the read | same |
 | Reconnect | `auth google-oauth reconnect`, same Google subject, client and scope only | same |
 | Local removal | `auth remove-local`; afterwards status is `MISSING` and a read fails with `AUTHENTICATION_REQUIRED` before any request | same |
@@ -27,8 +27,8 @@ nowhere else, exactly as for Google Ads and GA4.
 | # | Gap | State |
 | --- | --- | --- |
 | G1 | No GTM profile had been read through the real `OS_OAUTH_GOOGLE` credential path. `tests/test_gtm_measurement_workflow.py` and `tests/test_gtm_workflow_ultra_review.py` use `EXPLICIT_CI` and replace `credential`; the OAuth suites mention `gtm` only in scope and edit-refusal parametrizations | Closed: bearer, refresh, rejected refresh, expired refresh token, missing grant, cross-provider bundle and removal cases |
-| G2 | GTM draft, enrollment and reconnect were never exercised | Closed: wrong scopes (including GTM edit and publish scopes), developer-token and manager fields, non-numeric account and `PUBLISH` purpose are refused; enrollment stores one bound bundle and no secondary slot; reconnect refuses another Google subject |
-| G3 | `status` gave a GTM profile the Google Ads developer-token revocation line and nothing about Tag Manager permissions | Closed: `google_oauth_revocation_guidance(provider)`. GA4 profiles also stop receiving the developer-token line |
+| G2 | GTM draft, enrollment and reconnect were never exercised | Closed: wrong scopes (including GTM edit and publish scopes), manager fields, non-numeric account and `PUBLISH` purpose are refused; enrollment stores one bound bundle and no secondary slot; reconnect refuses another Google subject |
+| G3 | `status` gave a GTM profile the Google Ads revocation line and nothing about Tag Manager permissions | Closed: `google_oauth_revocation_guidance(provider)`. GA4 profiles also stop receiving the Google Ads line |
 | G4 | `401`/`403` on the default GTM read surfaced as the transport's generic `PROVIDER_ACCESS_REQUIRED` at exit 3 with a scope-only next action, while the full inventory retyped the same statuses at exit 4 and dropped the observed status. Neither pointed at `auth google-oauth status` or reconnect | Closed: one classifier, applied at all four GTM request sites |
 | G5 | Google documents the Tag Manager quota refusal as a `403` ([limits and quotas](https://developers.google.com/tag-platform/tag-manager/api/v2/limits-quotas), fetched 2026-10-10), so a `403` cannot be attributed to permission, a disabled API or quota from the status alone, and the transport does not read the body | Closed as a disclosure: the `403` diagnostic names all three causes, says it cannot choose, and tells the agent to wait before its single repeat |
 | G6 | The cached bearer is reused until 60 seconds before expiry and is captured once per read, so a long read can outlive it | Open, documented below |

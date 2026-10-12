@@ -14,7 +14,7 @@ from typing import Any, cast
 import httpx
 import pytest
 from test_google_ads_campaign_state import _campaign_response, _identity_response
-from test_google_ads_pause_credentials import _ACCESS, _DEVELOPER, _GENERIC_SERVICE, _installed
+from test_google_ads_pause_credentials import _ACCESS, _GENERIC_SERVICE, _installed
 from typer.testing import CliRunner
 
 import adhelm.cli as root_cli
@@ -22,6 +22,7 @@ from adhelm import google_ads_pause_cli, google_ads_pause_workflow
 from adhelm import google_ads_pause_planning_session as sessions
 from adhelm.config import save_configuration
 from adhelm.errors import AdhelmError, ExitCode
+from adhelm.google_oauth_credentials import GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE
 from adhelm.ledger import Ledger
 from adhelm.models import ArtifactRule, Configuration, OutputPreferences
 from adhelm.providers.google_ads_pause_contract import (
@@ -281,7 +282,7 @@ def test_post_retention_receipt_reload_corruption_is_ambiguous(
     assert uncertain.value.code == "GOOGLE_ADS_PAUSE_PLAN_RECEIPT_UNVERIFIED"
 
 
-@pytest.mark.parametrize("change", ["none", "developer-after-pair"])
+@pytest.mark.parametrize("change", ["none", "key-after-pair"])
 def test_create_composes_real_planner_with_fake_store_and_http(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str
 ) -> None:
@@ -295,15 +296,14 @@ def test_create_composes_real_planner_with_fake_store_and_http(
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
         assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         body = json.loads(request.content)
         current[0] += timedelta(seconds=1)
         if "FROM customer" in body["query"]:
             return httpx.Response(200, json=_identity_response())
         assert "WHERE campaign.id = 42" in body["query"]
-        if change == "developer-after-pair":
-            assert profile.secondary_credential_ref is not None
-            store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = "rotated-developer"
+        if change == "key-after-pair":
+            store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "c" * 64
         return httpx.Response(200, json=_campaign_response())
 
     monkeypatch.setattr(
@@ -320,9 +320,9 @@ def test_create_composes_real_planner_with_fake_store_and_http(
     if change == "none":
         assert result.exit_code == 0, result.output
         assert _payload(result)["data"]["maximum_incremental_spend"]["minor_units"] == 0
-        for secret in (_ACCESS, _DEVELOPER, "m56-google-ads-refresh-token"):
+        for secret in (_ACCESS, "m56-google-ads-refresh-token"):
             assert secret not in result.output
     else:
         assert result.exit_code == ExitCode.AUTHORIZATION
         assert _code(result) == "GOOGLE_ADS_PAUSE_CREDENTIAL_CHANGED"
-        assert "rotated-developer" not in result.output
+        assert "c" * 64 not in result.output

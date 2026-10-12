@@ -7,6 +7,12 @@ changes nothing in it: every remote write is refused in `0.1.0`
 until a live read pilot record for it is committed; the label and its meaning appear in
 every output that names the provider.
 
+Google retired Google Ads developer tokens on 2026-09-09. Access to the API now belongs
+to the Google Cloud project that owns your OAuth client, so there is no developer token
+to apply for, store or send, and AdHelm neither asks for one nor sends the
+`developer-token` header. You do not need a Google Ads manager account unless you manage
+several accounts through one.
+
 Run the interactive steps yourself, in a terminal on the machine whose browser you will
 use. They open your system browser and prompt for a secret without echo. Do not paste
 credentials, the client file or its contents into a chat with your AI agent; the agent
@@ -20,21 +26,26 @@ documentation under [Sources](#sources), with the date each page was fetched.
 
 ## Create the developer app
 
-You need a Google Cloud project that you control, one OAuth client in it, and a Google
-user who can open the Google Ads account.
+You need a Google Cloud project that you control, an OAuth consent screen and one OAuth
+client in it, and a Google user who can open the Google Ads account. The project is what
+Google grants API access to, so use the same project for the steps below.
 
 1. Select or create a Google Cloud project and enable the **Google Ads API** in its API
-   Library. Billing is optional; Google charges nothing for the API.
+   Library. Billing is optional; Google charges nothing for the API. A new project starts
+   at the `Test` access level.
 2. Open the **Google Ads API Overview** page in the Cloud console and read the project's
-   access level (see [Access tiers and limits](#access-tiers-and-limits)). A `Test`
-   project can reach only test accounts; apply for `Explorer` or `Basic` to read a
-   production account.
-3. In **Google Auth Platform**, register the app if the console asks you to, then:
+   access level. A `Test` project can reach only test accounts; to read a production
+   account, apply there for more access (see
+   [Access tiers and limits](#access-tiers-and-limits)). Apply on this page, not on the
+   API Center page inside Google Ads: Google does not process applications made there.
+3. In **Google Auth Platform**, set up the OAuth consent screen if the console asks you
+   to, then:
    - **Audience:** choose `External` for a personal Google user, or `Internal` if your
      Google Workspace organization owns the project. While the publishing status is
      `Testing`, add your own Google user as a test user. Read the note on seven-day
      expiry under [Access tiers and limits](#access-tiers-and-limits) before you choose
-     whether to publish.
+     whether to publish. Brand verification for Basic access needs `External` and
+     `In production`.
    - **Data Access:** add the scope in [Scopes](#scopes).
 4. In **Google Auth Platform > Clients**, choose **Create client**, set the application
    type to **Desktop app** and create it. In the confirmation dialog choose
@@ -56,7 +67,8 @@ configuration or history, and never printed.
 
 Your Google Ads **customer ID** is the ten-digit number without hyphens. If you reach
 the account through a manager (MCC) account, you also need the manager's ten-digit ID;
-Google requires it in the `login-customer-id` request header for that route.
+Google requires it in the `login-customer-id` request header for that route. Without a
+manager route, leave it out. A manager account is not otherwise needed to use the API.
 
 ## Scopes
 
@@ -85,29 +97,72 @@ writes into a Desktop client download.
 ## Access tiers and limits
 
 Google decides the API access level per Cloud project, from the project that holds your
-OAuth client:
+OAuth client. AdHelm cannot read the level: no reviewed Google Ads read returns it, so
+`auth google-oauth status` reports `cloud_project_access_level` as `NOT_OBSERVABLE` and
+the audit says so rather than assuming a tier.
 
 | Level | Production accounts | Operations per day | How you get it |
 | --- | --- | --- | --- |
 | Test | No, test accounts only | 15,000 | Automatic when you enable the API |
-| Explorer | Yes | 2,880 (production), 15,000 (test) | Apply on the Overview page; Google usually upgrades automatically |
-| Basic | Yes | 15,000 | Brand verification first, then apply on the Overview page |
+| Explorer | Yes | 2,880 (production), 15,000 (test) | Apply on the Overview page; Google may upgrade automatically |
+| Basic | Yes | 15,000 | Brand verification first, then apply from Explorer on the Overview page |
 | Standard | Yes | Unlimited, per-feature limits apply | Manual compliance review |
 
-For read-only use, `Explorer` or `Basic` is enough to read a production account. This is
-a Google-side limit, not an AdHelm setting.
+For read-only use, `Explorer` or higher is enough to read a production account; AdHelm
+recommends `Basic` because its daily allowance is not cut to 2,880 operations. This is a
+Google-side limit, not an AdHelm setting. The progression is Test, Explorer, Basic,
+Standard: you apply for `Basic` from `Explorer`, never straight from `Test`.
 
-**Developer token.** Google states that developer tokens were sunset on 2026-09-09: the
-`developer-token` header is now optional and ignored by Google's servers, access level
-comes from the Cloud project, Google tells new developers not to apply through a manager
-account's API Center, and it plans to reject the header in a future major API version.
-AdHelm `0.1.0` was built before that change. A Google Ads profile must still name a
-developer-token credential, `auth google-oauth status` reports that slot, and every read
-sends its value in the header. So enrollment includes a second, hidden-prompt step to
-fill the slot. If you still hold a developer token, enter it. If you never had one,
-enter a short non-secret placeholder such as `unused`; Google ignores the value. This is
-a known limitation of `0.1.0` and will stop being needed when AdHelm stops requiring the
-slot.
+**Apply for Explorer, then Basic.** Google's access-levels page says the project must be
+at `Explorer` before it can apply for `Basic`.
+
+1. On the **Google Ads API Overview** page, confirm the current level is `Test`, expand
+   **Upgrade access level**, and choose **Apply for access** for `Explorer`. Google may
+   upgrade the project automatically.
+2. Complete brand verification for the project. In **Google Auth Platform**, make the
+   app `External` and `In production`, fill in the **Branding** information, choose
+   **Verify branding**, and when it succeeds choose **Publish branding**. Google says
+   this takes a few minutes. It is required for every new `Basic` or `Standard`
+   application.
+3. Back on the Overview page, confirm no brand verification warnings remain and choose
+   **Apply for access** for `Basic`. Google says these applications are automated and
+   reviewed within minutes.
+
+Managing a project's access level needs quota-management permission, which the Owner,
+Editor, Quota Administrator and Service Usage Admin roles include.
+
+**No developer token.** Google states that developer tokens were sunset on 2026-09-09:
+the `developer-token` header is ignored by Google's servers and will be rejected in a
+future major API version, and a leaked token cannot grant access to another project.
+Google's "make your first call" page still says in its text that a token is required,
+while its steps and example request send none; this guide follows the Developer token page,
+which is the more recently updated of the two.
+Google moved an existing token's access level only to the project that had made calls
+with it in the 90 days before the sunset; a project whose token made no calls in that
+period did not inherit access and starts at `Test`.
+
+AdHelm never sends the header and has no credential slot for a token. A profile that the
+published 0.1.0 wrote carries a `secondary_credential_ref` (null, or the name of a
+developer-token entry). This release drops it on load and never reads or writes it. The
+Google grant 0.1.0 stored was sealed against the old profile shape, so reconnect each
+Google profile once with `adhelm auth google-oauth reconnect` as the same Google user; until you do, a read
+stops with `GOOGLE_OAUTH_PROFILE_BINDING_STALE`, whose next action is the exact command. See
+[Revoke](#revoke) for the entry 0.1.0 stored.
+
+**If a read is refused.** A `Test`-level project that reads a production account gets
+Google's `CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION` (a developer token that was never
+used before 2026-09-09 gets it too). AdHelm reports it as
+`GOOGLE_ADS_CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION` with a next action to apply for
+`Explorer` access on the Overview page, then `Basic`, as above. Google's page names
+`ACTION_NOT_PERMITTED` as the older-API-version form of the same error; on v25, the only
+version AdHelm calls, it is the generic user-permission error, so AdHelm reports it as
+the generic `GOOGLE_ADS_ACCESS_NOT_PERMITTED`. Google also documents a
+known issue in which projects upgraded after 2026-09-09 can still get
+`AUTHORIZATION_ERROR` on production accounts; AdHelm reports it as
+`GOOGLE_ADS_AUTHORIZATION_ERROR`, cites that known issue and Google's workaround
+(apply for `Explorer` access with a new project), and goes no further than the page says.
+A second known issue can reject brand-verified users for `Basic` or `Explorer` when the
+project is on a free trial or has a suspended billing account.
 
 **Consent screen status.** A project whose publishing status is `Testing` is limited to
 100 listed test users, and Google expires an authorization seven days after consent,
@@ -135,8 +190,7 @@ subject from the signed-in Google user and writes the final profile itself.
   "purpose": "READ",
   "currency": "USD",
   "timezone": "UTC",
-  "credential_ref": "google-ads-read-oauth",
-  "secondary_credential_ref": "google-ads-read-developer-token"
+  "credential_ref": "google-ads-read-oauth"
 }
 ```
 
@@ -148,8 +202,8 @@ Replace the example values:
   it differs from the file.
 - `currency` and `timezone`: the account's own three-letter currency and IANA time zone.
   AdHelm compares them with what Google reports and refuses to read on a mismatch.
-- `credential_ref` and `secondary_credential_ref`: local names for the two credential
-  slots. They must differ from each other and from the names of any other profile.
+- `credential_ref`: the local name of the credential slot. It must differ from the names
+  of any other profile's slot.
 
 `adhelm schema google-oauth-profile-draft` prints the draft's schema. Run these commands
 in the directory that holds both files:
@@ -182,20 +236,8 @@ was granted:
 }
 ```
 
-Store the developer-token value (see above). The prompt does not echo what you type.
-
-```sh guide:run
-adhelm auth store --profile google-ads-read --slot SECONDARY --interactive
-```
-
-```json guide:expect
-{
-  "data": {
-    "local_only": true,
-    "slots": [{ "slot": "SECONDARY", "state": "PRESENT" }]
-  }
-}
-```
+There is no second credential to store: the OAuth grant is the only credential this
+profile holds.
 
 ## Verify
 
@@ -211,7 +253,7 @@ adhelm auth google-oauth status --profile google-ads-read
     "provider": "google_ads",
     "local_state": "READY",
     "granted_scopes": ["openid", "https://www.googleapis.com/auth/adwords"],
-    "developer_token_slot_state": "PRESENT",
+    "cloud_project_access_level": "NOT_OBSERVABLE",
     "provider_authentication_verified": false
   }
 }
@@ -299,13 +341,12 @@ Revoking has two separate halves, and AdHelm can do only one of them.
    same OAuth client. To retire the client's secret, rotate it on the **Google Auth
    Platform > Clients** page. There is nothing to revoke for a developer token: Google no
    longer issues or checks them.
-2. **On this machine.** Remove both stored credentials. This deletes only your local
-   copies; it never revokes anything at Google and AdHelm cannot verify that you did
+2. **On this machine.** Remove the stored credential. This deletes only your local copy;
+   it never revokes anything at Google and AdHelm cannot verify that you did
    (`remote_revocation_verified` is always `false`).
 
 ```sh guide:run
 adhelm auth remove-local --profile google-ads-read
-adhelm auth remove-local --profile google-ads-read --slot SECONDARY
 adhelm auth google-oauth status --profile google-ads-read
 ```
 
@@ -316,13 +357,23 @@ adhelm auth google-oauth status --profile google-ads-read
 Removal leaves your local history, inventory snapshots and reports in place. Delete
 `client_secret.json` as well if you no longer need it.
 
+**A developer token stored by AdHelm 0.1.0.** The published 0.1.0 asked you to store a
+developer-token value in a second slot, kept in the operating-system credential store under
+the service `adhelm` and the name in the profile's `secondary_credential_ref`. This
+release never reads or sends it, and `auth remove-local` no longer addresses it. Delete it with
+your operating system's credential manager (Keychain Access, Credential Manager, or
+`secret-tool`/Seahorse), or leave it: it is inert, and Google ignores developer tokens.
+Re-enrolling under a new profile ID starts clean.
+
 ## Sources
 
 Fetched from Google's own documentation. Where Google's text and AdHelm's behavior
 differ, this guide says so above.
 
-- [Access levels](https://developers.google.com/google-ads/api/docs/access-levels) (fetched 2026-10-11; page last updated 2026-09-30)
-- [Developer token](https://developers.google.com/google-ads/api/docs/api-policy/developer-token) (fetched 2026-10-11; page last updated 2026-10-07)
+- [Developer token sunset](https://developers.google.com/google-ads/api/docs/api-policy/developer-token) (fetched 2026-10-12; page last updated 2026-10-07)
+- [Access levels](https://developers.google.com/google-ads/api/docs/api-policy/access-levels) (fetched 2026-10-12; page last updated 2026-09-30)
+- [Brand verification](https://developers.google.com/google-ads/api/docs/api-policy/brand-verification) (fetched 2026-10-12; page last updated 2026-10-07)
+- [Make your first call](https://developers.google.com/google-ads/api/docs/get-started/make-first-call) (fetched 2026-10-12; page last updated 2026-09-30)
 - [Set up a Google API Console project for authorization](https://developers.google.com/google-ads/api/docs/oauth/cloud-project) (fetched 2026-10-11; page last updated 2026-10-06)
 - [Single-user authentication workflow](https://developers.google.com/google-ads/api/docs/oauth/single-user-authentication) (fetched 2026-10-11; page last updated 2026-10-06)
 - [Call structure and login-customer-id](https://developers.google.com/google-ads/api/docs/concepts/call-structure) (fetched 2026-10-11; page last updated 2026-10-06)

@@ -2,7 +2,7 @@
 
 This module owns only two sealed ``googleAds:search`` reads: the configured
 customer identity and one selected campaign state.  It deliberately has no
-GAQL, resource-path, bearer, developer-token, mutation, pagination, or retry
+GAQL, resource-path, bearer, mutation, pagination, or retry
 surface for callers.  A configured session supplies the guarded header
 callback and closed target below.
 """
@@ -369,21 +369,19 @@ def _headers_snapshot(getter: HeaderGetter, target: _GoogleAdsEditTarget) -> dic
     try:
         if type(value) is not dict:
             raise ValueError("headers")
-        expected = {"authorization", "developer-token"}
+        expected = {"authorization"}
         if target.login_customer_client_ref is not None:
             expected.add("login-customer-id")
         if set(value) != expected or any(type(key) is not str for key in value):
             raise ValueError("header keys")
         authorization = value["authorization"]
-        developer = value["developer-token"]
         if (
             type(authorization) is not str
             or not authorization.startswith("Bearer ")
             or not _secret(authorization[7:])
-            or not _secret(developer)
         ):
             raise ValueError("credentials")
-        result = {"authorization": authorization, "developer-token": developer}
+        result = {"authorization": authorization}
         if target.login_customer_client_ref is not None:
             login = value["login-customer-id"]
             if type(login) is not str or login != target.login_customer_client_ref:

@@ -100,7 +100,9 @@ digests only; no account identifiers, names, tokens or raw payloads.
 Each provider has a setup guide in `docs/setup/<provider>.md` covering: which
 developer app or key to create, required scopes, redirect or callback
 configuration, access-tier limits that matter for read-only use (for example,
-Google Ads needs Basic developer-token access to read production accounts;
+Google Ads needs Explorer or higher access (AdHelm recommends Basic) for the
+Google Cloud project that owns your OAuth client, because Google retired developer
+tokens on 2026-09-09, to read production accounts;
 LinkedIn's Development tier allows reads on any ad account you administer and
 edits on up to five), the exact `adhelm` enrollment command, and how to revoke.
 Each guide is validated by running its commands against the fake provider in CI,

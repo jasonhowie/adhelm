@@ -51,8 +51,8 @@ delivery, `NOT_DOCUMENTED` provider conditional-write and idempotency semantics,
 and that a configured pause does not prove effective delivery or zero residual
 spend. Its opaque references exclude workspace, customer, login-customer,
 campaign, profile, and client-application raw values, credential binding,
-principal, configuration/profile digests, required scope, OAuth and
-developer-token material, raw provider payloads, and keys.
+principal, configuration/profile digests, required scope, OAuth
+material, raw provider payloads, and keys.
 
 Because Google Ads campaign PAUSE has no installed approval host, the artifact
 `authority` block records the same fixed `UNRELEASED`
@@ -161,7 +161,7 @@ it named was accurate only while no renderer was installed.
 
 - Fixture-only. Every test uses temporary ledgers, temporary output directories,
   fake protected-store and HTTP boundaries, and synthetic actions.
-- No live Google Ads request, real OAuth grant, real developer token, or real
+- No live Google Ads request, real OAuth grant, or real
   operating-system credential store is exercised.
 - No execution, approval, native host, or provider mutation path exists for
   Google Ads campaign PAUSE; that remains P03 work.

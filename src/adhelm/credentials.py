@@ -45,9 +45,7 @@ def _backend() -> keyring.backend.KeyringBackend:
     return backend
 
 
-def credential(
-    profile: ConfiguredProfile, *, ci_enabled: bool = False, secondary: bool = False
-) -> str:
+def credential(profile: ConfiguredProfile, *, ci_enabled: bool = False) -> str:
     try:
         profile = validate_configured_profile(profile)
     except (ValidationError, ValueError) as exc:
@@ -63,22 +61,8 @@ def credential(
             exit_code=4,
             next_action="Use the dedicated Meta token setup before a deliberate inspection.",
         )
-    if secondary:
-        if not isinstance(profile, Profile):
-            raise AdhelmError(
-                "SECONDARY_CREDENTIAL_UNSUPPORTED",
-                "Only Google Ads supports a secondary credential.",
-            )
-        reference = profile.secondary_credential_ref
-    else:
-        reference = profile.credential_ref
-    if reference is None:
-        raise AdhelmError(
-            "SECONDARY_CREDENTIAL_REQUIRED",
-            "A separate developer-token reference is required.",
-            exit_code=4,
-        )
-    if profile.credential_source == "OS_OAUTH_GOOGLE" and not secondary:
+    reference = profile.credential_ref
+    if profile.credential_source == "OS_OAUTH_GOOGLE":
         # The protected OAuth bundle is private local state, never a bearer
         # token itself.  Resolve it only after detached Profile validation.
         from adhelm.google_oauth_credentials import resolve_google_oauth_access_token

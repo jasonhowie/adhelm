@@ -1,5 +1,7 @@
 # Google Ads PAUSE binding ultra review
 
+> Note (2026-10-12): Google retired Google Ads developer tokens on 2026-09-09, and AdHelm no longer stores or sends one (G1). The developer-token text below is a historical record of the state when it was written.
+
 This independent M56 review exercised the private Google Ads PAUSE planning
 binding, facade, and retained-plan workflow with temporary configurations,
 fake protected stores, a local ledger, and `httpx.MockTransport`. No real

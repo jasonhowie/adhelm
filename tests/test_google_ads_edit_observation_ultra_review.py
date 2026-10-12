@@ -34,7 +34,6 @@ from adhelm.transport import SafeHttpClient
 _ADWORDS_SCOPE = "https://www.googleapis.com/auth/adwords"
 _PRINCIPAL_REF = "google_oidc_principal_v1." + "a" * 64
 _ACCESS_TOKEN = "fixture-google-ads-access-token"
-_DEVELOPER_TOKEN = "fixture-google-ads-developer-token"
 
 
 def _draft_data(**updates: object) -> dict[str, object]:
@@ -48,7 +47,6 @@ def _draft_data(**updates: object) -> dict[str, object]:
         "currency": "USD",
         "timezone": "UTC",
         "credential_ref": "google-ads-oauth-slot",
-        "secondary_credential_ref": "google-ads-developer-slot",
     }
     value.update(updates)
     return value
@@ -186,7 +184,6 @@ def _reader(
         or (
             lambda: {
                 "authorization": f"Bearer {_ACCESS_TOKEN}",
-                "developer-token": _DEVELOPER_TOKEN,
                 "login-customer-id": "0987654321",
             }
         ),
@@ -204,7 +201,7 @@ def test_fixed_google_ads_edit_reads_keep_closed_customer_status_non_gating() ->
             "https://googleads.googleapis.com/v25/customers/1234567890/googleAds:search"
         )
         assert request.headers["authorization"] == f"Bearer {_ACCESS_TOKEN}"
-        assert request.headers["developer-token"] == _DEVELOPER_TOKEN
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == "0987654321"
         query = json.loads(request.content)["query"]
         if query == campaign_state._IDENTITY_QUERY:
@@ -234,7 +231,6 @@ def test_campaign_id_is_exact_positive_int64_before_credential_callback_or_post(
         callback_calls.append(object())
         return {
             "authorization": f"Bearer {_ACCESS_TOKEN}",
-            "developer-token": _DEVELOPER_TOKEN,
             "login-customer-id": "0987654321",
         }
 
@@ -276,7 +272,6 @@ def test_header_callback_cannot_smuggle_ambient_cookie_state_into_fixed_post() -
         client.cookies.set("private-cookie", "private-value")
         return {
             "authorization": f"Bearer {_ACCESS_TOKEN}",
-            "developer-token": _DEVELOPER_TOKEN,
             "login-customer-id": "0987654321",
         }
 
@@ -310,7 +305,6 @@ def test_constructed_reader_and_mismatched_identity_fail_before_post() -> None:
         callback_calls.append(object())
         return {
             "authorization": f"Bearer {_ACCESS_TOKEN}",
-            "developer-token": _DEVELOPER_TOKEN,
             "login-customer-id": "0987654321",
         }
 
@@ -366,7 +360,6 @@ def _session_profile() -> Profile:
         timezone="UTC",
         credential_source="OS_OAUTH_GOOGLE",
         credential_ref="independent-google-ads-oauth",
-        secondary_credential_ref="independent-google-ads-developer",
         login_customer_ref="0987654321",
     )
 
@@ -419,8 +412,6 @@ def _install_session_profile(
         client_secret=None,
         expected_slot=slot,
     )
-    assert profile.secondary_credential_ref is not None
-    store.values[credentials._SERVICE, profile.secondary_credential_ref] = _DEVELOPER_TOKEN
     return store, profile, session_clock
 
 
@@ -432,7 +423,7 @@ def _session_handler(requests: list[httpx.Request]) -> httpx.MockTransport:
             "https://googleads.googleapis.com/v25/customers/1234567890/googleAds:search"
         )
         assert request.headers["authorization"] == f"Bearer {_ACCESS_TOKEN}"
-        assert request.headers["developer-token"] == _DEVELOPER_TOKEN
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == "0987654321"
         body = json.loads(request.content)
         assert set(body) == {"query", "searchSettings"}
@@ -482,10 +473,10 @@ def test_fixed_search_uses_nested_v25_search_settings_and_requires_resource_name
     assert campaign_error.value.code == "PROVIDER_RESPONSE_INVALID"
 
 
-def test_session_rechecks_configuration_and_both_protected_slots_before_campaign_post(
+def test_session_rechecks_configuration_before_campaign_post(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    store, profile, _session_clock = _install_session_profile(tmp_path, monkeypatch)
+    _store, profile, _session_clock = _install_session_profile(tmp_path, monkeypatch)
     requests: list[httpx.Request] = []
     monkeypatch.setattr(
         edit_session,
@@ -501,20 +492,6 @@ def test_session_rechecks_configuration_and_both_protected_slots_before_campaign
             session.read_campaign_state("42")
         assert config_error.value.code == "CONFIGURATION_CHANGED"
         assert len(requests) == 1
-
-    # A fresh session proves that a developer-token slot change is detected
-    # in its fixed header callback before its campaign POST.
-    save_configuration(tmp_path, Configuration(profiles=[profile]), replace=True)
-    with edit_session.configured_google_ads_edit_session(tmp_path, profile.profile_id) as session:
-        assert len(requests) == 2
-        assert profile.secondary_credential_ref is not None
-        store.values[credentials._SERVICE, profile.secondary_credential_ref] = "replacement-token"
-        with pytest.raises(AdhelmError) as credential_error:
-            session.read_campaign_state("42")
-        assert credential_error.value.code == "GOOGLE_ADS_EDIT_CREDENTIAL_CHANGED"
-        assert len(requests) == 2
-        assert _DEVELOPER_TOKEN not in str(credential_error.value)
-        assert "replacement-token" not in str(credential_error.value)
 
 
 def test_session_rejects_primary_oauth_bundle_rotation_before_campaign_post(

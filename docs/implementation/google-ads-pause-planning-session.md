@@ -8,10 +8,10 @@ for a retained plan.
 
 The factory accepts only a configured Google Ads OAuth `EDIT` profile. It
 captures the exact configuration digest before protected activity, then asks
-the credential lifecycle for a sealed three-slot snapshot: the OAuth bundle,
-the configured developer-token slot, and the fixed private PAUSE binding-key
+the credential lifecycle for a sealed two-slot snapshot: the OAuth bundle
+and the fixed private PAUSE binding-key
 slot. Initial preparation may refresh an OAuth bundle or create and read back
-that binding key. It yields no token, developer token, raw protected key,
+that binding key. It yields no token, raw protected key,
 bundle, client, URL, query, or generic credential selector.
 
 The public session is nonserializable and exposes only:
@@ -34,10 +34,10 @@ The public session is nonserializable and exposes only:
   before a ledger append. It yields a callback that must run at least once.
 
 Every fixed resource POST resolves a current **no-refresh** snapshot while the
-configuration transaction and the OAuth, developer-token, and PAUSE-key locks
+configuration transaction and the OAuth and PAUSE-key locks
 are held in casefolded reference order. Those locks are released before the
 fixed Google Ads HTTP request. Any configuration, profile, bearer/bundle,
-developer-token, binding-key, expiry, clock, or manager drift fails before the
+binding-key, expiry, clock, or manager drift fails before the
 next resource request. At the frozen M54 reader boundary, the new PAUSE drift
 diagnostic is mapped to the existing safe Google Ads EDIT credential diagnostic
 so the reader does not turn it into a generic provider error; this remains a

@@ -45,7 +45,6 @@ def _draft_data(*, purpose: str = "EDIT") -> dict[str, Any]:
         "currency": "USD",
         "timezone": "America/Chicago",
         "credential_ref": "google-ads-primary-oauth",
-        "secondary_credential_ref": "google-ads-developer-token",
         "login_customer_ref": "9876543210",
     }
 
@@ -109,9 +108,7 @@ def test_google_ads_read_retains_legacy_defaults_and_canonical_bytes(
     [
         ("account_ref", "123-456-7890"),
         ("login_customer_ref", "987-654-3210"),
-        ("secondary_credential_ref", None),
-        ("secondary_credential_ref", "google-ads-primary-oauth"),
-        ("secondary_credential_ref", "export-pseudonymization-v1"),
+        ("credential_ref", "export-pseudonymization-v1"),
         ("timezone", "Invalid/Timezone"),
         ("scopes", [_SCOPE, "openid"]),
         ("purpose", "ACTIVATE"),
@@ -185,5 +182,5 @@ def test_fake_edit_enrollment_retains_local_purpose_without_claiming_account_acc
     assert stored.timezone == "America/Chicago"
     assert result["resource_access_verified"] is False
     assert result["execution_authority"] is False
-    assert result["secondary_credential_status"] == "REQUIRED_NOT_EVALUATED"
-    assert result["credential_state"] == "PRIMARY_OAUTH_READY_SECONDARY_UNVERIFIED"
+    assert "secondary_credential_status" not in result
+    assert result["credential_state"] == "READY"

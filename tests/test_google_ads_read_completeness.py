@@ -18,8 +18,8 @@ import pytest
 from adhelm.errors import AdhelmError, ExitCode
 from adhelm.providers.google_ads import (
     GOOGLE_ADS_API_VERSION,
-    GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVELS,
-    GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_NOT_DOCUMENTED,
+    GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVELS,
+    GOOGLE_ADS_CLOUD_PROJECT_ACCESS_NOT_OBSERVABLE,
     GOOGLE_ADS_READ_SURFACES,
     GoogleAdsClient,
     GoogleAdsInventoryQuery,
@@ -35,7 +35,6 @@ CONFIG = GoogleAdsReadConfig(
     login_customer_client_ref="0987654321",
 )
 ACCESS_TOKEN = "access-fixture-token"
-DEVELOPER_TOKEN = "developer-fixture-token"
 # Deliberately hostile advertising copy: a legitimate Google Ads headline may
 # contain a phone number or an address, and the fixed read must neither retain
 # it nor fail on it.
@@ -59,7 +58,6 @@ def _client(
             sleep=lambda _: None,
         ),
         lambda: ACCESS_TOKEN,
-        lambda: DEVELOPER_TOKEN,
         now=lambda: now or datetime(2026, 9, 4, 12, tzinfo=UTC),
     )
 
@@ -328,9 +326,9 @@ def test_a_quota_refusal_is_a_precondition_failure_with_a_bounded_retry_hint() -
     assert "30 second(s)" in (error.next_action or "")
     assert "RESOURCE_EXHAUSTED" in (error.next_action or "")
     # The access level the allowance depends on is disclosed as unknown.
-    assert "no reviewed read discloses" in (error.next_action or "")
+    assert "AdHelm cannot observe" in (error.next_action or "")
     rendered = json.dumps({"message": error.message, "next_action": error.next_action})
-    assert ACCESS_TOKEN not in rendered and DEVELOPER_TOKEN not in rendered
+    assert ACCESS_TOKEN not in rendered
 
 
 def test_a_quota_refusal_without_a_retry_after_header_says_so() -> None:
@@ -513,13 +511,13 @@ def test_an_ad_schedule_for_a_campaign_the_same_read_never_returned_fails_closed
     assert raised.value.code == "PROVIDER_RESPONSE_INVALID"
 
 
-def test_the_developer_token_access_level_is_disclosed_as_not_documented_locally() -> None:
+def test_the_cloud_project_access_level_is_disclosed_as_not_observable() -> None:
     client = _client(_inventory_handler(test_account=True))
     identity = client.discover_identity(CONFIG)
-    assert identity.developer_token_access_level == GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_NOT_DOCUMENTED
-    assert identity.developer_token_access_level not in GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVELS
+    assert identity.cloud_project_access_level == GOOGLE_ADS_CLOUD_PROJECT_ACCESS_NOT_OBSERVABLE
+    assert identity.cloud_project_access_level not in GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVELS
     assert identity.test_account is True
-    assert GOOGLE_ADS_READ_SURFACES["DEVELOPER_TOKEN_ACCESS_LEVEL"] == "NOT_IN_REVIEWED_FIXED_READ"
+    assert GOOGLE_ADS_READ_SURFACES["CLOUD_PROJECT_ACCESS_LEVEL"] == "NOT_IN_REVIEWED_FIXED_READ"
 
 
 def test_a_customer_that_returns_no_test_account_flag_is_not_assumed_production() -> None:

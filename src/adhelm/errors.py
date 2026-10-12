@@ -24,6 +24,11 @@ class AdhelmError(Exception):
     ``Retry-After`` header only; no response text, header text, request value,
     or credential is ever recorded here.  Both stay ``None`` for every error
     that does not come from an observed HTTP status.
+
+    ``provider_error_code`` is likewise a classification fact: it is set only
+    when a caller supplied a closed allowlist of provider error-code constants
+    and exactly one of them appeared in a bounded refusal body.  Only the
+    allowlisted constant is stored, never any body text.
     """
 
     def __init__(
@@ -35,6 +40,7 @@ class AdhelmError(Exception):
         next_action: str = "Inspect the installed command contract.",
         status_code: int | None = None,
         retry_after_seconds: int | None = None,
+        provider_error_code: str | None = None,
     ) -> None:
         super().__init__(message)
         self.code = code
@@ -43,3 +49,4 @@ class AdhelmError(Exception):
         self.next_action = next_action
         self.status_code = status_code
         self.retry_after_seconds = retry_after_seconds
+        self.provider_error_code = provider_error_code

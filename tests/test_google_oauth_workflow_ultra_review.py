@@ -82,8 +82,6 @@ def _draft_data(provider: str = "ga4") -> dict[str, object]:
         "credential_ref": f"workflow-{provider}-oauth-primary",
         "currency": "USD",
     }
-    if provider == "google_ads":
-        data["secondary_credential_ref"] = "workflow-google-ads-secondary"
     return data
 
 
@@ -279,7 +277,7 @@ def test_reconnect_cannot_replace_slot_removed_while_browser_is_open(
 
     def remove_then_return(*_: object) -> GoogleOAuthInitialGrant:
         credential_setup.local_remove(
-            load_configuration(local_workflow.directory), "workflow-ga4-read", "PRIMARY"
+            load_configuration(local_workflow.directory), "workflow-ga4-read"
         )
         return _grant()
 
@@ -312,7 +310,7 @@ def test_oauth_status_and_remove_use_only_the_dedicated_bundle_service(
 
     assert [result.state for result in present] == ["PRESENT"]
     assert local_workflow.store.services[before_status:] == ["adhelm.google-oauth-v1"]
-    credential_setup.local_remove(configuration, "workflow-ga4-read", "PRIMARY")
+    credential_setup.local_remove(configuration, "workflow-ga4-read")
     before_missing_status = len(local_workflow.store.services)
 
     missing = credential_setup.credential_status(configuration, "workflow-ga4-read")
@@ -348,7 +346,7 @@ def test_config_first_uncertainty_can_recover_only_through_explicit_reconnect(
     assert recovered["operation"] == "RECONNECT"
     assert local_workflow.store.values
 
-    credential_setup.local_remove(configured, "workflow-ga4-read", "PRIMARY")
+    credential_setup.local_remove(configured, "workflow-ga4-read")
     assert local_workflow.store.values == {}
     after_local_remove = workflow.reconnect_google_oauth(
         local_workflow.directory,
@@ -466,8 +464,8 @@ def test_google_ads_receipt_is_bounded_truthful_and_secret_free(
     assert len(result.output.encode("utf-8")) <= 1024
     data = json.loads(result.output)["data"]
     assert data["credential_slot"] == "PRIMARY"
-    assert data["credential_state"] == "PRIMARY_OAUTH_READY_SECONDARY_UNVERIFIED"
-    assert data["secondary_credential_status"] == "REQUIRED_NOT_EVALUATED"
+    assert data["credential_state"] == "READY"
+    assert "secondary_credential_status" not in data
     assert data["resource_access_verified"] is False
     assert data["execution_authority"] is False
     for private in (
@@ -477,7 +475,6 @@ def test_google_ads_receipt_is_bounded_truthful_and_secret_free(
         SUBJECT,
         CLIENT,
         "workflow-google_ads-read",
-        "workflow-google-ads-secondary",
         "workflow-google_ads-oauth-primary",
     ):
         assert private not in result.output

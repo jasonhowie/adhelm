@@ -77,12 +77,16 @@ class GoogleOAuthProfileDraft(StrictModel):
     currency: Currency | None = None
     timezone: Annotated[str, Field(min_length=1, max_length=80)] = "UTC"
     credential_ref: SafeRef
-    secondary_credential_ref: SafeRef | None = None
     login_customer_ref: str | None = Field(default=None, pattern=r"^[0-9]{10}$")
 
     @model_validator(mode="before")
     @classmethod
     def explicit_google_ads_edit_expectations(cls, value: Any) -> Any:
+        if isinstance(value, dict) and "secondary_credential_ref" in value:
+            # A draft written for AdHelm 0.1.0 names a developer-token reference. Google
+            # retired developer tokens on 2026-09-09: the value is dropped, never carried
+            # into the profile and never read.
+            value = {k: v for k, v in value.items() if k != "secondary_credential_ref"}
         if (
             isinstance(value, dict)
             and value.get("provider") == "google_ads"
@@ -111,20 +115,13 @@ class GoogleOAuthProfileDraft(StrictModel):
         account_pattern = r"[0-9]{10}" if self.provider == "google_ads" else r"[0-9]{1,20}"
         if re.fullmatch(account_pattern, self.account_ref) is None:
             raise ValueError("The provider resource ID is invalid")
-        references = [self.credential_ref]
-        if self.secondary_credential_ref is not None:
-            references.append(self.secondary_credential_ref)
-        if len({ref.casefold() for ref in references}) != len(references) or any(
-            is_reserved_credential_reference(ref) for ref in references
-        ):
-            raise ValueError("Credential slots require distinct nonreserved references")
+        if is_reserved_credential_reference(self.credential_ref):
+            raise ValueError("The credential slot requires a nonreserved reference")
         if self.provider == "google_ads":
-            if self.secondary_credential_ref is None:
-                raise ValueError("Google Ads requires a separate developer-token reference")
             if self.purpose == "EDIT" and self.currency is None:
                 raise ValueError("Google Ads EDIT requires the declared account currency")
-        elif self.secondary_credential_ref is not None or self.login_customer_ref is not None:
-            raise ValueError("Only Google Ads supports these credential fields")
+        elif self.login_customer_ref is not None:
+            raise ValueError("Only Google Ads supports the manager login customer field")
         if self.provider in {"ga4", "ga4_admin"} and self.currency is None:
             raise ValueError("GA4 requires the declared property currency")
         try:

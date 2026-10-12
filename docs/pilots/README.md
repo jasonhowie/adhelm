@@ -47,7 +47,7 @@ report input before it touches a credential or a provider. The report input gets
 exactly the local checks `report <provider>` makes (one shared function): the
 provider's own closed report schema; the profile's account; for LinkedIn an explicit
 UTC profile; for GA4 the web-stream identity and the profile's property; for Google
-Ads a scoped profile with a separate developer-token reference; for a Meta token
+Ads a scoped profile; for a Meta token
 profile the account's declared time zone and currency. It must also declare the
 seven-day window, which is checked first, before those preconditions. A report input
 that would be refused is refused here, with no credential read, provider request or

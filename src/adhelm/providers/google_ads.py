@@ -112,7 +112,7 @@ GOOGLE_ADS_READ_SURFACES: Final[dict[str, GoogleAdsReadSurfaceStatus]] = {
     "CUSTOMER_IDENTITY": "IMPLEMENTED_FIXED_READ",
     "CUSTOMER_TEST_ACCOUNT_FLAG": "IMPLEMENTED_FIXED_READ",
     "CUSTOMER_ACCOUNT_STATUS": "NOT_IN_REVIEWED_FIXED_READ",
-    "DEVELOPER_TOKEN_ACCESS_LEVEL": "NOT_IN_REVIEWED_FIXED_READ",
+    "CLOUD_PROJECT_ACCESS_LEVEL": "NOT_IN_REVIEWED_FIXED_READ",
     "CAMPAIGN_INVENTORY": "IMPLEMENTED_FIXED_READ",
     "AD_GROUP_INVENTORY": "IMPLEMENTED_FIXED_READ",
     "AD_INVENTORY": "IMPLEMENTED_FIXED_READ",
@@ -179,11 +179,34 @@ GOOGLE_ADS_RESTRICTED_POLICY_APPROVAL_STATUSES: Final[frozenset[str]] = frozense
 # The one documented status that declares an intent to serve.  A declared
 # status is never an observation of delivery.
 GOOGLE_ADS_SERVING_INTENT_STATUS: Final = "ENABLED"
-# Google publishes Test, Basic and Standard developer-token access levels, and
-# no reviewed v25 read returns the level in use.  The connector therefore
-# discloses that it does not know it, and never assumes a tier.
-GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVELS: Final[tuple[str, ...]] = ("TEST", "BASIC", "STANDARD")
-GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_NOT_DOCUMENTED: Final = "NOT_DOCUMENTED_LOCALLY"
+# Google retired developer tokens on 2026-09-09.  API access now belongs to the
+# Google Cloud project that owns the OAuth client, at Test, Explorer, Basic or
+# Standard.  No reviewed v25 read returns the level in use, so the connector
+# discloses that it cannot observe it, and never assumes a tier.  Sources:
+#   https://developers.google.com/google-ads/api/docs/api-policy/developer-token
+#   https://developers.google.com/google-ads/api/docs/api-policy/access-levels
+#   (both fetched 2026-10-12; last updated 2026-10-07 and 2026-09-30)
+GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVELS: Final[tuple[str, ...]] = (
+    "TEST",
+    "EXPLORER",
+    "BASIC",
+    "STANDARD",
+)
+GOOGLE_ADS_CLOUD_PROJECT_ACCESS_NOT_OBSERVABLE: Final = "NOT_OBSERVABLE"
+# The authorization error-code constants this build classifies.  The first is
+# what Google v25 returns when a Test-level project calls a production account;
+# the second is the documented known issue for projects upgraded after
+# 2026-09-09.  `ACTION_NOT_PERMITTED` is deliberately not here: the Developer
+# token page names it as the pre-v25 equivalent, but on v25 (the only version
+# AdHelm calls) it is the generic user-permission error, so it is reported as
+# the generic access error rather than as a project-approval problem.
+GOOGLE_ADS_PROJECT_NOT_APPROVED_ERROR_CODES: Final[frozenset[str]] = frozenset(
+    {"CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION"}
+)
+GOOGLE_ADS_AUTHORIZATION_ERROR_CODE: Final = "AUTHORIZATION_ERROR"
+GOOGLE_ADS_CLASSIFIABLE_ERROR_CODES: Final[frozenset[str]] = (
+    GOOGLE_ADS_PROJECT_NOT_APPROVED_ERROR_CODES | {GOOGLE_ADS_AUTHORIZATION_ERROR_CODE}
+)
 
 # Normalized data-quality statuses the inventory branch retains beside a
 # snapshot.  Each presence fact is recorded in both directions, so a retained
@@ -194,8 +217,8 @@ GOOGLE_ADS_PAGINATION_TOTAL_NOT_DECLARED: Final = "GOOGLE_ADS_PAGINATION_TOTAL_N
 GOOGLE_ADS_TEST_ACCOUNT_DECLARED: Final = "GOOGLE_ADS_TEST_ACCOUNT_DECLARED"
 GOOGLE_ADS_PRODUCTION_ACCOUNT_DECLARED: Final = "GOOGLE_ADS_PRODUCTION_ACCOUNT_DECLARED"
 GOOGLE_ADS_TEST_ACCOUNT_FLAG_NOT_RETURNED: Final = "GOOGLE_ADS_TEST_ACCOUNT_FLAG_NOT_RETURNED"
-GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED: Final = (
-    "GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED"
+GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE: Final = (
+    "GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE"
 )
 GOOGLE_ADS_AD_SCHEDULE_PRESENT: Final = "GOOGLE_ADS_AD_SCHEDULE_PRESENT"
 GOOGLE_ADS_AD_SCHEDULE_ABSENT: Final = "GOOGLE_ADS_AD_SCHEDULE_ABSENT"
@@ -288,6 +311,43 @@ def classify_google_ads_transport_error(error: AdhelmError) -> AdhelmError:
     """
     status = getattr(error, "status_code", None)
     retry_after = getattr(error, "retry_after_seconds", None)
+    code = getattr(error, "provider_error_code", None)
+    if status in {401, 403} and code in GOOGLE_ADS_PROJECT_NOT_APPROVED_ERROR_CODES:
+        return AdhelmError(
+            "GOOGLE_ADS_CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION",
+            "Google Ads refused a production account because the Google Cloud project that "
+            "owns the OAuth client is not approved for production (Test access reaches test "
+            "accounts only).",
+            exit_code=int(ExitCode.AUTHORIZATION),
+            next_action=(
+                "Apply for Explorer access for that Google Cloud project on the Google Ads API "
+                "Overview page in Cloud Console: Explorer is the first access level that "
+                "reaches production accounts. AdHelm recommends Basic, which you apply for "
+                "from Explorer after brand verification. Do not apply through the Google Ads "
+                "API Center page. Then run `adhelm doctor` and read again."
+            ),
+            status_code=status,
+            retry_after_seconds=retry_after,
+            provider_error_code=code,
+        )
+    if status in {401, 403} and code == GOOGLE_ADS_AUTHORIZATION_ERROR_CODE:
+        return AdhelmError(
+            "GOOGLE_ADS_AUTHORIZATION_ERROR",
+            "Google Ads returned AUTHORIZATION_ERROR for this customer.",
+            exit_code=int(ExitCode.AUTHORIZATION),
+            next_action=(
+                "If this Google Cloud project's access level was upgraded after 2026-09-09, "
+                "Google documents a known issue in which AUTHORIZATION_ERROR can persist on "
+                "production accounts because the upgrade is not yet honored, with a fix "
+                "rolling out; Google's workaround is to apply for Explorer access with a new "
+                "project. Otherwise confirm the OAuth grant and the `login-customer-id` "
+                "manager route with `adhelm auth google-oauth status --profile <id>`. See "
+                "https://developers.google.com/google-ads/api/docs/api-policy/developer-token"
+            ),
+            status_code=status,
+            retry_after_seconds=retry_after,
+            provider_error_code=code,
+        )
     if status in {401, 403}:
         return AdhelmError(
             "GOOGLE_ADS_ACCESS_NOT_PERMITTED",
@@ -295,7 +355,7 @@ def classify_google_ads_transport_error(error: AdhelmError) -> AdhelmError:
             exit_code=int(ExitCode.AUTHORIZATION),
             next_action=(
                 "Run `adhelm auth google-oauth status --profile <id>`, then confirm the OAuth "
-                "grant, the separate developer token, and the manager `login-customer-id` route "
+                "grant and, when a manager account routes access, the `login-customer-id` "
                 "before another bounded read."
             ),
             status_code=status,
@@ -313,10 +373,10 @@ def classify_google_ads_transport_error(error: AdhelmError) -> AdhelmError:
             exit_code=int(ExitCode.PRECONDITION),
             next_action=(
                 f"{disclosed} Google returns RESOURCE_EXHAUSTED on this status for both the "
-                "developer token's daily operation allowance and its short-term request rate. "
-                "That allowance depends on the token's Test, Basic or Standard access level, "
-                "which no reviewed read discloses. Wait, then run the same bounded read once "
-                "more; do not retry in a loop."
+                "Cloud project's daily operation allowance and its short-term request rate. "
+                "That allowance depends on the project's Test, Explorer, Basic or Standard "
+                "access level, which AdHelm cannot observe. Wait, then run the same bounded "
+                "read once more; do not retry in a loop."
             ),
             status_code=status,
             retry_after_seconds=retry_after,
@@ -325,7 +385,6 @@ def classify_google_ads_transport_error(error: AdhelmError) -> AdhelmError:
 
 
 AccessTokenGetter = Callable[[], str]
-DeveloperTokenGetter = Callable[[], str]
 ReferenceFor = Callable[[Literal["customer", "campaign", "ad_group", "ad"], str], str]
 
 
@@ -559,16 +618,16 @@ class GoogleAdsIdentity(StrictModel):
     timezone: str = Field(min_length=1, max_length=80)
     currency: Currency
     # Google documents `customer.test_account`; it is a property of the customer,
-    # not of the developer token.  An account that does not return it is
+    # not of the Cloud project.  An account that does not return it is
     # `None`, never assumed to be production.
     test_account: bool | None = None
-    # No reviewed v25 read returns the developer token's Test/Basic/Standard
-    # access level, so this connector discloses that it does not know it.  The
-    # field exists so that a future reviewed disclosure has one place to land
-    # and every reader already handles the honest default.
-    developer_token_access_level: Literal["NOT_DOCUMENTED_LOCALLY", "TEST", "BASIC", "STANDARD"] = (
-        GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_NOT_DOCUMENTED
-    )
+    # No reviewed v25 read returns the Cloud project's Test/Explorer/Basic/
+    # Standard access level, so this connector discloses that it cannot observe
+    # it.  The field exists so that a future reviewed disclosure has one place
+    # to land and every reader already handles the honest default.
+    cloud_project_access_level: Literal[
+        "NOT_OBSERVABLE", "TEST", "EXPLORER", "BASIC", "STANDARD"
+    ] = GOOGLE_ADS_CLOUD_PROJECT_ACCESS_NOT_OBSERVABLE
     provider_api_version: Literal["v25"] = GOOGLE_ADS_API_VERSION
 
 
@@ -714,7 +773,6 @@ class GoogleAdsClient:
         self,
         transport: SafeHttpClient,
         access_token_getter: AccessTokenGetter,
-        developer_token_getter: DeveloperTokenGetter,
         *,
         reference_for: ReferenceFor = _default_reference_for,
         now: Callable[[], datetime] = lambda: datetime.now(UTC),
@@ -726,7 +784,6 @@ class GoogleAdsClient:
             )
         self._transport = transport
         self._access_token_getter = access_token_getter
-        self._developer_token_getter = developer_token_getter
         self._reference_for = reference_for
         self._now = now
         self._connector_version = connector_version
@@ -1008,7 +1065,6 @@ class GoogleAdsClient:
     def _post_search(self, config: GoogleAdsReadConfig, body: dict[str, Any]) -> httpx.Response:
         headers = {
             "authorization": f"Bearer {_safe_credential(self._access_token_getter)}",
-            "developer-token": _safe_credential(self._developer_token_getter),
         }
         if config.login_customer_client_ref is not None:
             headers["login-customer-id"] = config.login_customer_client_ref
@@ -1019,6 +1075,7 @@ class GoogleAdsClient:
                 headers=headers,
                 json=body,
                 mutation=False,
+                classifiable_error_codes=GOOGLE_ADS_CLASSIFIABLE_ERROR_CODES,
             )
         except AdhelmError as error:
             # Classification reads the observed HTTP status and the bounded

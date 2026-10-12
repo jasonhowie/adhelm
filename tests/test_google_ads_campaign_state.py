@@ -21,7 +21,6 @@ from adhelm.transport import SafeHttpClient
 _CUSTOMER = "1234567890"
 _LOGIN = "0987654321"
 _TOKEN = "fixture-google-oauth-bearer"
-_DEVELOPER = "fixture-google-developer-token"
 
 
 def _target() -> _GoogleAdsEditTarget:
@@ -36,7 +35,6 @@ def _target() -> _GoogleAdsEditTarget:
 def _headers() -> dict[str, str]:
     return {
         "authorization": f"Bearer {_TOKEN}",
-        "developer-token": _DEVELOPER,
         "login-customer-id": _LOGIN,
     }
 
@@ -120,7 +118,7 @@ def test_identity_and_campaign_use_exact_one_attempt_fixed_v25_searches() -> Non
             f"https://googleads.googleapis.com/v25/customers/{_CUSTOMER}/googleAds:search"
         )
         assert request.headers["authorization"] == f"Bearer {_TOKEN}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == _LOGIN
         body = json.loads(request.content)
         assert body["searchSettings"] == {"returnTotalResultsCount": True}
@@ -359,3 +357,20 @@ def test_models_are_frozen_and_bind_their_native_references() -> None:
             customer_client_ref=_CUSTOMER,
             status="PAUSED",
         )
+
+
+def test_a_developer_token_header_from_the_getter_is_refused_before_any_request() -> None:
+    """Google retired developer tokens on 2026-09-09; the closed header set has none."""
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(500)
+
+    def getter() -> dict[str, str]:
+        return {**_headers(), "developer-token": "retired-developer-token"}
+
+    with pytest.raises(AdhelmError) as refused:
+        _reader(handler, getter).discover_identity()
+    assert refused.value.code == "PROVIDER_ACCESS_REQUIRED"
+    assert requests == []

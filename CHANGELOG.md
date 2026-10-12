@@ -4,6 +4,49 @@ All notable changes to AdHelm are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+
+- The Google Ads developer token. Google retired developer tokens on 2026-09-09:
+  API access now belongs to the Google Cloud project that owns the OAuth client,
+  at Test, Explorer, Basic or Standard, so a new user can no longer obtain the
+  token 0.1.0 asked for. AdHelm no longer asks for, stores, reads or sends one:
+  the `developer-token` header is gone from every request, enrollment no longer
+  prompts for a second credential, `auth store`, `rotate` and `remove-local` lose
+  their `--slot` option (there is only the profile's own credential), and
+  `auth google-oauth status` loses the `developer_token_slot_*` fields and its
+  `INCOMPLETE_COVERAGE` outcome.
+
+### Changed
+
+- The access level AdHelm reports is the Cloud project's, not a token's:
+  `auth google-oauth status` returns `cloud_project_access_level`, always
+  `NOT_OBSERVABLE` because no reviewed read returns it, and the Google Ads audit
+  finding `GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED` is now
+  `GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE`.
+- A Google Ads read that Google refuses with `CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION`
+  is reported as `GOOGLE_ADS_CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION`, with a next
+  action to apply for Explorer access for the project on the Google Ads API Overview
+  page (AdHelm recommends Basic, which is applied for from Explorer after brand
+  verification). `AUTHORIZATION_ERROR` is reported as `GOOGLE_ADS_AUTHORIZATION_ERROR`
+  and cites Google's documented known issue for projects upgraded after 2026-09-09.
+  For a `401` or `403` only, the shared transport now scans a body of at most 64 KiB
+  for one of those two codes and stores nothing else from it.
+- The Google Ads setup guide follows the Cloud Console flow.
+
+### Fixed
+
+- Google Ads reads work for a user who has no developer token.
+
+### Upgrading from 0.1.0
+
+0.1.0 users: re-enroll Google profiles (`adhelm auth google-oauth reconnect --profile
+<id> --client-config <file> --interactive`, as the same Google user); an old
+developer-token entry in the OS credential store is inert and can be deleted. The
+retired `secondary_credential_ref` in `config.json` is dropped on load. Until a profile
+is reconnected, its reads stop with `GOOGLE_OAUTH_PROFILE_BINDING_STALE`.
+
 ## [0.1.0] - Unreleased
 
 The first public release. It is read-only: it makes no change to any advertising

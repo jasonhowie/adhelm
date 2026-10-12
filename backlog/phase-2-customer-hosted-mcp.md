@@ -302,5 +302,5 @@ Research pointers, checked during planning on 2026-09-04 and to be revalidated
 for selected versions: [MCP Streamable HTTP](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http),
 [MCP authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization),
 [Claude remote connector networking](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp),
-and [Google Ads developer-token prerequisites](https://developers.google.com/google-ads/api/docs/api-policy/developer-token).
+and [Google Ads access prerequisites (developer tokens retired 2026-09-09)](https://developers.google.com/google-ads/api/docs/api-policy/developer-token).
 These references establish research inputs, not tested product compatibility.

@@ -59,12 +59,13 @@ against another's resources.
    description, or destination value can enter a local record, a projection, a
    log, or an error message. Those dimensions are `PARTIAL` at best and are
    never reported as healthy.
-3. **The developer-token access level is unknown.** Google publishes Test,
-   Basic and Standard access levels, and no reviewed v25 read returns the level
-   in use. `GoogleAdsIdentity.developer_token_access_level` is therefore always
-   `NOT_DOCUMENTED_LOCALLY`, the retained account snapshot carries
-   `GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED`, and
-   `GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED` says so on every
+3. **The Cloud project access level is unknown.** Google publishes Test,
+   Explorer, Basic and Standard access levels for the project that owns the
+   OAuth client (developer tokens were retired on 2026-09-09), and no reviewed
+   v25 read returns the level in use. `GoogleAdsIdentity.cloud_project_access_level` is therefore always
+   `NOT_OBSERVABLE`, the retained account snapshot carries
+   `GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE`, and
+   `GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE` says so on every
    audit. No rule assumes a quota, an environment, or a serving capability from
    it. The one adjacent fact that *is* documented is `customer.test_account`,
    which the read retains and `GA_POLICY_TEST_ACCOUNT_DECLARED` reports: a test
@@ -142,7 +143,7 @@ The statuses below are the maximum each dimension can reach.
 | `TRACKING` | `NOT_READ` | Conversion actions, Google tag status, tracking templates, and URL parameters are not requested |
 | `NATIVE_CONVERSION` | `NOT_READ` | The fixed report request projects impressions, clicks, and cost micros only |
 | `BROWSER_MEASUREMENT` | `NOT_APPLICABLE` | A local audit executes no browser and loads no page |
-| `POLICY` | `PARTIAL` | The ad policy summary approval and review statuses and the customer test-account flag are read; policy topics, customer status, and the developer-token access level are not |
+| `POLICY` | `PARTIAL` | The ad policy summary approval and review statuses and the customer test-account flag are read; policy topics, customer status, and the Cloud project access level are not |
 | `DRIFT` | `COVERED` | Only when both retained reads are whole bounded reads for the same account |
 
 ## Rule table
@@ -237,7 +238,7 @@ retained status contradicts.
 | `GA_POLICY_APPROVAL_STATUS_NOT_REVIEWED` | `INFO` | An ad returned an approval status outside the reviewed enumeration |
 | `GA_POLICY_REVIEW_STATUS_NOT_RETURNED` | `LOW` | An ad returned no policy review status |
 | `GA_POLICY_REVIEW_STATUS_NOT_REVIEWED` | `INFO` | An ad returned a review status outside the reviewed enumeration |
-| `GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED` | `INFO` | Always, once an account snapshot is retained |
+| `GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE` | `INFO` | Always, once an account snapshot is retained |
 | `GA_POLICY_TEST_ACCOUNT_DECLARED` | `MEDIUM` | The retained customer declares `test_account` |
 | `GA_POLICY_ACCOUNT_STATUS_NOT_READ` | `INFO` | Always, once an account snapshot is retained |
 
@@ -363,9 +364,9 @@ subject is distinct.
   audit or for the reads that produce its evidence.
 - **No provider-UI reconciliation.** No finding has been compared against the
   Google Ads interface for an identical account, window, timezone, or currency.
-- **The developer-token access tier is unproven.** Test, Basic and Standard are
-  documented, none is observable through a reviewed read, and no token has been
-  exercised against a live customer. Quota behaviour, `RESOURCE_EXHAUSTED`
+- **The Cloud project access level is unproven.** Test, Explorer, Basic and
+  Standard are documented, none is observable through a reviewed read, and no
+  project has been exercised against a live customer. Quota behaviour, `RESOURCE_EXHAUSTED`
   semantics, and manager-route (`login-customer-id`) behaviour are classified
   from the HTTP status only and remain `UNVERIFIED`.
 - **GAQL field compatibility is unverified.** The additive campaign settings,

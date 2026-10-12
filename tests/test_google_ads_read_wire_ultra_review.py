@@ -32,7 +32,6 @@ def _client(handler: httpx.MockTransport) -> GoogleAdsClient:
             sleep=lambda _seconds: None,
         ),
         lambda: "wire-access-token",
-        lambda: "wire-developer-token",
         now=lambda: _NOW,
     )
 
@@ -161,7 +160,7 @@ def _assert_fixed_request(request: httpx.Request) -> str:
         "https://googleads.googleapis.com/v25/customers/1234567890/googleAds:search"
     )
     assert request.headers["authorization"] == "Bearer wire-access-token"
-    assert request.headers["developer-token"] == "wire-developer-token"
+    assert "developer-token" not in request.headers
     assert request.headers["login-customer-id"] == "0987654321"
     body = json.loads(request.content)
     assert set(body) == {"query", "searchSettings"}

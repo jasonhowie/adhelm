@@ -151,12 +151,11 @@ def _cli(tmp_path: Path, *arguments: str) -> Result:
 # --- the draft and the enrolled profile -----------------------------------------
 
 
-def test_a_gtm_draft_needs_no_currency_developer_token_or_manager_route() -> None:
+def test_a_gtm_draft_needs_no_currency_or_manager_route() -> None:
     draft = GoogleOAuthProfileDraft.model_validate(_draft())
     assert draft.provider == "gtm"
     assert draft.purpose == "READ"
     assert draft.currency is None
-    assert draft.secondary_credential_ref is None
     assert "principal_ref" not in draft.model_dump()
 
 
@@ -167,7 +166,6 @@ def test_a_gtm_draft_needs_no_currency_developer_token_or_manager_route() -> Non
         {"scopes": ["https://www.googleapis.com/auth/tagmanager.edit.containers"]},
         {"scopes": ["https://www.googleapis.com/auth/tagmanager.publish"]},
         {"scopes": [GTM_SCOPE, "https://www.googleapis.com/auth/tagmanager.edit.containers"]},
-        {"secondary_credential_ref": "gtm-developer-token"},
         {"login_customer_ref": "1234567890"},
         {"account_ref": "gtm-account"},
         {"account_ref": "1" * 21},
@@ -229,7 +227,7 @@ def test_enrolling_gtm_stores_one_bound_bundle_and_no_secondary_slot(enrolment) 
     )
     assert profile.scopes == [GTM_SCOPE]
     assert result["credential_state"] == "READY"
-    assert result["secondary_credential_status"] == "NOT_APPLICABLE"
+    assert "secondary_credential_status" not in result
     assert result["resource_access_verified"] is False
     assert result["execution_authority"] is False
     assert len(store.values) == 1
@@ -266,7 +264,7 @@ def test_reconnecting_gtm_replaces_the_grant_only_for_the_same_google_user(
 # --- status ---------------------------------------------------------------------
 
 
-def test_gtm_status_needs_no_developer_token_and_describes_gtm_permissions_separately(
+def test_gtm_status_has_no_developer_token_fields_and_describes_gtm_permissions_separately(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     profile, _ = _enrolled(tmp_path, monkeypatch)
@@ -281,8 +279,8 @@ def test_gtm_status_needs_no_developer_token_and_describes_gtm_permissions_separ
     assert data["provider"] == "gtm"
     assert data["local_state"] == "READY"
     assert data["granted_scopes"] == [GTM_SCOPE]
-    assert data["developer_token_slot_state"] == "NOT_REQUIRED"
-    assert data["developer_token_slot_next_action"] is None
+    assert not [key for key in data if "developer" in key]
+    assert data["cloud_project_access_level"] == "NOT_OBSERVABLE"
     guidance = data["revocation_guidance"]
     assert guidance == list(google_oauth_revocation_guidance("gtm"))
     assert any("User management" in item and "not by this OAuth grant" in item for item in guidance)
@@ -296,12 +294,13 @@ def test_revocation_guidance_names_only_what_applies_to_the_provider() -> None:
     def mentions(provider: GoogleOAuthProvider, text: str) -> bool:
         return any(text in item for item in google_oauth_revocation_guidance(provider))
 
-    assert mentions("google_ads", "developer token")
+    assert mentions("google_ads", "Google Cloud project that owns the OAuth client")
+    assert not mentions("google_ads", "developer token")
     assert not mentions("google_ads", "User management")
     assert mentions("gtm", "User management")
     providers: tuple[GoogleOAuthProvider, ...] = ("google_ads", "ga4", "ga4_admin", "gtm")
     for provider in providers[1:]:
-        assert not mentions(provider, "developer token")
+        assert not mentions(provider, "Google Cloud project that owns the OAuth client")
     for provider in providers:
         assert mentions(provider, "Local removal never revokes the grant at Google")
 

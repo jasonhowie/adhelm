@@ -118,6 +118,11 @@ and every output that names a provider show the same label.
 does not block work on the others. Provider quotas, approvals and access tiers
 belong to the provider. You must obtain API access yourself, and a provider can
 change or withdraw its API.
+For Google Ads, API access belongs to the Google Cloud project that owns your OAuth
+client, at Test, Explorer, Basic or Standard; there is no developer token (Google retired
+them on 2026-09-09), and reading a production account needs the project to be upgraded on
+the Google Ads API Overview page in Cloud Console. AdHelm cannot observe the project's
+level.
 
 ## What 0.1.0 does not do
 

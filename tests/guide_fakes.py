@@ -19,12 +19,12 @@ records, rather than answers, any request that a read-only guide must never make
 host outside the provider's API, a method other than `GET`, or a `POST` that is not one
 of the provider's documented read-only queries or its token endpoint.
 
-One check is stricter than Google on purpose. The Google Ads fake also refuses a
-request whose `developer-token` header is not a value the guide stored (the hidden
-prompt answers), so a guide that skips or misnames the SECONDARY slot fails. Google
-itself has ignored that header since 2026-09-09 (Developer token page, fetched
-2026-10-11), so the 401 is a fake-only check, not Google behavior. It proves the value
-held in the SECONDARY slot is the value AdHelm sends.
+One check is stricter than Google on purpose. Every Google fake records, and refuses,
+a request that carries a `developer-token` header. Google has ignored that header since
+it retired developer tokens on 2026-09-09 and will reject it in a future major version
+(Developer token page, fetched 2026-10-12), so the refusal is a fake-only check, not
+Google behavior. It proves AdHelm never sends one, and a Google Ads guide never has the
+reader enter one: the fake's hidden prompt has no answer to give.
 """
 
 from __future__ import annotations
@@ -74,7 +74,6 @@ CLIENT_ID = "123456789012-exampleexampleexample.apps.googleusercontent.com"
 CLIENT_SECRET = "fixture-client-secret-value"
 REFRESH_TOKEN = "fixture-refresh-token-value"
 GOOGLE_SUBJECT = "fixture-google-subject"
-DEVELOPER_TOKEN = "fixture-developer-token-value"
 
 ADWORDS = "https://www.googleapis.com/auth/adwords"
 ANALYTICS_READONLY = "https://www.googleapis.com/auth/analytics.readonly"
@@ -309,24 +308,23 @@ class FakeGoogle(FakeProvider):
         if self._grants[token] != api.scope:
             return httpx.Response(403, json={"error": "insufficient authentication scopes"})
         # Fake-only check, stricter than Google (which ignores the header since
-        # 2026-09-09): it proves the value stored in the SECONDARY slot is the one sent.
-        if api.scope == ADWORDS and request.headers.get("developer-token") not in self._prompted:
+        # 2026-09-09): AdHelm must never send a developer token.
+        if "developer-token" in request.headers:
+            self.violations.append(
+                f"a developer-token header to {request.url.host}{request.url.path}"
+            )
             return httpx.Response(
-                401,
-                json={
-                    "error": "fake-only check: developer-token is not the value the guide stored"
-                },
+                400, json={"error": "fake-only check: no developer-token header is expected"}
             )
         return None
 
 
 def google_ads() -> FakeGoogle:
-    """Google Ads read API for customer 1234567890, and the developer token a guide stores."""
+    """Google Ads read API for customer 1234567890; a guide stores no second credential."""
     return FakeGoogle(
         apis={
             "googleads.googleapis.com": _Api(_google_handler, ADWORDS, (":search", ":searchStream"))
-        },
-        prompt_answers=[DEVELOPER_TOKEN],
+        }
     )
 
 

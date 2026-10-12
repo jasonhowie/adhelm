@@ -70,8 +70,8 @@ _SLOT_HMAC_KEY_LOCK = Lock()
 # resolver. This is an in-process misuse guard, not a same-user Python trust
 # boundary or an authorization credential.
 _EXECUTION_SNAPSHOT_ISSUER = object()
-# Google Ads PAUSE planning has a third, fixed, protected slot beyond the
-# configured OAuth bundle and developer-token slots.  It is deliberately a
+# Google Ads PAUSE planning has a second, fixed, protected slot beyond the
+# configured OAuth bundle.  It is deliberately a
 # process-local issuer guard only: the OS-store value itself supplies the
 # durable HMAC key, while this marker prevents a constructed Python object from
 # crossing the fixed lifecycle boundary in ordinary callers.
@@ -253,17 +253,15 @@ class _GoogleOAuthExecutionSnapshot:
 
 
 class _GoogleAdsEditExecutionSnapshot:
-    """Private dual-slot Google Ads EDIT association for one fixed session.
+    """Private Google Ads EDIT association for one fixed session.
 
-    The OAuth bundle remains in the OAuth-only credential service, while the
-    developer token remains in the ordinary OS credential service.  This
-    object joins those two values only after both exact slot locks are held.
+    The OAuth bundle remains in the OAuth-only credential service.  Google
+    retired developer tokens on 2026-09-09, so no second credential joins it.
     It has no serializer and is consumed immediately by the fixed Google Ads
     EDIT session, which keeps only a keyed continuity marker.
     """
 
     _bearer_token: str
-    _developer_token: str
     profile_digest: str
     provider: Literal["google_ads"]
     purpose: Literal["EDIT"]
@@ -272,7 +270,6 @@ class _GoogleAdsEditExecutionSnapshot:
     client_ref: str
     api_scope: Literal["https://www.googleapis.com/auth/adwords"]
     credential_ref: str
-    secondary_credential_ref: str
     login_customer_ref: str | None
     currency: str
     timezone: str
@@ -282,7 +279,6 @@ class _GoogleAdsEditExecutionSnapshot:
 
     __slots__ = (
         "_bearer_token",
-        "_developer_token",
         "profile_digest",
         "provider",
         "purpose",
@@ -291,7 +287,6 @@ class _GoogleAdsEditExecutionSnapshot:
         "client_ref",
         "api_scope",
         "credential_ref",
-        "secondary_credential_ref",
         "login_customer_ref",
         "currency",
         "timezone",
@@ -304,7 +299,6 @@ class _GoogleAdsEditExecutionSnapshot:
         self,
         *,
         _bearer_token: str,
-        _developer_token: str,
         profile_digest: str,
         provider: Literal["google_ads"],
         purpose: Literal["EDIT"],
@@ -313,7 +307,6 @@ class _GoogleAdsEditExecutionSnapshot:
         client_ref: str,
         api_scope: Literal["https://www.googleapis.com/auth/adwords"],
         credential_ref: str,
-        secondary_credential_ref: str,
         login_customer_ref: str | None,
         currency: str,
         timezone: str,
@@ -325,7 +318,6 @@ class _GoogleAdsEditExecutionSnapshot:
             raise TypeError("Google Ads EDIT execution snapshots are lifecycle-issued only")
         for name, value in (
             ("_bearer_token", _bearer_token),
-            ("_developer_token", _developer_token),
             ("profile_digest", profile_digest),
             ("provider", provider),
             ("purpose", purpose),
@@ -334,7 +326,6 @@ class _GoogleAdsEditExecutionSnapshot:
             ("client_ref", client_ref),
             ("api_scope", api_scope),
             ("credential_ref", credential_ref),
-            ("secondary_credential_ref", secondary_credential_ref),
             ("login_customer_ref", login_customer_ref),
             ("currency", currency),
             ("timezone", timezone),
@@ -359,17 +350,16 @@ class _GoogleAdsEditExecutionSnapshot:
 
 
 class _GoogleAdsPauseProtectedSnapshot:
-    """Private three-slot association for one future Google Ads PAUSE plan.
+    """Private two-slot association for one future Google Ads PAUSE plan.
 
     The public M55 action receives only the nonsecret execution facts exposed
-    here.  The bearer, developer token, complete OAuth bundle association, and
+    here.  The bearer, complete OAuth bundle association, and
     fixed private binding key remain inside this lifecycle module and the
     future fixed planning session.  A snapshot is not a credential, provider
     permission, or execution authorization.
     """
 
     _bearer_token: str
-    _developer_token: str
     profile_ref: str
     profile_configuration_digest: str
     account_client_ref: str
@@ -387,7 +377,6 @@ class _GoogleAdsPauseProtectedSnapshot:
 
     __slots__ = (
         "_bearer_token",
-        "_developer_token",
         "profile_ref",
         "profile_configuration_digest",
         "account_client_ref",
@@ -408,7 +397,6 @@ class _GoogleAdsPauseProtectedSnapshot:
         self,
         *,
         _bearer_token: str,
-        _developer_token: str,
         profile_ref: str,
         profile_configuration_digest: str,
         account_client_ref: str,
@@ -428,7 +416,6 @@ class _GoogleAdsPauseProtectedSnapshot:
             raise TypeError("Google Ads PAUSE snapshots are lifecycle-issued only")
         for name, value in (
             ("_bearer_token", _bearer_token),
-            ("_developer_token", _developer_token),
             ("profile_ref", profile_ref),
             ("profile_configuration_digest", profile_configuration_digest),
             ("account_client_ref", account_client_ref),
@@ -590,17 +577,6 @@ class GoogleOAuthLocalStatus:
     identity_last_verified_at: None
     identity_last_verified_not_after: datetime | None
     primary_slot_present: bool
-    developer_token_slot_required: bool
-    # Three states plus "not required".  A credential store that could not be
-    # questioned is `UNKNOWN_STORE_FAILURE`, never `ABSENT`: reporting an
-    # absence there would be indistinguishable from an incomplete enrolment.
-    developer_token_slot_state: Literal[
-        "PRESENT", "ABSENT", "UNKNOWN_STORE_FAILURE", "NOT_REQUIRED"
-    ]
-    # Retained for readers that only need the settled case.  `True` and `False`
-    # are answers; `None` means the question was not settled -- either not
-    # required, or a store that could not answer.
-    developer_token_slot_present: bool | None
 
 
 def google_oauth_local_status(
@@ -617,13 +593,8 @@ def google_oauth_local_status(
     _validate_configuration_references(validated)
     profile = _selected_google_oauth_profile(validated, profile_id)
     digest_value = digest(profile)
-    developer_required = profile.provider == "google_ads"
     with credential_mutation_lock(profile.credential_ref):
         raw = _read_slot(_credential_backend(), profile.credential_ref)
-    developer_state: Literal["PRESENT", "ABSENT", "UNKNOWN_STORE_FAILURE", "NOT_REQUIRED"] = (
-        _google_ads_developer_token_slot_state(profile) if developer_required else "NOT_REQUIRED"
-    )
-    developer_present = {"PRESENT": True, "ABSENT": False}.get(developer_state)
     if raw is None:
         return GoogleOAuthLocalStatus(
             profile_configuration_digest=digest_value,
@@ -641,9 +612,6 @@ def google_oauth_local_status(
             identity_last_verified_at=None,
             identity_last_verified_not_after=None,
             primary_slot_present=False,
-            developer_token_slot_required=developer_required,
-            developer_token_slot_state=developer_state,
-            developer_token_slot_present=developer_present,
         )
     try:
         bundle = _decode_bundle(raw)
@@ -668,9 +636,6 @@ def google_oauth_local_status(
             identity_last_verified_at=None,
             identity_last_verified_not_after=None,
             primary_slot_present=True,
-            developer_token_slot_required=developer_required,
-            developer_token_slot_state=developer_state,
-            developer_token_slot_present=developer_present,
         )
     now = _checked_now()
     requested = tuple(bundle.requested_scopes)
@@ -697,42 +662,7 @@ def google_oauth_local_status(
         identity_last_verified_at=None,
         identity_last_verified_not_after=bundle.access_token_expires_at,
         primary_slot_present=True,
-        developer_token_slot_required=developer_required,
-        developer_token_slot_state=developer_state,
-        developer_token_slot_present=developer_present,
     )
-
-
-def _google_ads_developer_token_slot_state(
-    profile: Profile,
-) -> Literal["PRESENT", "ABSENT", "UNKNOWN_STORE_FAILURE"]:
-    """Report whether the separate developer-token slot holds a value.
-
-    The value itself is never read out of this function, compared, or returned;
-    only its presence is.  A configured profile with no secondary reference has
-    no slot at all, which is `ABSENT`: `auth status` must describe an
-    incompletely enrolled profile without failing.
-
-    A credential store that raised is a different fact and gets a different
-    answer.  A real OS backend can fail for one entry and answer for another --
-    a locked collection, a dropped D-Bus session, a Keychain prompt the user
-    dismissed -- and none of that means the token is missing.  Collapsing it
-    into `ABSENT` would be exactly the silent fallback `AGENTS.md` rule 20
-    forbids, so the unanswered case is reported as such.
-    """
-    secondary = profile.secondary_credential_ref
-    if type(secondary) is not str or _SAFE_REFERENCE.fullmatch(secondary) is None:
-        return "ABSENT"
-    try:
-        backend, service = _generic_credential_store()
-    except AdhelmError:
-        return "UNKNOWN_STORE_FAILURE"
-    with credential_mutation_lock(secondary):
-        try:
-            value = backend.get_password(service, secondary)
-        except Exception:
-            return "UNKNOWN_STORE_FAILURE"
-    return "PRESENT" if type(value) is str and bool(value) else "ABSENT"
 
 
 def remove_google_oauth_bundle(profile: Profile) -> None:
@@ -799,33 +729,18 @@ def _resolve_google_oauth_execution_snapshot(profile: Profile) -> _GoogleOAuthEx
 def _resolve_google_ads_edit_execution_snapshot(
     profile: Profile,
 ) -> _GoogleAdsEditExecutionSnapshot:
-    """Resolve one sealed Google Ads EDIT OAuth/developer-token association.
+    """Resolve one sealed Google Ads EDIT OAuth association.
 
-    This is the only M54 boundary that reads both credential services.  It
-    locks the two distinct configured references in a deterministic order,
-    then calls the existing primary-bundle locked core rather than trying to
-    re-enter its nonreentrant primary lock.  No generic credential resolver is
-    involved, and callers receive no serializable secret surface.
+    This locks the one configured OAuth reference and calls the existing
+    primary-bundle locked core.  No generic credential resolver is involved,
+    and callers receive no serializable secret surface.
     """
 
     checked = _checked_google_ads_edit_profile(profile)
-    secondary = checked.secondary_credential_ref
-    if secondary is None:
-        raise _google_ads_edit_profile_required()
-    references = tuple(sorted((checked.credential_ref, secondary), key=str.casefold))
-    if len({reference.casefold() for reference in references}) != 2:
-        raise _google_ads_edit_profile_required()
-    with ExitStack() as stack:
-        for reference in references:
-            stack.enter_context(credential_mutation_lock(reference))
+    with credential_mutation_lock(checked.credential_ref):
         bundle, resolved_at = _resolve_google_oauth_bundle_locked(_credential_backend(), checked)
-        generic_backend, generic_service = _generic_credential_store()
-        developer_token = _read_google_ads_developer_token_locked(
-            generic_backend, generic_service, secondary
-        )
         return _GoogleAdsEditExecutionSnapshot(
             _bearer_token=bundle.access_token,
-            _developer_token=developer_token,
             profile_digest=bundle.profile_digest,
             provider="google_ads",
             purpose="EDIT",
@@ -834,7 +749,6 @@ def _resolve_google_ads_edit_execution_snapshot(
             client_ref=bundle.client_ref,
             api_scope="https://www.googleapis.com/auth/adwords",
             credential_ref=checked.credential_ref,
-            secondary_credential_ref=secondary,
             login_customer_ref=checked.login_customer_ref,
             currency=cast(str, checked.currency),
             timezone=checked.timezone,
@@ -847,18 +761,16 @@ def _resolve_google_ads_edit_execution_snapshot(
 def _checked_google_ads_edit_execution_snapshot(
     value: object, profile: Profile
 ) -> _GoogleAdsEditExecutionSnapshot:
-    """Accept only the lifecycle-issued dual-slot snapshot for this profile."""
+    """Accept only the lifecycle-issued snapshot for this profile."""
 
     if type(value) is not _GoogleAdsEditExecutionSnapshot:
         raise _invalid_google_ads_edit_execution_snapshot()
     checked = _checked_google_ads_edit_profile(profile)
-    secondary = checked.secondary_credential_ref
-    if secondary is None or checked.currency is None:
+    if checked.currency is None:
         raise _invalid_google_ads_edit_execution_snapshot()
     try:
         issuer = value._issuer
         bearer_token = value._bearer_token
-        developer_token = value._developer_token
         profile_digest = value.profile_digest
         provider = value.provider
         purpose = value.purpose
@@ -867,7 +779,6 @@ def _checked_google_ads_edit_execution_snapshot(
         client_ref = value.client_ref
         api_scope = value.api_scope
         credential_ref = value.credential_ref
-        secondary_ref = value.secondary_credential_ref
         login_customer_ref = value.login_customer_ref
         currency = value.currency
         timezone = value.timezone
@@ -882,7 +793,6 @@ def _checked_google_ads_edit_execution_snapshot(
             (client_ref, checked.client_ref),
             (api_scope, "https://www.googleapis.com/auth/adwords"),
             (credential_ref, checked.credential_ref),
-            (secondary_ref, secondary),
             (currency, checked.currency),
             (timezone, checked.timezone),
         )
@@ -894,7 +804,6 @@ def _checked_google_ads_edit_execution_snapshot(
         if login_customer_ref != checked.login_customer_ref:
             raise ValueError("login customer")
         _checked_secret_text(bearer_token, name="token", maximum=_MAX_SECRET_BYTES)
-        _checked_secret_text(developer_token, name="developer token", maximum=_MAX_SECRET_BYTES)
         if (
             type(expires_at) is not datetime
             or expires_at.tzinfo is None
@@ -915,12 +824,12 @@ def _checked_google_ads_edit_execution_snapshot(
 def _prepare_google_ads_pause_protected_snapshot(
     profile: Profile, configuration_digest: str
 ) -> _GoogleAdsPauseProtectedSnapshot:
-    """Issue one sealed three-slot Google Ads PAUSE planning snapshot.
+    """Issue one sealed two-slot Google Ads PAUSE planning snapshot.
 
     This is the only PAUSE helper permitted to refresh the OAuth bundle or
     create the dedicated local binding key.  A caller must already hold its
-    configuration transaction; this helper then acquires the configured OAuth,
-    developer-token, and fixed binding-key references in casefolded order.
+    configuration transaction; this helper then acquires the configured OAuth
+    and fixed binding-key references in casefolded order.
     """
 
     checked = _checked_google_ads_edit_profile(profile)
@@ -933,15 +842,11 @@ def _prepare_google_ads_pause_protected_snapshot(
             stack.enter_context(credential_mutation_lock(reference))
         bundle, resolved_at = _resolve_google_oauth_bundle_locked(_credential_backend(), checked)
         generic_backend, generic_service = _generic_credential_store()
-        developer_token = _read_google_ads_developer_token_locked(
-            generic_backend, generic_service, _google_ads_developer_reference(checked)
-        )
         binding_key = _prepare_google_ads_pause_binding_key_locked(generic_backend, generic_service)
         return _new_google_ads_pause_protected_snapshot(
             profile=checked,
             configuration_digest=checked_configuration_digest,
             bundle=bundle,
-            developer_token=developer_token,
             binding_key=binding_key,
             resolved_at=resolved_at,
         )
@@ -952,11 +857,11 @@ def _current_google_ads_pause_protected_snapshot(
     configuration_digest: str,
     expected_binding: object,
 ) -> _GoogleAdsPauseProtectedSnapshot:
-    """Re-read all three PAUSE slots without refresh, write, or key creation.
+    """Re-read both PAUSE slots without refresh, write, or key creation.
 
     The expected snapshot is a private capability held by the fixed planning
     session.  It is structurally checked before any protected-store read, then
-    compared to a fresh no-refresh snapshot under all three ordered locks.
+    compared to a fresh no-refresh snapshot under both ordered locks.
     """
 
     checked = _checked_google_ads_edit_profile(profile)
@@ -985,8 +890,8 @@ def _google_ads_pause_retention_recheck(
     """Hold verified local PAUSE facts for one owner-only append callback.
 
     The caller supplies a profile selected while its configuration transaction
-    remains open.  This helper then holds all three protected-slot locks.  Its
-    callback rereads the three slots through the already-held local handles
+    remains open.  This helper then holds both protected-slot locks.  Its
+    callback rereads the two slots through the already-held local handles
     and checks the trusted clock.  It does not acquire a new backend, reenter a
     lock, refresh, write, use a provider route, or touch the ledger.  At least
     one callback is required before the context closes.
@@ -1022,7 +927,7 @@ def _google_ads_pause_retention_recheck(
                 raise _google_ads_pause_retention_recheck_required()
             try:
                 # This is intentionally a local reread through the exact
-                # handles captured while all three locks were acquired.  It
+                # handles captured while both locks were acquired.  It
                 # never obtains a backend, reacquires a lock, dispatches
                 # refresh, writes a slot, opens a provider route, or touches
                 # the ledger, but it detects manual protected-store drift that
@@ -1056,7 +961,7 @@ def _current_google_ads_pause_protected_snapshot_locked(
     configuration_digest: str,
     expected: _GoogleAdsPauseProtectedSnapshot,
 ) -> _GoogleAdsPauseProtectedSnapshot:
-    """Build and compare one no-refresh snapshot while all three locks are held."""
+    """Build and compare one no-refresh snapshot while both locks are held."""
 
     oauth_backend = _credential_backend()
     generic_backend, generic_service = _generic_credential_store()
@@ -1079,7 +984,7 @@ def _current_google_ads_pause_protected_snapshot_from_handles_locked(
     generic_backend: _CredentialStore,
     generic_service: str,
 ) -> _GoogleAdsPauseProtectedSnapshot:
-    """Use captured locked handles to prove the current three-slot association.
+    """Use captured locked handles to prove the current two-slot association.
 
     This narrow core is used by the retention callback.  It must stay free of
     backend getters, lock acquisition, refresh dispatch, and writes so the
@@ -1090,15 +995,11 @@ def _current_google_ads_pause_protected_snapshot_from_handles_locked(
         bundle, resolved_at = _read_google_ads_pause_bundle_no_refresh_locked(
             oauth_backend, profile
         )
-        developer_token = _read_google_ads_developer_token_locked(
-            generic_backend, generic_service, _google_ads_developer_reference(profile)
-        )
         binding_key = _read_google_ads_pause_binding_key_locked(generic_backend, generic_service)
         current = _new_google_ads_pause_protected_snapshot(
             profile=profile,
             configuration_digest=configuration_digest,
             bundle=bundle,
-            developer_token=developer_token,
             binding_key=binding_key,
             resolved_at=resolved_at,
         )
@@ -1158,7 +1059,6 @@ def _new_google_ads_pause_protected_snapshot(
     profile: Profile,
     configuration_digest: str,
     bundle: _GoogleOAuthCredentialBundle,
-    developer_token: str,
     binding_key: bytes,
     resolved_at: datetime,
 ) -> _GoogleAdsPauseProtectedSnapshot:
@@ -1168,10 +1068,8 @@ def _new_google_ads_pause_protected_snapshot(
     checked_configuration_digest = _checked_google_ads_pause_configuration_digest(
         configuration_digest
     )
-    secondary = _google_ads_developer_reference(checked)
     try:
         _validate_bundle_binding(bundle, checked)
-        _checked_secret_text(developer_token, name="developer token", maximum=_MAX_SECRET_BYTES)
         _checked_google_ads_pause_binding_key_bytes(binding_key)
         expires_at = _pause_utc_time(bundle.access_token_expires_at)
         checked_resolved_at = _pause_utc_time(resolved_at)
@@ -1184,7 +1082,6 @@ def _new_google_ads_pause_protected_snapshot(
             _bearer_token=_checked_secret_text(
                 bundle.access_token, name="token", maximum=_MAX_SECRET_BYTES
             ),
-            _developer_token=developer_token,
             profile_ref=checked.profile_id,
             profile_configuration_digest=digest(checked),
             account_client_ref=checked.account_ref,
@@ -1199,8 +1096,6 @@ def _new_google_ads_pause_protected_snapshot(
                 profile=checked,
                 configuration_digest=checked_configuration_digest,
                 bundle=bundle,
-                developer_token=developer_token,
-                developer_reference=secondary,
             ),
             configuration_digest=checked_configuration_digest,
             _resolved_at=checked_resolved_at,
@@ -1219,8 +1114,6 @@ def _google_ads_pause_credential_binding_ref(
     profile: Profile,
     configuration_digest: str,
     bundle: _GoogleOAuthCredentialBundle,
-    developer_token: str,
-    developer_reference: str,
 ) -> str:
     """Return the stable nonsecret ref for complete canonical protected facts."""
 
@@ -1233,10 +1126,6 @@ def _google_ads_pause_credential_binding_ref(
                 configuration_digest
             ),
             "currency": checked.currency,
-            "developer_credential_ref": developer_reference,
-            "developer_token": _checked_secret_text(
-                developer_token, name="developer token", maximum=_MAX_SECRET_BYTES
-            ),
             "login_customer_client_ref": checked.login_customer_ref,
             "oauth_credential_ref": checked.credential_ref,
             # This is the complete canonical protected bundle, including its
@@ -1278,7 +1167,6 @@ def _checked_google_ads_pause_protected_snapshot(
     try:
         issuer = value._issuer
         bearer_token = value._bearer_token
-        developer_token = value._developer_token
         profile_ref = value.profile_ref
         profile_digest = value.profile_configuration_digest
         account_client_ref = value.account_client_ref
@@ -1321,7 +1209,6 @@ def _checked_google_ads_pause_protected_snapshot(
         ):
             raise ValueError("snapshot association")
         _checked_secret_text(bearer_token, name="token", maximum=_MAX_SECRET_BYTES)
-        _checked_secret_text(developer_token, name="developer token", maximum=_MAX_SECRET_BYTES)
         checked_resolved_at = _pause_utc_time(resolved_at)
         checked_expires_at = _pause_utc_time(expires_at)
         if checked_resolved_at >= checked_expires_at:
@@ -1404,30 +1291,18 @@ def _assert_google_ads_pause_snapshot_matches(
         raise _google_ads_pause_credential_changed() from None
 
 
-def _google_ads_pause_lock_references(profile: Profile) -> tuple[str, str, str]:
-    """Return exactly the three distinct PAUSE slots in deterministic lock order."""
+def _google_ads_pause_lock_references(profile: Profile) -> tuple[str, str]:
+    """Return exactly the two distinct PAUSE slots in deterministic lock order."""
 
-    secondary = _google_ads_developer_reference(profile)
     references = tuple(
         sorted(
-            (
-                profile.credential_ref,
-                secondary,
-                GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE,
-            ),
+            (profile.credential_ref, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE),
             key=str.casefold,
         )
     )
-    if len(references) != 3 or len({reference.casefold() for reference in references}) != 3:
+    if len(references) != 2 or len({reference.casefold() for reference in references}) != 2:
         raise _google_ads_edit_profile_required()
     return references
-
-
-def _google_ads_developer_reference(profile: Profile) -> str:
-    secondary = profile.secondary_credential_ref
-    if type(secondary) is not str or _SAFE_REFERENCE.fullmatch(secondary) is None:
-        raise _google_ads_edit_profile_required()
-    return secondary
 
 
 def _prepare_google_ads_pause_binding_key_locked(backend: _CredentialStore, service: str) -> bytes:
@@ -1807,7 +1682,6 @@ def _checked_google_ads_edit_profile(value: object) -> Profile:
         checked.provider != "google_ads"
         or checked.purpose != "EDIT"
         or checked.scopes != ["https://www.googleapis.com/auth/adwords"]
-        or checked.secondary_credential_ref is None
         or checked.currency is None
     ):
         raise _google_ads_edit_profile_required()
@@ -1826,7 +1700,6 @@ def _checked_google_ads_edit_profile(value: object) -> Profile:
             and re.fullmatch(r"[0-9]{10}", checked.login_customer_ref) is None
         ):
             raise ValueError("login")
-        _checked_secret_text(checked.secondary_credential_ref, name="reference", maximum=160)
     except Exception:
         raise _google_ads_edit_profile_required() from None
     return checked
@@ -1982,6 +1855,11 @@ def _validate_bundle_binding(bundle: _GoogleOAuthCredentialBundle, profile: Prof
         (bundle.api_scope, scope),
     )
     if not all(hmac.compare_digest(actual, expected) for actual, expected in expected_values):
+        # Only the configuration digest differs: the grant is for this very account,
+        # principal, client and scope, but was sealed against an older shape of the profile
+        # (for example by AdHelm 0.1.0, before the developer-token field was removed).
+        if all(hmac.compare_digest(actual, expected) for actual, expected in expected_values[1:]):
+            raise _stale_bundle(profile)
         raise _invalid_bundle()
 
 
@@ -2041,11 +1919,11 @@ def _credential_backend() -> _CredentialStore:
 
 
 def _generic_credential_store() -> tuple[_CredentialStore, str]:
-    """Return the separate ordinary-store backend/service for developer tokens.
+    """Return the separate ordinary-store backend/service for the PAUSE binding key.
 
     Importing this only at the protected boundary preserves the existing
     credentials-to-lifecycle import direction.  The OAuth bundle service and
-    ordinary developer-token service intentionally remain distinct.
+    ordinary-store service intentionally remain distinct.
     """
 
     from adhelm.credentials import _SERVICE as generic_service
@@ -2059,24 +1937,7 @@ def _generic_credential_store() -> tuple[_CredentialStore, str]:
     except AdhelmError:
         raise
     except Exception:
-        raise _developer_token_store_unavailable() from None
-
-
-def _read_google_ads_developer_token_locked(
-    backend: _CredentialStore, service: str, reference: str
-) -> str:
-    """Read one exact developer token only while its reference lock is held."""
-
-    try:
-        value = backend.get_password(service, reference)
-    except AdhelmError:
-        raise _developer_token_store_unavailable() from None
-    except Exception:
-        raise _developer_token_store_unavailable() from None
-    try:
-        return _checked_secret_text(value, name="developer token", maximum=_MAX_SECRET_BYTES)
-    except Exception:
-        raise _developer_token_required() from None
+        raise _generic_store_unavailable() from None
 
 
 def _decode_bundle(raw: str) -> _GoogleOAuthCredentialBundle:
@@ -2361,6 +2222,20 @@ def _invalid_bundle() -> AdhelmError:
     )
 
 
+def _stale_bundle(profile: Profile) -> AdhelmError:
+    return AdhelmError(
+        "GOOGLE_OAUTH_PROFILE_BINDING_STALE",
+        "The stored Google OAuth grant was sealed against an older form of this profile "
+        "(for example by AdHelm 0.1.0) and no longer matches it.",
+        exit_code=ExitCode.AUTHORIZATION,
+        next_action=(
+            "Reconnect this profile with `adhelm auth google-oauth reconnect --profile "
+            f"{profile.profile_id} --client-config <client_secret.json> --interactive`, signing "
+            "in as the same Google user. The profile and your history are kept."
+        ),
+    )
+
+
 def _invalid_execution_snapshot() -> AdhelmError:
     return AdhelmError(
         "GOOGLE_OAUTH_EXECUTION_SNAPSHOT_INVALID",
@@ -2379,19 +2254,10 @@ def _google_ads_edit_profile_required() -> AdhelmError:
     )
 
 
-def _developer_token_required() -> AdhelmError:
-    return AdhelmError(
-        "GOOGLE_ADS_DEVELOPER_TOKEN_REQUIRED",
-        "The configured Google Ads developer token is unavailable.",
-        exit_code=ExitCode.AUTHORIZATION,
-        next_action="Store the developer token in the configured local OS credential slot.",
-    )
-
-
-def _developer_token_store_unavailable() -> AdhelmError:
+def _generic_store_unavailable() -> AdhelmError:
     return AdhelmError(
         "CREDENTIAL_STORE_UNAVAILABLE",
-        "The OS credential store is unavailable for the configured Google Ads developer token.",
+        "The OS credential store is unavailable for the Google Ads PAUSE binding key.",
         exit_code=ExitCode.PRECONDITION,
         next_action="Check the local OS credential store and retry deliberately.",
     )

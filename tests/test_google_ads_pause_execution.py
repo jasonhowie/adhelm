@@ -1,6 +1,6 @@
 """Google Ads campaign PAUSE on the generic execution route, with fakes only.
 
-Real here: the M55 contract, the F01 planning workflow, the three-slot
+Real here: the M55 contract, the F01 planning workflow, the two-slot
 protected-credential lifecycle, the S3 retained record, the S4 route, a real
 signed approval receipt from an ephemeral test key, a real ``SafetyKernel``,
 and a real local ledger.  Fake here: the operating-system credential store, the
@@ -36,7 +36,6 @@ from test_generic_execution_route import (
 )
 from test_google_ads_pause_credentials import (
     _ACCESS,
-    _DEVELOPER,
     _installed,
 )
 
@@ -114,7 +113,7 @@ class _FakeGoogleAds:
             body = json.loads(request.content)
             assert request.method == "POST"
             assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-            assert request.headers["developer-token"] == _DEVELOPER
+            assert "developer-token" not in request.headers
             assert body["searchSettings"] == {"returnTotalResultsCount": True}
             if "FROM customer" in body["query"]:
                 self.searches.append("customer")
@@ -124,7 +123,7 @@ class _FakeGoogleAds:
         assert str(request.url) == _MUTATE_URL
         assert request.method == "POST"
         assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         body = json.loads(request.content)
         self.mutations.append(body)
         if self.mutate_error is not None:
@@ -466,7 +465,6 @@ def test_the_emitted_result_carries_no_identifier_or_secret(
     )
     for secret in (
         _ACCESS,
-        _DEVELOPER,
         "m56-google-ads-refresh-token",
         "m56-google-client-secret",
         _CUSTOMER,
@@ -477,7 +475,6 @@ def test_the_emitted_result_carries_no_identifier_or_secret(
     history = json.dumps(Ledger(tmp_path).records("changes"))
     for secret in (
         _ACCESS,
-        _DEVELOPER,
         "m56-google-ads-refresh-token",
         "m56-google-client-secret",
         "campaigns:mutate",

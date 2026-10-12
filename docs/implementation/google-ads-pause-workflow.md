@@ -42,7 +42,7 @@ artifact preferences before calling this workflow.
 Tests use fake sessions and local temporary configuration/ledgers, including
 source binding, expiry, preflight and retained-result uncertainty. Three full private-session integration cases also use real configuration,
 protected lifecycle, reader, compiler, history and review components with fake
-store/HTTP edges. They cover success, developer-token drift after the pair and
+store/HTTP edges. They cover success, OAuth-bundle drift after the pair and
 manual configuration drift at final append. The 647-case affected group and
 whole-source static checks pass; archived validation remains separate. This
 document makes no live provider or installed-authority claim.

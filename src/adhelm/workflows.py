@@ -108,7 +108,7 @@ def require_report_preconditions(
     * the query's account is the selected profile's account;
     * LinkedIn fixed reporting runs on an explicit UTC profile;
     * GA4 has the expected web-stream identity and its property is the profile's;
-    * Google Ads has a scoped profile with a separate developer-token reference;
+    * Google Ads has a scoped profile;
     * a Meta token profile is not used under ``--ci``, and the query's source time
       zone and currency are the account declaration's.
     """
@@ -138,12 +138,6 @@ def require_report_preconditions(
         if not isinstance(profile, Profile):
             raise AdhelmError(
                 "SCOPED_PROFILE_REQUIRED", "Google Ads requires a scoped OAuth profile."
-            )
-        if profile.secondary_credential_ref is None:
-            raise AdhelmError(
-                "SECONDARY_CREDENTIAL_REQUIRED",
-                "Google Ads requires a separate developer-token reference.",
-                exit_code=4,
             )
         google_config = GoogleAdsReadConfig(
             account_ref=profile.account_ref,
@@ -244,14 +238,10 @@ def run_report(
         return _share_report(root, ledger, report, stored, key, artifact_preflight)
     # Google resource reads may need a protected OAuth refresh.  Resolve each
     # primary credential once before identity discovery so every request in one
-    # sequential observation sees the same bearer token.  Google Ads also has
-    # its separate static developer-token snapshot.
+    # sequential observation sees the same bearer token.
     google_primary_token: str | None = None
-    google_developer_token: str | None = None
     if provider in {"google_ads", "ga4"}:
         google_primary_token = credential(profile, ci_enabled=ci_enabled)
-    if provider == "google_ads":
-        google_developer_token = credential(profile, ci_enabled=ci_enabled, secondary=True)
 
     def getter() -> str:
         if google_primary_token is not None:
@@ -310,14 +300,8 @@ def run_report(
         elif isinstance(query, GoogleAdsReportQuery):
             assert google_config is not None
             assert google_primary_token is not None
-            assert google_developer_token is not None
 
-            def developer_getter() -> str:
-                return google_developer_token
-
-            google = GoogleAdsClient(
-                SafeHttpClient(client, {"googleads.googleapis.com"}), getter, developer_getter
-            )
+            google = GoogleAdsClient(SafeHttpClient(client, {"googleads.googleapis.com"}), getter)
             google_identity = google.discover_identity(google_config)
             if google_identity.timezone != profile.timezone or (
                 profile.currency is not None and google_identity.currency != profile.currency
