@@ -73,7 +73,9 @@ def _repository(tmp_path: Path, *, version: str = VERSION, name: str = "adhelm")
 
 def _wheel_files(root: Path) -> dict[str, bytes]:
     return {
-        "adhelm/__init__.py": b"",
+        "adhelm/__init__.py": (
+            f'__version__ = "{VERSION}"\nRELEASE_STATE = "RELEASED_0_1_0"\n'
+        ).encode(),
         "adhelm/py.typed": b"",
         "adhelm/bundled_skills/one/SKILL.md": b"one",
         "adhelm/bundled_skills/two/SKILL.md": b"two",
@@ -91,7 +93,9 @@ def _sdist_files(root: Path) -> dict[str, bytes]:
         "README.md": b"readme",
         "LICENSE": (root / "LICENSE").read_bytes(),
         "NOTICE": (root / "NOTICE").read_bytes(),
-        "src/adhelm/__init__.py": b"",
+        "src/adhelm/__init__.py": (
+            f'__version__ = "{VERSION}"\nRELEASE_STATE = "RELEASED_0_1_0"\n'
+        ).encode(),
     }
 
 
@@ -972,3 +976,23 @@ def test_the_sdist_includes_the_readme_the_long_description_is_made_from() -> No
     included = _pyproject()["tool"]["hatch"]["build"]["targets"]["sdist"]["include"]
 
     assert "/README.md" in included
+
+
+@pytest.mark.parametrize("kind", ["wheel", "sdist"])
+def test_built_artifact_with_stale_release_state_cannot_pass_release_gate(
+    release_tree: tuple[Path, Path], kind: str
+) -> None:
+    root, dist = release_tree
+    source = (
+        f'__version__ = "{VERSION}"\nRELEASE_STATE = "READY_FOR_USER_AUTHORIZATION"\n'
+    ).encode()
+    if kind == "wheel":
+        files = _wheel_files(root)
+        files["adhelm/__init__.py"] = source
+        _write_wheel(dist / WHEEL, files)
+    else:
+        files = _sdist_files(root)
+        files["src/adhelm/__init__.py"] = source
+        _write_sdist(dist / SDIST, files)
+    with pytest.raises(release.ReleaseError, match="release state"):
+        _verify(root, dist, f"v{VERSION}")

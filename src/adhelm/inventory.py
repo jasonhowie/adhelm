@@ -779,8 +779,20 @@ def _google_snapshots(inventory: GoogleAdsInventory, identity: Any) -> list[dict
                 # prefixed data-quality status instead.
                 "budget_type": "DAILY" if item.budget_period == "DAILY" else None,
                 "bid_strategy": item.bid_strategy,
-                "schedule_start": item.start_date.isoformat() if item.start_date else None,
-                "schedule_end": item.end_date.isoformat() if item.end_date else None,
+                "schedule_start": (
+                    item.start_date_time.astimezone(UTC).isoformat()
+                    if item.start_date_time
+                    else item.start_date.isoformat()
+                    if item.start_date
+                    else None
+                ),
+                "schedule_end": (
+                    item.end_date_time.astimezone(UTC).isoformat()
+                    if item.end_date_time
+                    else item.end_date.isoformat()
+                    if item.end_date
+                    else None
+                ),
             },
             status=item.status,
             quality=[GOOGLE_ADS_STATE_SHAPE_STATUS, *_google_campaign_quality(item)],
@@ -1360,6 +1372,26 @@ def _change_for_snapshot(
         return None
     before = prior["payload"]
     deltas = _snapshot_deltas(before, snapshot)
+    if provider == "google_ads":
+        prefix = "GOOGLE_ADS_STATE_SHAPE_"
+        before_shapes = {
+            value for value in before["data_quality_statuses"] if value.startswith(prefix)
+        }
+        after_shapes = {
+            value for value in snapshot["data_quality_statuses"] if value.startswith(prefix)
+        }
+        if before_shapes != after_shapes:
+            # Date-only history cannot prove a change to an exact timestamp.
+            # Establish the new schedule baseline while preserving comparable
+            # changes (budget/status/etc.) and the original historical record.
+            deltas = [
+                delta
+                for delta in deltas
+                if delta["path"]
+                not in {"normalized_state.schedule_start", "normalized_state.schedule_end"}
+            ]
+            if not deltas:
+                return None
     if not baseline["changed"] and not deltas:
         return None
     if baseline["changed"]:

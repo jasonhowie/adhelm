@@ -8,6 +8,16 @@ decided by [ADR 0013](adr/0013-open-source-release.md). It does not replace
 target. Nothing in this document permits claiming `COMPLETE`, `v1.0.0`, live
 parity, write support or a compliance property.
 
+## Patch releases
+
+The read-only scope and runtime refusal apply to the `0.1.x` maintenance line.
+`RELEASED_0_1_0` names the already-published read-only release milestone, not the
+exact package version. A prepared 0.1.1 build retains that milestone and reports
+its exact version separately; it does not claim that 0.1.1 has been published.
+The built wheel and sdist must contain matching version constants and that
+milestone before the tag-triggered publication workflow can continue. The
+installed-wheel smoke verifies the same state from actual CLI output.
+
 ## Release claim
 
 > AdHelm 0.1.0 lets a marketer direct their own AI agent through a local,

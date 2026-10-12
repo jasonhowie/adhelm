@@ -20,7 +20,7 @@ import httpx
 from pydantic import Field, model_validator
 
 from adhelm.canonical import parse_json
-from adhelm.errors import AdhelmError, ExitCode
+from adhelm.errors import AdhelmError, ExitCode, copy_provider_diagnostics
 from adhelm.models import Currency, Money, SafeRef, StrictModel
 from adhelm.privacy import validate_data
 from adhelm.reporting import NormalizedReport, PerformanceRow, QualityStatus, ReportEnvelope
@@ -1063,4 +1063,6 @@ class LinkedInAdsClient:
         except AdhelmError as error:
             # Classify the observed status only; the refusal carries no response
             # body, so a LinkedIn-typed diagnostic can never disclose one.
-            raise classify_linkedin_ads_transport_error(error, permission=permission) from None
+            raise copy_provider_diagnostics(
+                error, classify_linkedin_ads_transport_error(error, permission=permission)
+            ) from None

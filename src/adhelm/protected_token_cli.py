@@ -270,6 +270,7 @@ def build_token_app(binding: TokenCliBinding) -> typer.Typer:
         redirect_port: Annotated[int, typer.Option("--redirect-port")],
         scopes: Annotated[list[str] | None, typer.Option("--scopes")] = None,
         interactive: Annotated[bool, typer.Option("--interactive")] = False,
+        no_browser: Annotated[bool, typer.Option("--no-browser")] = False,
     ) -> None:
         from adhelm.cli import emit, guarded, root
 
@@ -285,6 +286,7 @@ def build_token_app(binding: TokenCliBinding) -> typer.Typer:
                 redirect_port=redirect_port,
                 scopes=_checked_scopes(scopes),
                 interactive=interactive,
+                **({"no_browser": True} if no_browser else {}),
             )
             emit(command, lifecycle_data(spec, result), maximum_bytes=maximum)
 

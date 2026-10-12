@@ -19,7 +19,7 @@ import httpx
 from pydantic import Field, model_validator
 
 from adhelm.canonical import parse_json
-from adhelm.errors import AdhelmError, ExitCode
+from adhelm.errors import AdhelmError, ExitCode, copy_provider_diagnostics
 from adhelm.models import Currency, Money, SafeRef, StrictModel
 from adhelm.privacy import validate_data
 from adhelm.reporting import NormalizedReport, PerformanceRow, ReportEnvelope
@@ -928,7 +928,10 @@ class TikTokAdsClient:
             # A declared business failure is classified from its integer code
             # alone.  `message` is never read, so no provider text can reach a
             # local diagnostic.
-            raise classify_tiktok_ads_business_code(code)
+            diagnostic = classify_tiktok_ads_business_code(code)
+            if 0 <= code <= 2_147_483_647:
+                diagnostic.provider_code = str(code)
+            raise diagnostic
         if (
             type(code) is not int
             or code != 0
@@ -985,7 +988,9 @@ class TikTokAdsClient:
             # it: a `429` or a denial reaches the caller as the exact TikTok
             # diagnostic.  Only the observed status and a bounded `Retry-After`
             # are read; no response body is available here.
-            raise classify_tiktok_ads_transport_error(error) from None
+            raise copy_provider_diagnostics(
+                error, classify_tiktok_ads_transport_error(error)
+            ) from None
 
     def _identity_matches(self, account_ref: str, identity: TikTokAdsIdentity) -> str:
         # Typed identities may be supplied directly; SafeRef is not an advertiser-ID type.

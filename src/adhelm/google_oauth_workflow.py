@@ -81,11 +81,14 @@ def _check_new_profile(configuration: Configuration, draft: GoogleOAuthProfileDr
 
 
 def _browser_grant(
-    target: GoogleOAuthTarget, client: GoogleInstalledClient
+    target: GoogleOAuthTarget, client: GoogleInstalledClient, *, no_browser: bool = False
 ) -> GoogleOAuthInitialGrant:
     with GoogleOAuthLoopbackReceiver() as receiver:
         attempt = start_google_oauth_authorization(target, receiver.redirect_uri)
-        open_system_browser(attempt)
+        if no_browser:
+            open_system_browser(attempt, no_browser=True)
+        else:
+            open_system_browser(attempt)
         raw_query = receiver.receive_query()
         receiver.require_unexpired()
         callback = consume_google_oauth_callback(attempt, raw_query)
@@ -189,7 +192,12 @@ def google_oauth_status(directory: Path, profile_id: str) -> object:
 
 
 def enroll_google_oauth(
-    directory: Path, input_file: Path, client_file: Path, *, interactive: bool = False
+    directory: Path,
+    input_file: Path,
+    client_file: Path,
+    *,
+    interactive: bool = False,
+    no_browser: bool = False,
 ) -> dict[str, object]:
     """Derive a final subject-bound profile only after verified browser authorization."""
     from adhelm.google_oauth_credentials import (
@@ -205,7 +213,11 @@ def enroll_google_oauth(
     client = read_google_installed_client(client_file, expected_client_ref=draft.client_ref)
     target = GoogleOAuthTarget(client_ref=draft.client_ref, api_scope=draft.scopes[0])
     expected_slot = prepare_google_oauth_slot(draft.credential_ref, replace=False)
-    grant = _browser_grant(target, client)
+    grant = (
+        _browser_grant(target, client, no_browser=True)
+        if no_browser
+        else _browser_grant(target, client)
+    )
     profile = Profile.model_validate(
         {
             **draft.model_dump(mode="python", warnings="error"),
@@ -248,7 +260,12 @@ def enroll_google_oauth(
 
 
 def reconnect_google_oauth(
-    directory: Path, profile_id: str, client_file: Path, *, interactive: bool = False
+    directory: Path,
+    profile_id: str,
+    client_file: Path,
+    *,
+    interactive: bool = False,
+    no_browser: bool = False,
 ) -> dict[str, object]:
     """Replace one protected grant only for the same configured principal/client/scope."""
     from adhelm.google_oauth_credentials import (
@@ -273,7 +290,11 @@ def reconnect_google_oauth(
     client = read_google_installed_client(client_file, expected_client_ref=profile.client_ref)
     target = GoogleOAuthTarget(client_ref=profile.client_ref, api_scope=profile.scopes[0])
     expected_slot = prepare_google_oauth_install(configuration, profile_id, replace=True)
-    grant = _browser_grant(target, client)
+    grant = (
+        _browser_grant(target, client, no_browser=True)
+        if no_browser
+        else _browser_grant(target, client)
+    )
     if grant.identity.principal_ref != profile.principal_ref:
         raise AdhelmError(
             "GOOGLE_OAUTH_PRINCIPAL_MISMATCH",

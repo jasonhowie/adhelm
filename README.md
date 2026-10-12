@@ -18,7 +18,11 @@ your own credentials.
 
 ## Status
 
-`0.1.0` is the first public release and it is **read-only**. Every command that
+`0.1.1` is the current source version, prepared as a read-only maintenance
+release. See the [changelog](CHANGELOG.md) for its fixes. Publication requires a
+separate release tag.
+
+`0.1.0` is the first public release and it is **read-only**. Every command in the `0.1.x` line that
 would change an advertising or analytics account is listed by `adhelm discover`
 with status `UNRELEASED` and is refused at runtime; see
 [What 0.1.0 does not do](#what-010-does-not-do). The release is gated by the

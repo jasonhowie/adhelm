@@ -108,6 +108,7 @@ def enroll(
     input_file: Annotated[Path, typer.Option("--input")],
     client_file: Annotated[Path, typer.Option("--client-config")],
     interactive: Annotated[bool, typer.Option("--interactive")] = False,
+    no_browser: Annotated[bool, typer.Option("--no-browser")] = False,
 ) -> None:
     """Enroll one fixed Google OAuth profile through the local system browser."""
     from adhelm.cli import emit, guarded, root
@@ -116,7 +117,13 @@ def enroll(
         google_oauth_workflow._require_interactive(interactive)
         directory = root(ctx)
         maximum = load_configuration(directory).output.max_output_bytes
-        result = enroll_google_oauth(directory, input_file, client_file, interactive=interactive)
+        result = enroll_google_oauth(
+            directory,
+            input_file,
+            client_file,
+            interactive=interactive,
+            **({"no_browser": True} if no_browser else {}),
+        )
         emit("auth google-oauth enroll", result, maximum_bytes=maximum)
 
     guarded("auth google-oauth enroll", work)
@@ -134,6 +141,7 @@ def reconnect(
     profile_id: Annotated[str, typer.Option("--profile")],
     client_file: Annotated[Path, typer.Option("--client-config")],
     interactive: Annotated[bool, typer.Option("--interactive")] = False,
+    no_browser: Annotated[bool, typer.Option("--no-browser")] = False,
 ) -> None:
     """Reconnect the exact configured Google subject/client/scope; no Google resource operation."""
     from adhelm.cli import emit, guarded, root
@@ -142,7 +150,13 @@ def reconnect(
         google_oauth_workflow._require_interactive(interactive)
         directory = root(ctx)
         maximum = load_configuration(directory).output.max_output_bytes
-        result = reconnect_google_oauth(directory, profile_id, client_file, interactive=interactive)
+        result = reconnect_google_oauth(
+            directory,
+            profile_id,
+            client_file,
+            interactive=interactive,
+            **({"no_browser": True} if no_browser else {}),
+        )
         emit("auth google-oauth reconnect", result, maximum_bytes=maximum)
 
     guarded("auth google-oauth reconnect", work)

@@ -404,6 +404,16 @@ CSV rules:
 - identical verified inputs, projection version, filters, and platform-independent
   newline setting produce byte-identical output.
 
+## Projection version 3
+
+0.1.1 adds `conversion_count_decimal`, `conversion_kind`, `campaign_ref`, and
+`date` columns to `conversions.csv`. Consumers must select one conversion kind
+before summing Google Ads totals; primary and all conversions overlap. The
+exact decimal column is authoritative when present, while legacy records leave
+it empty. Source rows remain reconstructible through the nested child tables.
+Campaign labels are pseudonymized by default. No historical JSONL is migrated
+or modified to generate these columns.
+
 ## Retention and deletion
 
 The customer controls the local data directory and a versioned retention

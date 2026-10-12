@@ -27,6 +27,11 @@ reader accepts only the documented installed-client shape, checks endpoint
 metadata, and always uses fixed runtime endpoints. File bytes, client secrets,
 codes, tokens, raw subjects, and browser authorization URLs are never copied to
 configuration, canonical history, logs, artifacts, or structured command output.
+Starting with 0.1.1, the explicitly interactive terminal handoff displays only
+the validated authorization URL on stderr so the user can open it manually.
+This includes state/nonce/PKCE challenge, never the verifier, token or callback
+code. The URL is not displayed without a local TTY. `--no-browser` skips the OS
+launcher while preserving the same bounded, single-use loopback flow.
 The OS credential bundle is a separate private format, not a public CLI schema.
 It uses a dedicated fixed OS-store service, so legacy raw-token profiles cannot
 retrieve bundle bytes even if they select the same reference. Both services

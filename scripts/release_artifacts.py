@@ -10,6 +10,7 @@ trusting the stage before it. Nothing here signs, uploads or contacts a network.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import os
@@ -159,6 +160,7 @@ def _require_portable_description(label: str, metadata_bytes: bytes, version: st
 
 def verify_wheel(wheel: Path, version: str, root: Path) -> None:
     members = _wheel_members(_require_regular(wheel))
+    require_release_constants(members.get("adhelm/__init__.py", b""), version)
     dist_info = f"{PROJECT_NAME}-{version}.dist-info"
     stray = {
         PurePosixPath(name).parts[0]
@@ -198,11 +200,37 @@ def verify_wheel(wheel: Path, version: str, root: Path) -> None:
 
 def verify_sdist(sdist: Path, version: str, root: Path) -> None:
     members = _sdist_members(_require_regular(sdist), f"{PROJECT_NAME}-{version}")
+    require_release_constants(members.get("src/adhelm/__init__.py", b""), version)
     for required in ("pyproject.toml", "PKG-INFO", "README.md"):
         if required not in members:
             raise ReleaseError(f"{sdist.name} is missing {required}.")
     _require_license_files(members, "", root, sdist.name)
     _require_portable_description(sdist.name, members["PKG-INFO"], version)
+
+
+def require_release_constants(source: bytes, version: str) -> None:
+    """Inspect the packaged source, without executing code from an artifact."""
+    try:
+        tree = ast.parse(source)
+    except (SyntaxError, ValueError):
+        raise ReleaseError("The artifact has invalid package release constants.") from None
+    values: dict[str, list[object]] = {"__version__": [], "RELEASE_STATE": []}
+    for statement in tree.body:
+        if isinstance(statement, ast.Assign):
+            targets = statement.targets
+            value = statement.value
+        elif isinstance(statement, ast.AnnAssign):
+            targets = [statement.target]
+            value = statement.value
+        else:
+            continue
+        for target in targets:
+            if isinstance(target, ast.Name) and target.id in values:
+                values[target.id].append(value.value if isinstance(value, ast.Constant) else None)
+    if values != {"__version__": [version], "RELEASE_STATE": ["RELEASED_0_1_0"]}:
+        raise ReleaseError(
+            "The artifact version or release state does not match the read-only release."
+        )
 
 
 def verify_artifacts(dist: Path, pyproject: Path, tag: str | None = None) -> dict[str, str]:

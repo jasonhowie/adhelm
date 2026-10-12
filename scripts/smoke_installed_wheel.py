@@ -53,6 +53,8 @@ def check_version(envelope: dict[str, Any], expected: str) -> None:
         raise SmokeError(f"version did not report AdHelm {expected}.")
     if envelope.get("data", {}).get("version") != expected:
         raise SmokeError(f"version data did not report AdHelm {expected}.")
+    if envelope.get("data", {}).get("release_state") != "RELEASED_0_1_0":
+        raise SmokeError("the installed wheel does not report the released read-only milestone.")
 
 
 def check_discover(envelope: dict[str, Any]) -> None:

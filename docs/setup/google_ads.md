@@ -220,6 +220,13 @@ the account and approve the consent screen.
 adhelm auth google-oauth enroll --input google-ads-draft.json --client-config client_secret.json --interactive
 ```
 
+While enrollment waits, stderr shows the authorization URL, the local callback
+address, the five-minute deadline and Ctrl-C cancellation instructions. Stdout
+is reserved for the final JSON result. If no browser tab opens, open the printed
+URL in a browser on the same machine. Add `--no-browser` to the enrollment or
+reconnect command to skip automatic launch. Keep the URL in your local terminal;
+do not paste it into chat or logs.
+
 The result states that no Google resource was read and no authority to change anything
 was granted:
 
@@ -364,6 +371,26 @@ release never reads or sends it, and `auth remove-local` no longer addresses it.
 your operating system's credential manager (Keychain Access, Credential Manager, or
 `secret-tool`/Seahorse), or leave it: it is inert, and Google ignores developer tokens.
 Re-enrolling under a new profile ID starts clean.
+
+## Conversion metrics and recognizable campaigns (0.1.1)
+
+The fixed daily report requests conversions and all conversions separately,
+each with its value. These totals overlap: do not add them. Counts can be
+fractional; `conversion_count_decimal` is authoritative when present. Values
+retain their exact native decimal alongside the rounded USD minor-unit amount.
+Attribution models and action-specific windows remain unknown because this
+query does not inventory conversion actions. Missing metrics are unavailable,
+not zero. This is aggregate reporting, not proof of native measurement health.
+
+To see campaign names in the report's JSON, set `"include_campaign_names": true`
+in the report input. This explicitly allows the screened campaign label into
+that command's output, where the chosen agent can see it. The name is attached
+to the exact campaign reference returned in that same report, with its original
+observation time; duplicate names never merge campaigns. Names are not selected
+by default. Retained names can be shown again with
+`adhelm report show <record-digest> --include-campaign-names`. Default report
+views, artifacts and exports pseudonymize the label. Old reports contain no
+name; rerun the read with the option to obtain one.
 
 ## Sources
 

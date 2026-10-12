@@ -13,7 +13,7 @@ from adhelm.errors import AdhelmError
 from adhelm.ledger import Ledger
 from adhelm.privacy import opaque_ref
 
-PROJECTION_VERSION = 2
+PROJECTION_VERSION = 3
 _FORMULA_PREFIXES = ("'", "=", "+", "-", "@", "\t", "\r")
 
 
@@ -186,15 +186,13 @@ def _is_reference_field(field: str) -> bool:
 def _is_customer_supplied_name_field(field: str) -> bool:
     """Customer-supplied advertising names never leave in cleartext.
 
-    A retained campaign join map (`CAMPAIGN_JOIN_MAP_RETAINED`) is the only
-    record in this product that carries an advertising campaign *name*: the
-    customer supplies it so the deterministic join engine can propose an exact
-    name match.  No connector retains that name, so exporting it would put a
-    customer's own text outside the local boundary.  It is pseudonymized with
-    the same keyed reference as a provider identifier, which keeps a name
-    stable across exports without revealing it.
+    Campaign join maps and explicitly requested Google Ads report labels can
+    retain campaign names locally. Both are pseudonymized with the same keyed
+    reference as a provider identifier, keeping a name stable across exports
+    without revealing it. Marketing-text export preferences do not release
+    campaign labels; named report views have their own explicit disclosure.
     """
-    return field == "provider_campaign_name"
+    return field in {"provider_campaign_name", "google_ads_campaign_name"}
 
 
 def _is_reference_classification(value: Any) -> bool:
@@ -423,6 +421,10 @@ def _tables(
                 "conversion_source",
                 "conversion_action_ref",
                 "conversion_count",
+                "conversion_count_decimal",
+                "conversion_kind",
+                "campaign_ref",
+                "date",
                 "conversion_value_minor",
                 "currency",
                 "join_status",
@@ -596,6 +598,10 @@ def _tables(
                         "conversion_source": row.get("conversion_source"),
                         "conversion_action_ref": row.get("conversion_action_ref"),
                         "conversion_count": row.get("conversion_count"),
+                        "conversion_count_decimal": row.get("conversion_count_decimal"),
+                        "conversion_kind": row.get("conversion_kind"),
+                        "campaign_ref": row.get("campaign_ref"),
+                        "date": row.get("provider_extensions", {}).get("google_ads_date"),
                         "conversion_value_minor": _minor_units(row.get("conversion_value")),
                         "currency": _currency(row.get("conversion_value")),
                         "join_status": row.get("join_status"),

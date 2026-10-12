@@ -15,7 +15,7 @@ plan; every input is a record this product already retained.
 
 | Input | Source | What it proves |
 | --- | --- | --- |
-| One normalized report | The retained `PERFORMANCE_OBSERVATION` the caller selected by record digest | Daily campaign- or ad-grain impressions, clicks, the exact provider `cost_micros` string, and the rounded USD minor-unit amount for the declared window |
+| One normalized report | The retained `PERFORMANCE_OBSERVATION` the caller selected by record digest | Daily campaign- or ad-grain impressions, clicks, exact provider cost micros, rounded USD minor units, and separate primary/all-conversion counts and values when present |
 | One inventory read | The `RESOURCE_SNAPSHOT` records named by an `INVENTORY_READ_COMPLETED` marker | Customer, campaign, ad-group, and ad identity, parents, declared status, and the normalized data-quality statuses the Google Ads inventory branch appends |
 | An optional earlier inventory read | The read before it, selected the same way | Out-of-band change between two retained observations |
 | An optional local creative catalog | Outstanding `CREATIVE_DEPLOYMENT` declarations for the same provider account | A **local** claim that a creative version names a Google Ads ad; never a provider-verified association |
@@ -141,7 +141,7 @@ The statuses below are the maximum each dimension can reach.
 | `CREATIVE` | `PARTIAL` | Ad identity, type, and responsive-search component counts; never copy text, pinning, or assets |
 | `DESTINATION_CONFIGURATION` | `PARTIAL` | Only whether an ad declared a final URL; no URL, display path, suffix, or parameter value |
 | `TRACKING` | `NOT_READ` | Conversion actions, Google tag status, tracking templates, and URL parameters are not requested |
-| `NATIVE_CONVERSION` | `NOT_READ` | The fixed report request projects impressions, clicks, and cost micros only |
+| `NATIVE_CONVERSION` | `PARTIAL` when conversion rows are retained, otherwise `NOT_READ` | Separate primary/all-conversion counts and values; no conversion-action definitions or attribution settings |
 | `BROWSER_MEASUREMENT` | `NOT_APPLICABLE` | A local audit executes no browser and loads no page |
 | `POLICY` | `PARTIAL` | The ad policy summary approval and review statuses and the customer test-account flag are read; policy topics, customer status, and the Cloud project access level are not |
 | `DRIFT` | `COVERED` | Only when both retained reads are whole bounded reads for the same account |
@@ -367,8 +367,8 @@ subject is distinct.
 - **The Cloud project access level is unproven.** Test, Explorer, Basic and
   Standard are documented, none is observable through a reviewed read, and no
   project has been exercised against a live customer. Quota behaviour, `RESOURCE_EXHAUSTED`
-  semantics, and manager-route (`login-customer-id`) behaviour are classified
-  from the HTTP status only and remain `UNVERIFIED`.
+  semantics, and manager-route (`login-customer-id`) behaviour remain
+  `UNVERIFIED`; bounded provider diagnostics add evidence without live verification.
 - **GAQL field compatibility is unverified.** The additive campaign settings,
   the `campaign_criterion` ad-schedule read, and the ad policy-summary and
   responsive-search projections are compiled from the published v25 field

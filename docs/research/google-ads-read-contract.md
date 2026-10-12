@@ -1,5 +1,18 @@
 # Google Ads fixed read contract — 2026-09-04
 
+## 0.1.1 maintenance amendment
+
+The [read-pilot corrections](../implementation/read-pilot-fixes.md) supersede
+older field/projection descriptions below: campaign schedules use the v25
+`start_date_time`/`end_date_time` fields in the account timezone. Daily reports
+also request primary and all-conversion counts/values separately, preserving
+exact fractional counts in conversion row v2. Explicit `include_campaign_names`
+reads retain screened campaign labels locally; default views and exports
+pseudonymize them. Native-conversion audit coverage depends on retained rows
+and never proves conversion-action configuration or attribution settings.
+Structured diagnostics preserve screened codes/request IDs, alongside the
+Cloud-project classification, without retaining raw response prose.
+
 ## Evidence status
 
 This repository implements a **fixture-tested only** Google Ads REST read

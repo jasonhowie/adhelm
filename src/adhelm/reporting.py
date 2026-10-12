@@ -14,7 +14,13 @@ from datetime import date, datetime
 from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation, localcontext
 from typing import Final, Literal
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import (
+    Field,
+    SerializerFunctionWrapHandler,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 
 from adhelm.canonical import digest
 from adhelm.models import Currency, Money, Provider, SafeRef, StrictModel
@@ -76,6 +82,28 @@ JoinSource = Literal["DECLARED", "ACCEPTED_HEURISTIC"]
 MetricGrain = Literal["ACCOUNT", "CAMPAIGN", "AD_GROUP", "AD", "RENDITION", "COMPONENT", "UNKNOWN"]
 _MAX_MONEY_MINOR_UNITS = 9_007_199_254_740_991
 _LINKEDIN_DECIMAL = re.compile(r"[0-9]+(?:\.[0-9]+)?")
+
+
+def canonical_metric_decimal(value: object) -> str:
+    """Preserve a bounded nonnegative provider decimal without a binary-float round trip."""
+    if type(value) not in {int, str, Decimal}:
+        raise ValueError("Expected an exact provider decimal")
+    text = str(value)
+    if len(text) > 80 or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?", text):
+        raise ValueError("Invalid provider decimal")
+    try:
+        number = Decimal(text)
+    except InvalidOperation:
+        raise ValueError("Invalid provider decimal") from None
+    if not number.is_finite() or number < 0 or number > _MAX_MONEY_MINOR_UNITS:
+        raise ValueError("Provider decimal exceeds bounds")
+    exponent = number.as_tuple().exponent
+    if not isinstance(exponent, int) or not -18 <= exponent <= 18:
+        raise ValueError("Provider decimal precision exceeds bounds")
+    result = format(number, "f")
+    if "." in result:
+        result = result.rstrip("0").rstrip(".")
+    return result
 
 
 def _aware(value: datetime) -> datetime:
@@ -241,6 +269,7 @@ class PerformanceRow(StrictModel):
             "ga4_restricted_metrics",
             "google_ads_cost_micros",
             "google_ads_rounding",
+            "google_ads_campaign_name",
             "reddit_ads_spend_micros",
             "reddit_ads_rounding",
             "linkedin_ads_cost_in_local_currency",
@@ -248,6 +277,12 @@ class PerformanceRow(StrictModel):
         }
         if any(key not in allowed or not isinstance(item, str) for key, item in value.items()):
             raise ValueError("Unsupported provider reporting extension")
+        name = value.get("google_ads_campaign_name")
+        if name is not None:
+            assert isinstance(name, str)
+            if not 1 <= len(name) <= 255 or not all(character.isprintable() for character in name):
+                raise ValueError("Invalid campaign label")
+            validate_data(name)
         native_keys = {
             "google_ads_cost_micros": "google_ads_rounding",
             "reddit_ads_spend_micros": "reddit_ads_rounding",
@@ -340,7 +375,7 @@ class PerformanceRow(StrictModel):
 
 
 class ConversionBreakdownRow(StrictModel):
-    schema_version: Literal[1] = 1
+    schema_version: Literal[1, 2] = 1
     report_id: SafeRef
     campaign_ref: SafeRef | None = None
     campaign_join_key: SafeRef | None = None
@@ -354,6 +389,7 @@ class ConversionBreakdownRow(StrictModel):
     attribution_model: str = Field(min_length=1, max_length=120)
     attribution_window: str | None = Field(default=None, max_length=120)
     conversion_count: int | None = Field(default=None, ge=0)
+    conversion_count_decimal: str | None = None
     conversion_value: Money | None = None
     join_status: JoinStatus = "UNMAPPED"
     data_quality_statuses: list[QualityStatus] = Field(default_factory=list, max_length=32)
@@ -366,19 +402,69 @@ class ConversionBreakdownRow(StrictModel):
     def reviewed_extensions_only(
         cls, value: dict[str, str | int | bool | None]
     ) -> dict[str, str | int | bool | None]:
-        # Only the GA4 aggregate cell/report provenance is reviewed so far.  A
-        # persisted conversion count of ``null`` must stay distinguishable from
-        # a withheld, restricted, or never-returned measurement.
+        # GA4 cell/report provenance and Google Ads exact aggregate provenance
+        # are closed allowlists. Null remains distinct from a measured zero.
         allowed = {
             "ga4_cell_status_keyEvents",
             "ga4_dimension_statuses",
             "ga4_join_source",
             "ga4_join_map_digest",
             "ga4_completeness",
+            "google_ads_date",
+            "google_ads_conversion_value",
+            "google_ads_rounding",
         }
         if any(key not in allowed or not isinstance(item, str) for key, item in value.items()):
             raise ValueError("Unsupported conversion reporting extension")
         return value
+
+    @model_serializer(mode="wrap")
+    def omit_absent_decimal(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
+        result: dict[str, object] = dict(handler(self))
+        if self.conversion_count_decimal is None:
+            result.pop("conversion_count_decimal", None)
+        return result
+
+    @model_validator(mode="after")
+    def exact_conversion_values(self) -> ConversionBreakdownRow:
+        if self.schema_version == 1 and (
+            self.conversion_count_decimal is not None
+            or any(key.startswith("google_ads_") for key in self.provider_extensions)
+        ):
+            raise ValueError("Exact Google Ads conversion fields require schema version 2")
+        if self.conversion_count_decimal is not None:
+            if (
+                canonical_metric_decimal(self.conversion_count_decimal)
+                != self.conversion_count_decimal
+            ):
+                raise ValueError("Conversion count must be a canonical decimal string")
+            count = Decimal(self.conversion_count_decimal)
+            expected = int(count) if count == count.to_integral_value() else None
+            if self.conversion_count != expected:
+                raise ValueError("Integer conversion count disagrees with exact decimal")
+        native = self.provider_extensions.get("google_ads_conversion_value")
+        if native is not None:
+            if canonical_metric_decimal(native) != native:
+                raise ValueError("Conversion value must be a canonical decimal string")
+            if self.provider_extensions.get("google_ads_rounding") != "HALF_EVEN_TO_MINOR":
+                raise ValueError("Conversion value must disclose rounding")
+            with localcontext() as context:
+                context.prec = 80
+                minor = int((Decimal(native) * 100).quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+            if self.conversion_value is None or self.conversion_value.minor_units != minor:
+                raise ValueError("Conversion value disagrees with exact native value")
+        return self
+
+
+def upcast_conversion_row(row: ConversionBreakdownRow) -> ConversionBreakdownRow:
+    """Produce a v2 view without modifying the original persisted v1 row."""
+    values = row.model_dump(mode="python")
+    if row.schema_version == 1:
+        values["schema_version"] = 2
+        values["conversion_count_decimal"] = (
+            str(row.conversion_count) if row.conversion_count is not None else None
+        )
+    return ConversionBreakdownRow.model_validate(values)
 
 
 class PerformanceObservationPayload(StrictModel):
@@ -434,6 +520,11 @@ class NormalizedReport(StrictModel):
                 if amount is not None and amount.currency != currency:
                     raise ValueError("Money currency disagrees with the report envelope")
         for conversion in self.conversion_rows:
+            if any(
+                allowed_prefix is None or not key.startswith(allowed_prefix)
+                for key in conversion.provider_extensions
+            ):
+                raise ValueError("Conversion extensions must belong to the declared provider")
             if (
                 conversion.conversion_value is not None
                 and conversion.conversion_value.currency != currency

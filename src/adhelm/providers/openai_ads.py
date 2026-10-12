@@ -18,7 +18,7 @@ import httpx
 from pydantic import Field, ValidationError, field_validator, model_validator
 
 from adhelm.canonical import parse_json
-from adhelm.errors import AdhelmError, ExitCode
+from adhelm.errors import AdhelmError, ExitCode, copy_provider_diagnostics
 from adhelm.models import Currency, Money, SafeRef, StrictModel
 from adhelm.privacy import validate_data
 from adhelm.reporting import NormalizedReport, PerformanceRow, QualityStatus, ReportEnvelope
@@ -1083,7 +1083,9 @@ class OpenAIAdsClient:
             # Classify the observed status only. The refusal carries no response
             # body here, so an OpenAI-typed quota or credential diagnostic can
             # never disclose one, and an unclassified status is re-raised as-is.
-            raise classify_openai_ads_transport_error(error) from None
+            raise copy_provider_diagnostics(
+                error, classify_openai_ads_transport_error(error)
+            ) from None
 
     def _identity_matches(self, account_ref: str, identity: OpenAIAdsIdentity) -> None:
         account = _client_id(identity.account_client_ref, "identity account ID")
