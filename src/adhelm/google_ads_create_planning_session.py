@@ -76,8 +76,7 @@ _CAMPAIGN_FIELDS: Final = (
     "campaign.network_settings.target_google_tv_network, "
     "campaign.geo_target_type_setting.positive_geo_target_type, "
     "campaign.geo_target_type_setting.negative_geo_target_type, "
-    "campaign.asset_automation_settings.asset_automation_type, "
-    "campaign.asset_automation_settings.asset_automation_status, "
+    "campaign.asset_automation_settings, "
     "campaign_budget.explicitly_shared, campaign_budget.period, "
     "campaign_budget.delivery_method, campaign_budget.total_amount_micros"
 )

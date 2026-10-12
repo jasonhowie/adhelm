@@ -112,7 +112,7 @@ PROVIDER: Final[Provider] = "google_ads"
 # Bump this when a rule's semantics change.  It is part of every finding's
 # content identity, so an audit produced by a different rule table can never be
 # mistaken for one produced by this table.
-RULE_TABLE_VERSION: Final = "google_ads.rules.2026-09-09.1"
+RULE_TABLE_VERSION: Final = "google_ads.rules.2026-10-12.1"
 _BOUNDED: Final[AnalyticsCompleteness] = "BOUNDED_NON_EXHAUSTIVE"
 _NOT_ANALYTICS: Final[AnalyticsCompleteness] = "NOT_APPLICABLE"
 # The one route this build can compile for an existing Google Ads campaign.
@@ -711,8 +711,8 @@ RULES: Final[dict[str, _Rule]] = dict(
                 confidence="HIGH",
                 risk="LOW",
                 analytics_completeness=_NOT_ANALYTICS,
-                observation="The fixed Google Ads delivery request projects date, identifiers, impressions, clicks, and cost micros only, so no native conversion count, conversion action, or attribution context is available for this account.",
-                suggested_action="Do not infer a conversion count from clicks; a native conversion report read is required and is not implemented here.",
+                observation="This retained Google Ads report contains no native conversion metrics. Older reports did not request them; absent metrics never establish zero conversions.",
+                suggested_action="Run a fresh Google Ads report; keep conversion-action definitions and attribution context separate from aggregate counts.",
             )
         ),
         _rule(
@@ -1504,7 +1504,7 @@ def _account_scoped_findings(
         ("GA_DESTINATION_VALUES_NOT_READ", True),
         ("GA_TRACKING_CONVERSION_ACTION_NOT_READ", True),
         ("GA_TRACKING_TEMPLATE_AND_PARAMETERS_NOT_READ", True),
-        ("GA_NATIVE_CONVERSION_NOT_READ", True),
+        ("GA_NATIVE_CONVERSION_NOT_READ", not context.report.conversion_rows),
         ("GA_BROWSER_NOT_APPLICABLE", True),
         ("GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE", True),
         ("GA_POLICY_TEST_ACCOUNT_DECLARED", GOOGLE_ADS_TEST_ACCOUNT_DECLARED in quality),
@@ -1819,7 +1819,7 @@ def _coverage_map(
         "CREATIVE": "PARTIAL" if has_ads or _local_bindings(context) else "NOT_READ",
         "DESTINATION_CONFIGURATION": "PARTIAL" if has_ads else "NOT_READ",
         "TRACKING": "PARTIAL" if has_campaigns else "NOT_READ",
-        "NATIVE_CONVERSION": "PARTIAL" if has_report_rows else "NOT_READ",
+        "NATIVE_CONVERSION": "PARTIAL" if context.report.conversion_rows else "NOT_READ",
         "BROWSER_MEASUREMENT": "NOT_APPLICABLE",
         "POLICY": "PARTIAL" if has_ads or bool(grouped["ACCOUNT"]) else "NOT_READ",
         "DRIFT": (
@@ -1845,7 +1845,7 @@ _RATIONALE: Final[dict[AuditDimension, str]] = {
     "CREATIVE": "Ad identity, type, declared status, and responsive-search component counts are read; headline and description text, pinning, and assets are not.",
     "DESTINATION_CONFIGURATION": "Only whether an ad declared a final URL is read; no URL, display path, suffix, or parameter value is retained.",
     "TRACKING": "Conversion actions, Google tag status, tracking templates, and URL parameters are not requested by this build's fixed read.",
-    "NATIVE_CONVERSION": "The fixed report request projects impressions, clicks, and cost micros only; no conversion field is requested.",
+    "NATIVE_CONVERSION": "New reports request conversions and all-conversions counts and values separately. Retained rows determine coverage; conversion-action definitions and attribution settings are not read.",
     "BROWSER_MEASUREMENT": "A local audit executes no browser and loads no page.",
     "POLICY": "The ad policy summary approval and review statuses and the customer test-account flag are read; policy topics, customer status, and the Cloud project's API access level are not.",
     "DRIFT": "Drift compares two retained snapshot sets for one account; it needs both to be supplied.",
@@ -1903,7 +1903,9 @@ def _coverage(
         count = 0
         rationale = _RATIONALE[dimension]
         if status in {"COVERED", "PARTIAL"}:
-            if dimension in {"DELIVERY", "SPEND"} and context.report.performance_rows:
+            if (dimension in {"DELIVERY", "SPEND"} and context.report.performance_rows) or (
+                dimension == "NATIVE_CONVERSION" and context.report.conversion_rows
+            ):
                 sources.append("PERFORMANCE_OBSERVATION")
                 refs = (context.source_record_digest,)
                 count += 1

@@ -307,6 +307,14 @@ The first command removes the app secret, the refresh token and AdHelm's lifecyc
 record, the second the access token. Removal leaves your local history, inventory
 snapshots and reports in place.
 
+## Browser handoff (0.1.1)
+
+Interactive enrollment prints the validated authorization URL and the bounded
+local callback wait to stderr. If no tab opens, open that URL in a browser on
+the same machine, or rerun with `--no-browser` to skip automatic launch. Ctrl-C
+cancels. Stdout remains JSON-only. Keep the URL in the local terminal and never
+paste it, an authorization code, or a credential into chat.
+
 ## Sources
 
 Fetched from Reddit's own Ads API documentation. Where Reddit's text and AdHelm's

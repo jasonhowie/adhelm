@@ -14,7 +14,7 @@ import httpx
 from pydantic import Field, model_validator
 
 from adhelm.canonical import parse_json
-from adhelm.errors import AdhelmError
+from adhelm.errors import AdhelmError, copy_provider_diagnostics
 from adhelm.models import Currency, Money, SafeRef, StrictModel
 from adhelm.privacy import validate_data
 from adhelm.reporting import NormalizedReport, PerformanceRow, ReportEnvelope
@@ -691,7 +691,7 @@ class RedditAdsClient:
                 **options,
             )
         except AdhelmError as error:
-            explained = _explain_denial(error)
+            explained = copy_provider_diagnostics(error, _explain_denial(error))
             if explained is error:
                 # Not a denial this adapter explains: re-raise untouched so the
                 # original exception chain (for example a transport failure's

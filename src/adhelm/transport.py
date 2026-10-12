@@ -11,6 +11,7 @@ import httpx
 
 from adhelm.errors import AdhelmError
 from adhelm.privacy import validate_data
+from adhelm.provider_diagnostics import provider_error_details
 
 _MAXIMUM_DISCLOSED_RETRY_AFTER_SECONDS = 3_600
 
@@ -104,6 +105,40 @@ def _allowlisted_error_code(response: httpx.Response, allowed: frozenset[str]) -
 
     walk(decoded, 0)
     return next(iter(found)) if len(found) == 1 else None
+
+
+def _refusal_details(
+    response: httpx.Response, allowed: frozenset[str], maximum_bytes: int
+) -> dict[str, Any]:
+    """Read the stream once for project classification and screened diagnostics."""
+    if not allowed:
+        return provider_error_details(response, maximum_bytes=maximum_bytes)
+    raw = bytearray()
+    try:
+        for chunk in response.iter_bytes():
+            if len(raw) + len(chunk) > min(maximum_bytes, _ERROR_BODY_LIMIT):
+                return {}
+            raw.extend(chunk)
+    except (httpx.HTTPError, ValueError, RuntimeError):
+        return {}
+    # iter_bytes already decoded content. Copy only diagnostic headers, never
+    # content-encoding, so neither parser decodes the cached bytes a second time.
+    cached = httpx.Response(
+        response.status_code,
+        content=bytes(raw),
+        request=response.request,
+        headers={
+            name: response.headers[name]
+            for name in ("request-id", "x-request-id", "x-li-uuid")
+            if name in response.headers
+        },
+    )
+    details = provider_error_details(cached, maximum_bytes=maximum_bytes)
+    code = _allowlisted_error_code(cached, allowed)
+    if code is not None:
+        details["provider_error_code"] = code
+        details.setdefault("provider_code", code)
+    return details
 
 
 class SafeHttpClient:
@@ -206,6 +241,9 @@ class SafeHttpClient:
                         next_action="Reauthorize locally with the required scope.",
                         status_code=status,
                         retry_after_seconds=disclosed,
+                        **provider_error_details(
+                            response, maximum_bytes=self.maximum_response_bytes
+                        ),
                     )
                 if status >= 500:
                     raise AdhelmError(
@@ -214,6 +252,9 @@ class SafeHttpClient:
                         exit_code=6,
                         status_code=status,
                         retry_after_seconds=disclosed,
+                        **provider_error_details(
+                            response, maximum_bytes=self.maximum_response_bytes
+                        ),
                     )
                 if status >= 400:
                     raise AdhelmError(
@@ -221,6 +262,9 @@ class SafeHttpClient:
                         "Provider rejected the fixed operation.",
                         status_code=status,
                         retry_after_seconds=disclosed,
+                        **provider_error_details(
+                            response, maximum_bytes=self.maximum_response_bytes
+                        ),
                     )
                 data = bytearray()
                 for chunk in response.iter_bytes():
@@ -357,8 +401,8 @@ class SafeHttpClient:
                             next_action="Reauthorize locally with the required scope.",
                             status_code=status,
                             retry_after_seconds=disclosed,
-                            provider_error_code=_allowlisted_error_code(
-                                response, classifiable_error_codes
+                            **_refusal_details(
+                                response, classifiable_error_codes, self.maximum_response_bytes
                             ),
                         )
                     if status in {429, 502, 503, 504} and not mutation and attempt < attempts - 1:
@@ -378,12 +422,18 @@ class SafeHttpClient:
                                 exit_code=6,
                                 status_code=status,
                                 retry_after_seconds=disclosed,
+                                **provider_error_details(
+                                    response, maximum_bytes=self.maximum_response_bytes
+                                ),
                             )
                         raise AdhelmError(
                             "PROVIDER_REQUEST_FAILED",
                             "Provider rejected the fixed operation.",
                             status_code=status,
                             retry_after_seconds=disclosed,
+                            **provider_error_details(
+                                response, maximum_bytes=self.maximum_response_bytes
+                            ),
                         )
                     data = bytearray()
                     for chunk in response.iter_bytes():

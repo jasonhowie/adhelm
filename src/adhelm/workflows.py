@@ -384,6 +384,12 @@ def run_report(
     report = _report_provenance(report, query, checkpoint)
     stored = persist_report(ledger, report) if not ephemeral else None
     shared = _share_report(root, ledger, report, stored, key, artifact_preflight)
+    if isinstance(query, GoogleAdsReportQuery) and query.include_campaign_names:
+        from adhelm.report_sharing import report_for_output
+
+        shared["performance_rows"] = report_for_output(report, key, include_campaign_names=True)[
+            "performance_rows"
+        ]
     if ga4_aggregate is not None:
         # Report-level GA4 completeness and quality facts that the normalized
         # rows cannot carry.  Rows are deliberately not repeated here.

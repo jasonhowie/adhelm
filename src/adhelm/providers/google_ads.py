@@ -13,7 +13,7 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
-from decimal import ROUND_HALF_EVEN, Decimal
+from decimal import ROUND_HALF_EVEN, Decimal, localcontext
 from typing import Any, Final, Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -21,10 +21,17 @@ import httpx
 from pydantic import Field, model_validator
 
 from adhelm.canonical import parse_json
-from adhelm.errors import AdhelmError, ExitCode
+from adhelm.errors import AdhelmError, ExitCode, copy_provider_diagnostics
 from adhelm.models import Currency, Money, SafeRef, StrictModel
 from adhelm.privacy import validate_data
-from adhelm.reporting import NormalizedReport, PerformanceRow, QualityStatus, ReportEnvelope
+from adhelm.reporting import (
+    ConversionBreakdownRow,
+    NormalizedReport,
+    PerformanceRow,
+    QualityStatus,
+    ReportEnvelope,
+    canonical_metric_decimal,
+)
 from adhelm.transport import SafeHttpClient
 
 _HOST = "googleads.googleapis.com"
@@ -59,7 +66,7 @@ _IDENTITY_QUERY = (
 )
 _CAMPAIGN_QUERY = (
     "SELECT campaign.id, campaign.status, campaign.advertising_channel_type, "
-    "campaign.start_date, campaign.end_date, campaign.bidding_strategy_type, "
+    "campaign.start_date_time, campaign.end_date_time, campaign.bidding_strategy_type, "
     "campaign.network_settings.target_google_search, "
     "campaign.network_settings.target_search_network, "
     "campaign.network_settings.target_content_network, "
@@ -144,7 +151,7 @@ GOOGLE_ADS_READ_SURFACES: Final[dict[str, GoogleAdsReadSurfaceStatus]] = {
     "PLACEMENT": "NOT_IN_REVIEWED_FIXED_READ",
     "CONVERSION_ACTION_INVENTORY": "NOT_IN_REVIEWED_FIXED_READ",
     "CAMPAIGN_CONVERSION_GOAL": "NOT_IN_REVIEWED_FIXED_READ",
-    "NATIVE_CONVERSION_METRICS": "NOT_IN_REVIEWED_FIXED_READ",
+    "NATIVE_CONVERSION_METRICS": "IMPLEMENTED_FIXED_READ",
     "REPORT_FRESHNESS": "NOT_IN_REVIEWED_FIXED_READ",
     "REPORT_ATTRIBUTION_WINDOW": "NOT_IN_REVIEWED_FIXED_READ",
 }
@@ -264,7 +271,7 @@ GOOGLE_ADS_BUDGET_DELIVERY_METHOD_NOT_RETURNED: Final = (
 # same commit as any change to what `_google_snapshots` puts in
 # `normalized_state`; the retained value never enters `normalized_state`
 # itself, so recording it creates no drift of its own.
-GOOGLE_ADS_STATE_SHAPE_VERSION: Final = "2026-09-09.1"
+GOOGLE_ADS_STATE_SHAPE_VERSION: Final = "2026-10-12.1"
 GOOGLE_ADS_STATE_SHAPE_PREFIX: Final = "GOOGLE_ADS_STATE_SHAPE_"
 GOOGLE_ADS_STATE_SHAPE_STATUS: Final = (
     GOOGLE_ADS_STATE_SHAPE_PREFIX + GOOGLE_ADS_STATE_SHAPE_VERSION
@@ -419,7 +426,7 @@ def _json(
     redact: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     try:
-        payload = parse_json(response.content, maximum_bytes=8_388_608)
+        payload = parse_json(response.content, maximum_bytes=8_388_608, decimal_numbers=True)
     except (ValueError, UnicodeDecodeError, AdhelmError) as exc:
         raise AdhelmError(
             "PROVIDER_RESPONSE_INVALID", f"Google Ads {context} response is not JSON."
@@ -545,6 +552,30 @@ def _date(value: Any, context: str) -> date | None:
         raise AdhelmError("PROVIDER_RESPONSE_INVALID", f"Google Ads {context} is invalid.") from exc
 
 
+def _campaign_datetime(value: Any, timezone: str) -> datetime | None:
+    if value is None or value == "":
+        return None
+    try:
+        if type(value) is not str or not re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", value
+        ):
+            raise ValueError("Invalid date-time spelling")
+        wall = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        zone = ZoneInfo(timezone)
+        first = wall.replace(tzinfo=zone, fold=0)
+        second = wall.replace(tzinfo=zone, fold=1)
+        if (
+            first.utcoffset() != second.utcoffset()
+            or first.astimezone(UTC).astimezone(zone).replace(tzinfo=None) != wall
+        ):
+            raise ValueError("Ambiguous or nonexistent local time")
+        return first
+    except (ValueError, OverflowError, ZoneInfoNotFoundError):
+        raise AdhelmError(
+            "PROVIDER_RESPONSE_INVALID", "Google Ads campaign date-time is invalid or ambiguous."
+        ) from None
+
+
 def _micros_source(value: Any, context: str) -> tuple[int, str]:
     """Validate the protobuf JSON decimal representation without losing it."""
     parsed = _string(value, context, maximum=19)
@@ -644,6 +675,8 @@ class GoogleAdsCampaign(StrictModel):
     budget_explicitly_shared: bool | None = None
     start_date: date | None = None
     end_date: date | None = None
+    start_date_time: datetime | None = None
+    end_date_time: datetime | None = None
     # Presence and enum facts only.  `None` means the fixed read did not return
     # the setting; it never means the setting is off.
     target_google_search: bool | None = None
@@ -727,6 +760,7 @@ class GoogleAdsReportQuery(StrictModel):
     level: Literal["CAMPAIGN", "AD"] = "CAMPAIGN"
     currency: Currency | None = None
     maximum_rows: int = Field(default=10_000, ge=1, le=_MAX_PAGES * _MAX_PAGE_ROWS)
+    include_campaign_names: bool = False
 
     @model_validator(mode="after")
     def valid_window(self) -> GoogleAdsReportQuery:
@@ -850,7 +884,8 @@ class GoogleAdsClient:
         # malformed campaign still fails on the campaign read rather than
         # after a later one.
         campaign_fields = [
-            self._campaign_fields(row, identity.currency) for row in campaign_search.rows
+            self._campaign_fields(row, identity.currency, identity.timezone)
+            for row in campaign_search.rows
         ]
         # The ad-schedule criterion read follows immediately, so a campaign's
         # schedule presence is decided inside the same bounded pass.  A campaign
@@ -961,6 +996,11 @@ class GoogleAdsClient:
                 connector_version=self._connector_version,
             ),
             performance_rows=rows,
+            conversion_rows=[
+                conversion
+                for raw, performance in zip(search.rows, rows, strict=True)
+                for conversion in self._conversion_rows(raw, performance, query, identity.currency)
+            ],
         )
 
     def _search(
@@ -1081,9 +1121,13 @@ class GoogleAdsClient:
             # Classification reads the observed HTTP status and the bounded
             # `Retry-After` the shared transport attached, never a response
             # body.  An unclassified refusal is re-raised unchanged.
-            raise classify_google_ads_transport_error(error) from None
+            raise copy_provider_diagnostics(
+                error, classify_google_ads_transport_error(error)
+            ) from None
 
-    def _campaign_fields(self, row: dict[str, Any], currency: Currency) -> dict[str, Any]:
+    def _campaign_fields(
+        self, row: dict[str, Any], currency: Currency, timezone: str
+    ) -> dict[str, Any]:
         """Validate one campaign row into constructor arguments.
 
         Ad-schedule presence comes from a second bounded read, so the campaign
@@ -1097,8 +1141,8 @@ class GoogleAdsClient:
                 "id",
                 "status",
                 "advertisingChannelType",
-                "startDate",
-                "endDate",
+                "startDateTime",
+                "endDateTime",
                 "biddingStrategyType",
                 "networkSettings",
                 "geoTargetTypeSetting",
@@ -1147,9 +1191,9 @@ class GoogleAdsClient:
         client_ref = _id(campaign.get("id"), "campaign ID")
         # Validate the dates here so a malformed pair fails on this row rather
         # than after the following request.
-        start_date = _date(campaign.get("startDate"), "campaign start date")
-        end_date = _date(campaign.get("endDate"), "campaign end date")
-        if start_date is not None and end_date is not None and end_date < start_date:
+        start = _campaign_datetime(campaign.get("startDateTime"), timezone)
+        end = _campaign_datetime(campaign.get("endDateTime"), timezone)
+        if start is not None and end is not None and end < start:
             raise AdhelmError(
                 "PROVIDER_RESPONSE_INVALID", "Google Ads campaign schedule is invalid."
             )
@@ -1163,8 +1207,10 @@ class GoogleAdsClient:
             "budget_period": budget_period,
             "budget_delivery_method": budget_delivery,
             "budget_explicitly_shared": budget_shared,
-            "start_date": start_date,
-            "end_date": end_date,
+            "start_date": start.date() if start else None,
+            "end_date": end.date() if end else None,
+            "start_date_time": start,
+            "end_date_time": end,
             "target_google_search": _network_flag(network, "targetGoogleSearch"),
             "target_search_network": _network_flag(network, "targetSearchNetwork"),
             "target_content_network": _network_flag(network, "targetContentNetwork"),
@@ -1279,6 +1325,9 @@ class GoogleAdsClient:
             )
             source = "ad_group_ad"
             order = "segments.date, campaign.id, ad_group.id, ad_group_ad.ad.id"
+        fields += ", metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value"
+        if query.include_campaign_names:
+            fields += ", campaign.name"
         return (
             f"SELECT {fields} FROM {source} WHERE segments.date BETWEEN "
             f"'{query.window_start.isoformat()}' AND '{query.window_end.isoformat()}' ORDER BY {order}"
@@ -1310,9 +1359,23 @@ class GoogleAdsClient:
         campaign = _object(row.get("campaign"), "report campaign")
         segments = _object(row.get("segments"), "report segments")
         metrics = _object(row.get("metrics"), "report metrics")
-        _keys(campaign, {"id"}, "report campaign")
+        _keys(
+            campaign, {"id", "name"} if query.include_campaign_names else {"id"}, "report campaign"
+        )
         _keys(segments, {"date"}, "report segments")
-        _keys(metrics, {"impressions", "clicks", "costMicros"}, "report metrics")
+        _keys(
+            metrics,
+            {
+                "impressions",
+                "clicks",
+                "costMicros",
+                "conversions",
+                "conversionsValue",
+                "allConversions",
+                "allConversionsValue",
+            },
+            "report metrics",
+        )
         report_date = _date(segments.get("date"), "report date")
         if report_date is None or not query.window_start <= report_date <= query.window_end:
             raise AdhelmError(
@@ -1363,8 +1426,90 @@ class GoogleAdsClient:
             provider_extensions={
                 "google_ads_cost_micros": cost_micros,
                 "google_ads_rounding": "HALF_EVEN_TO_MINOR",
+                **(
+                    {
+                        "google_ads_campaign_name": _string(
+                            campaign.get("name"), "campaign name", maximum=255
+                        )
+                    }
+                    if query.include_campaign_names
+                    else {}
+                ),
             },
         )
+
+    @staticmethod
+    def _conversion_rows(
+        raw: dict[str, Any],
+        performance: PerformanceRow,
+        query: GoogleAdsReportQuery,
+        currency: Currency,
+    ) -> list[ConversionBreakdownRow]:
+        metrics = raw["metrics"]
+        result: list[ConversionBreakdownRow] = []
+        for count_key, value_key, kind in (
+            ("conversions", "conversionsValue", "GOOGLE_ADS_CONVERSIONS"),
+            ("allConversions", "allConversionsValue", "GOOGLE_ADS_ALL_CONVERSIONS"),
+        ):
+            if count_key not in metrics and value_key not in metrics:
+                continue  # Missing is unavailable, never an invented zero.
+            extensions: dict[str, str | int | bool | None] = {
+                "google_ads_date": str(performance.dimension_value)
+            }
+            count = None
+            exact_count = None
+            amount = None
+            for key in (count_key, value_key):
+                if key not in metrics:
+                    continue
+                try:
+                    native = canonical_metric_decimal(metrics[key])
+                except ValueError:
+                    raise AdhelmError(
+                        "PROVIDER_RESPONSE_INVALID", "Google Ads conversion metric is invalid."
+                    ) from None
+                if key == count_key:
+                    exact_count = native
+                    number = Decimal(native)
+                    count = int(number) if number == number.to_integral_value() else None
+                else:
+                    extensions["google_ads_conversion_value"] = native
+                    extensions["google_ads_rounding"] = "HALF_EVEN_TO_MINOR"
+                    with localcontext() as context:
+                        context.prec = 80
+                        minor = int(
+                            (Decimal(native) * 100).quantize(Decimal(1), rounding=ROUND_HALF_EVEN)
+                        )
+                    if minor > 9_007_199_254_740_991:
+                        raise AdhelmError(
+                            "PROVIDER_RESPONSE_INVALID",
+                            "Google Ads conversion value exceeds the supported money bound.",
+                        )
+                    amount = Money(currency=currency, minor_units=minor)
+            result.append(
+                ConversionBreakdownRow(
+                    schema_version=2,
+                    report_id=query.report_id,
+                    campaign_ref=performance.campaign_ref,
+                    resource_ref=performance.resource_ref,
+                    conversion_source="PROVIDER",
+                    conversion_kind=kind,
+                    attribution_model="NOT_AVAILABLE_FROM_PROVIDER",
+                    conversion_count=count,
+                    conversion_count_decimal=exact_count,
+                    conversion_value=amount,
+                    provider_extensions=extensions,
+                    data_quality_statuses=list(
+                        dict.fromkeys(
+                            [
+                                *performance.data_quality_statuses,
+                                "NOT_AVAILABLE_FROM_PROVIDER",
+                            ]
+                        )
+                    ),
+                )
+            )
+        return result
 
     def _matches(
         self, config: GoogleAdsReadConfig, account_ref: str, identity: GoogleAdsIdentity

@@ -417,6 +417,19 @@ class Diagnostic(StrictModel):
     message: str
     next_action: str
     capability: str | None = None
+    http_status: int | None = Field(default=None, ge=100, le=599)
+    provider_code: str | None = Field(default=None, max_length=160)
+    provider_request_id: str | None = Field(default=None, max_length=128)
+
+    @model_serializer(mode="wrap")
+    def omit_absent_provider_details(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, Any]:
+        result: dict[str, Any] = dict(handler(self))
+        for key in ("http_status", "provider_code", "provider_request_id"):
+            if result.get(key) is None:
+                result.pop(key, None)
+        return result
 
 
 class ProviderReleaseLabel(StrictModel):

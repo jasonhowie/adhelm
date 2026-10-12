@@ -1,7 +1,8 @@
 """Explicit system-browser handoff and a bounded loopback-only OAuth callback.
 
 No listener, process, or browser is created by import. Callback bytes and the
-authorization URL are never logged, reflected, or returned as CLI output.
+authorization URL never enter logs or structured CLI output. The validated
+URL is deliberately displayed only during a local interactive terminal handoff.
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ from adhelm.google_oauth_protocol import (
     GoogleOAuthAuthorizationAttempt,
     google_oauth_authorization_url,
 )
+from adhelm.oauth_handoff import show_authorization_handoff
 
 _MAX_HEADERS = 16_384
 _MAX_REQUESTS = 16
@@ -30,7 +32,9 @@ _TOTAL_SECONDS = 300
 _RESPONSE_BODY = b"Return to the local CLI to check the authorization result."
 
 
-def open_system_browser(attempt: GoogleOAuthAuthorizationAttempt) -> None:
+def open_system_browser(
+    attempt: GoogleOAuthAuthorizationAttempt, *, no_browser: bool = False
+) -> None:
     """Open only a revalidated private authorization attempt using an OS launcher."""
     authorization_url = google_oauth_authorization_url(attempt)
     try:
@@ -50,6 +54,9 @@ def open_system_browser(attempt: GoogleOAuthAuthorizationAttempt) -> None:
         or any(ord(character) < 33 or ord(character) > 126 for character in authorization_url)
     ):
         raise AdhelmError("GOOGLE_OAUTH_BROWSER_URL_INVALID", "Invalid authorization handoff.")
+    show_authorization_handoff(authorization_url, provider="Google")
+    if no_browser:
+        return
     try:
         if sys.platform == "win32":
             os.startfile(authorization_url)

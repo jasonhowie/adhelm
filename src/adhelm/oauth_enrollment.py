@@ -664,7 +664,7 @@ def prompt_hidden_secret(
     return value
 
 
-def open_system_browser(attempt: OAuthAuthorizationAttempt) -> None:
+def open_system_browser(attempt: OAuthAuthorizationAttempt, *, no_browser: bool = False) -> None:
     """Open only a revalidated private authorization attempt using an OS launcher."""
     url = authorization_url(attempt)
     expected_host = attempt.target.contract.authorization_host
@@ -681,6 +681,11 @@ def open_system_browser(attempt: OAuthAuthorizationAttempt) -> None:
         or any(ord(character) < 33 or ord(character) > 126 for character in url)
     ):
         raise AdhelmError("OAUTH_BROWSER_URL_INVALID", "Invalid authorization handoff.")
+    from adhelm.oauth_handoff import show_authorization_handoff
+
+    show_authorization_handoff(url, provider=expected_host)
+    if no_browser:
+        return
     try:
         if sys.platform == "win32":
             os.startfile(url)  # type: ignore[attr-defined,unused-ignore]

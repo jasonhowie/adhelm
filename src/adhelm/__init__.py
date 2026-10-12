@@ -2,7 +2,7 @@
 
 from typing import Final
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 #: The gate state this build reports in `adhelm version`, `discover` and `doctor` and in
 #: `scripts/check_repository.py`. The states are defined in the "Gate states" table of

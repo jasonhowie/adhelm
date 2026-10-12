@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adhelm"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local, read-only CLI for AI agents to audit and report on your ad and analytics accounts"
 dynamic = ["readme"]
 requires-python = ">=3.12"
@@ -60,7 +60,7 @@ path = "README.md"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
 pattern = '\]\((?!https?://|#|mailto:)(?:\./)?([^)\s]+)\)'
-replacement = '](https://github.com/jasonhowie/adhelm/blob/v0.1.0/\1)'
+replacement = '](https://github.com/jasonhowie/adhelm/blob/v0.1.1/\1)'
 
 # The build backend and its dependencies are pinned exactly for `uv build`, so a third party
 # rebuilding a release tag installs the same tooling the release run did. The ranges in

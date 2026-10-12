@@ -262,8 +262,8 @@ def _campaign_inventory_row(
         "id": campaign_id,
         "status": "ENABLED",
         "advertisingChannelType": "SEARCH",
-        "startDate": "2026-01-01",
-        "endDate": "",
+        "startDateTime": "2026-01-01 00:00:00",
+        "endDateTime": "",
         "biddingStrategyType": "MANUAL_CPC",
     }
     fields.update(campaign)
@@ -541,10 +541,10 @@ def test_a_row_with_no_date_is_refused_rather_than_placed_in_the_window() -> Non
 @pytest.mark.parametrize(
     "dates",
     [
-        {"startDate": "20260101"},
-        {"startDate": "2026-W01-1"},
-        {"endDate": "２０２６-０１-０１"},
-        {"startDate": "2026-03-01", "endDate": "2026-02-01"},
+        {"startDateTime": "20260101"},
+        {"startDateTime": "2026-W01-1"},
+        {"endDateTime": "２０２６-０１-０１ 23:59:59"},
+        {"startDateTime": "2026-03-01 00:00:00", "endDateTime": "2026-02-01 23:59:59"},
     ],
 )
 def test_campaign_schedule_dates_follow_the_same_spelling_and_order_rules(

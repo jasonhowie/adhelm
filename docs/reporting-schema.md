@@ -196,6 +196,33 @@ Rules:
 - Provider extensions are namespaced, typed, allowlisted, and schema-versioned.
   Unknown response fields fail validation before display or persistence.
 
+## Read-only 0.1.1 additions
+
+Google Ads reports add two distinct aggregate conversion kinds:
+`GOOGLE_ADS_CONVERSIONS` and `GOOGLE_ADS_ALL_CONVERSIONS`. These are overlapping
+alternatives, never additive partitions. Conversion row schema version 2 adds the nullable
+`conversion_count_decimal` field carries a canonical nonnegative decimal string
+(up to 18 decimal places). Integer-compatible counts retain `conversion_count`;
+fractional counts leave that legacy integer field null. An absent decimal field
+is omitted when serializing legacy records, preserving their original shape.
+The Google parser reads JSON decimals directly, without a binary-float round trip.
+Both v1 and v2 rows remain readable; an explicit upcaster can produce a v2 view
+without changing the original record. AdHelm 0.1.0 cannot read v2 rows: upgrade
+the reader or use the deterministic CSV projection when sharing with that build.
+
+The closed conversion extensions are `google_ads_date`,
+`google_ads_conversion_value`, and `google_ads_rounding`. Native decimal values
+remain exact, with `HALF_EVEN_TO_MINOR` disclosed for the money projection.
+Action references, counting methods, and attribution settings are not invented
+for these campaign/ad aggregates. Missing metrics stay unavailable, including
+when the provider omits every conversion field. Old JSONL is never rewritten.
+
+A Google Ads query may explicitly request `include_campaign_names`. The screened
+`google_ads_campaign_name` extension is then displayed for that read. A later
+`report show` needs `--include-campaign-names` to display it again. Default
+exports and artifacts pseudonymize this field even when other marketing text
+is included. The name is a label on the provider ID, never a join key.
+
 ## Join contract
 
 Preferred joins, in order:

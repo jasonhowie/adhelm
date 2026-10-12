@@ -457,7 +457,14 @@ def fail(command: str, error: AdhelmError) -> None:
         command=command,
         outcome="FAILED_CLOSED",
         diagnostics=[
-            Diagnostic(code=error.code, message=error.message, next_action=error.next_action)
+            Diagnostic(
+                code=error.code,
+                message=error.message,
+                next_action=error.next_action,
+                http_status=error.status_code,
+                provider_code=error.provider_code,
+                provider_request_id=error.provider_request_id,
+            )
         ],
     )
     typer.echo(canonical_bytes(envelope).decode())
@@ -1069,9 +1076,11 @@ def _report(
             ephemeral=ephemeral,
             ci_enabled=ci,
         )
-        rows = report["performance_rows"]
-        total = len(rows)
-        report["performance_rows"] = rows[:selected_limit]
+        counts = {key: len(report[key]) for key in ("performance_rows", "conversion_rows")}
+        total = max(counts.values())
+        for key in counts:
+            report[key] = report[key][:selected_limit]
+        report["row_counts"] = counts
         report["observation_persisted"] = not ephemeral
         if total > selected_limit:
             report["remaining_rows"] = total - selected_limit
@@ -1275,19 +1284,25 @@ def report_catalog_command(
 
 @reports_app.command("show")
 def report_show_command(
-    ctx: typer.Context, record_digest: str, cursor: int = 0, limit: int | None = None
+    ctx: typer.Context,
+    record_digest: str,
+    cursor: int = 0,
+    limit: int | None = None,
+    include_campaign_names: bool = False,
 ) -> None:
     """Read a specific retained report revision through the redacted sharing boundary."""
 
     def work() -> None:
         from adhelm.credentials import export_key
         from adhelm.ledger import Ledger
-        from adhelm.projections import _redact_payload
+        from adhelm.report_sharing import report_for_output
         from adhelm.saved_reports import load_report
 
         selected_limit, maximum_bytes = _page_preferences(ctx, cursor, limit)
         report, provenance = load_report(Ledger(root(ctx)), record_digest)
-        data = _redact_payload(report.model_dump(mode="json"), export_key(), False)
+        data = report_for_output(
+            report, export_key(), include_campaign_names=include_campaign_names
+        )
         count = max(len(data["performance_rows"]), len(data["conversion_rows"]))
         totals = {key: len(data[key]) for key in ("performance_rows", "conversion_rows")}
         for key in totals:

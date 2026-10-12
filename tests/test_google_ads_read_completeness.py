@@ -82,8 +82,8 @@ def _campaign_row(*, budget: bool = True) -> dict[str, object]:
             "id": "11",
             "status": "ENABLED",
             "advertisingChannelType": "SEARCH",
-            "startDate": "2026-01-01",
-            "endDate": "",
+            "startDateTime": "2026-01-01 00:00:00",
+            "endDateTime": "",
             "biddingStrategyType": "MANUAL_CPC",
             "networkSettings": {
                 "targetGoogleSearch": True,

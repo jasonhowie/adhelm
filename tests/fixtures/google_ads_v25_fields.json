@@ -1,0 +1,612 @@
+{
+  "api_version": "v25",
+  "fields": {
+    "ad_group.cpc_bid_micros": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group.id": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group.name": {
+      "category": "ATTRIBUTE",
+      "data_type": "STRING",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "ad_group.status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ENABLEDPAUSEDREMOVEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group.type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              DISPLAY_STANDARDHOTEL_ADSPROMOTED_HOTEL_ADSSEARCH_DYNAMIC_ADSSEARCH_STANDARDSHOPPING_COMPARISON_LISTING_ADSSHOPPING_PRODUCT_ADSSHOPPING_SMART_ADSSMART_CAMPAIGN_ADSTRAVEL_ADSUNKNOWNUNSPECIFIEDVIDEO_BUMPERVIDEO_EFFICIENT_REACHVIDEO_NON_SKIPPABLE_IN_STREAMVIDEO_RESPONSIVEVIDEO_TRUE_VIEW_IN_DISPLAYVIDEO_TRUE_VIEW_IN_STREAMYOUTUBE_AUDIO",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_ad.ad.final_urls": {
+      "category": "ATTRIBUTE",
+      "data_type": "STRING",
+      "filterable": "True",
+      "repeated": "True",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "ad_group_ad.ad.id": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_ad.ad.responsive_search_ad.descriptions": {
+      "category": "ATTRIBUTE",
+      "data_type": "MESSAGE",
+      "filterable": "False",
+      "repeated": "True",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "ad_group_ad.ad.responsive_search_ad.headlines": {
+      "category": "ATTRIBUTE",
+      "data_type": "MESSAGE",
+      "filterable": "False",
+      "repeated": "True",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "ad_group_ad.ad.type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              APP_ADAPP_ENGAGEMENT_ADAPP_PRE_REGISTRATION_ADCALL_ADDEMAND_GEN_CAROUSEL_ADDEMAND_GEN_MULTI_ASSET_ADDEMAND_GEN_PRODUCT_ADDEMAND_GEN_VIDEO_RESPONSIVE_ADDYNAMIC_HTML5_ADEXPANDED_DYNAMIC_SEARCH_ADEXPANDED_TEXT_ADHOTEL_ADHTML5_UPLOAD_ADIMAGE_ADIN_FEED_VIDEO_ADLEGACY_APP_INSTALL_ADLEGACY_RESPONSIVE_DISPLAY_ADLOCAL_ADRESPONSIVE_DISPLAY_ADRESPONSIVE_SEARCH_ADSHOPPING_COMPARISON_LISTING_ADSHOPPING_PRODUCT_ADSHOPPING_SMART_ADSMART_CAMPAIGN_ADTEXT_ADTRAVEL_ADUNKNOWNUNSPECIFIEDVIDEO_ADVIDEO_BUMPER_ADVIDEO_NON_SKIPPABLE_IN_STREAM_ADVIDEO_RESPONSIVE_ADVIDEO_TRUEVIEW_IN_STREAM_ADYOUTUBE_AUDIO_AD",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_ad.policy_summary.approval_status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              APPROVEDAPPROVED_LIMITEDAREA_OF_INTEREST_ONLYDISAPPROVEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_ad.policy_summary.review_status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ELIGIBLE_MAY_SERVEREVIEWEDREVIEW_IN_PROGRESSUNDER_APPEALUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_ad.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "ad_group_ad.status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ENABLEDPAUSEDREMOVEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_criterion.keyword.match_type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              BROADEXACTPHRASEUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_criterion.keyword.text": {
+      "category": "ATTRIBUTE",
+      "data_type": "STRING",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_criterion.negative": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_criterion.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "ad_group_criterion.status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ENABLEDPAUSEDREMOVEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "ad_group_criterion.type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              AD_SCHEDULEAGE_RANGEAPP_PAYMENT_MODELAUDIENCEBRANDBRAND_LISTCARRIERCOMBINED_AUDIENCECONTENT_LABELCUSTOM_AFFINITYCUSTOM_AUDIENCECUSTOM_INTENTDEVICEGENDERINCOME_RANGEIP_BLOCKKEYWORDKEYWORD_THEMELANGUAGELIFE_EVENTLISTING_GROUPLISTING_SCOPELOCAL_SERVICE_IDLOCATIONLOCATION_GROUPMOBILE_APPLICATIONMOBILE_APP_CATEGORYMOBILE_DEVICENEGATIVE_KEYWORD_LISTOPERATING_SYSTEM_VERSIONPARENTAL_STATUSPLACEMENTPLACEMENT_LISTPROXIMITYRETAIL_FILTERRETAIL_FILTER_BUNDLESEARCH_THEMETOPICUNKNOWNUNSPECIFIEDUSER_INTERESTUSER_LISTVERTICAL_ADS_ITEM_BIDVERTICAL_ADS_ITEM_GROUP_RULEVERTICAL_ADS_ITEM_GROUP_RULE_LISTVIDEO_LINEUPWEBPAGEWEBPAGE_LISTYOUTUBE_CHANNELYOUTUBE_VIDEO",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.advertising_channel_type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              DEMAND_GENDISPLAYHOTELLOCALLOCAL_SERVICESMULTI_CHANNELPERFORMANCE_MAXSEARCHSHOPPINGSMARTTRAVELUNKNOWNUNSPECIFIEDVIDEO",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.asset_automation_settings": {
+      "category": "ATTRIBUTE",
+      "data_type": "MESSAGE",
+      "filterable": "False",
+      "repeated": "True",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign.bidding_strategy_type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              COMMISSIONENHANCED_CPCFIXED_CPMFIXED_SHARE_OF_VOICEINVALIDMANUAL_CPAMANUAL_CPCMANUAL_CPMMANUAL_CPVMAXIMIZE_CONVERSIONSMAXIMIZE_CONVERSION_VALUEPAGE_ONE_PROMOTEDPERCENT_CPCTARGET_CPATARGET_CPCTARGET_CPMTARGET_CPVTARGET_IMPRESSION_SHARETARGET_OUTRANK_SHARETARGET_ROASTARGET_SPENDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.end_date_time": {
+      "category": "ATTRIBUTE",
+      "data_type": "DATE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.geo_target_type_setting.negative_geo_target_type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              PRESENCEPRESENCE_OR_INTERESTUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.geo_target_type_setting.positive_geo_target_type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              PRESENCEPRESENCE_OR_INTERESTSEARCH_INTERESTUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.id": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.name": {
+      "category": "ATTRIBUTE",
+      "data_type": "STRING",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.network_settings.target_content_network": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.network_settings.target_google_search": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.network_settings.target_google_tv_network": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.network_settings.target_partner_search_network": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.network_settings.target_search_network": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.network_settings.target_youtube": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign.start_date_time": {
+      "category": "ATTRIBUTE",
+      "data_type": "DATE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign.status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ENABLEDPAUSEDREMOVEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_budget.amount_micros": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_budget.delivery_method": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ACCELERATEDSTANDARDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_budget.explicitly_shared": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_budget.period": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              CUSTOM_PERIODDAILYUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_budget.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign_budget.total_amount_micros": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.ad_schedule.day_of_week": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              FRIDAYMONDAYSATURDAYSUNDAYTHURSDAYTUESDAYUNKNOWNUNSPECIFIEDWEDNESDAY",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.ad_schedule.end_hour": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT32",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.ad_schedule.end_minute": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              FIFTEENFORTY_FIVETHIRTYUNKNOWNUNSPECIFIEDZERO",
+      "filterable": "False",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign_criterion.ad_schedule.start_hour": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT32",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.ad_schedule.start_minute": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              FIFTEENFORTY_FIVETHIRTYUNKNOWNUNSPECIFIEDZERO",
+      "filterable": "False",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign_criterion.criterion_id": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.language.language_constant": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign_criterion.location.geo_target_constant": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign_criterion.negative": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "campaign_criterion.status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              ENABLEDPAUSEDREMOVEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "campaign_criterion.type": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              AD_SCHEDULEAGE_RANGEAPP_PAYMENT_MODELAUDIENCEBRANDBRAND_LISTCARRIERCOMBINED_AUDIENCECONTENT_LABELCUSTOM_AFFINITYCUSTOM_AUDIENCECUSTOM_INTENTDEVICEGENDERINCOME_RANGEIP_BLOCKKEYWORDKEYWORD_THEMELANGUAGELIFE_EVENTLISTING_GROUPLISTING_SCOPELOCAL_SERVICE_IDLOCATIONLOCATION_GROUPMOBILE_APPLICATIONMOBILE_APP_CATEGORYMOBILE_DEVICENEGATIVE_KEYWORD_LISTOPERATING_SYSTEM_VERSIONPARENTAL_STATUSPLACEMENTPLACEMENT_LISTPROXIMITYRETAIL_FILTERRETAIL_FILTER_BUNDLESEARCH_THEMETOPICUNKNOWNUNSPECIFIEDUSER_INTERESTUSER_LISTVERTICAL_ADS_ITEM_BIDVERTICAL_ADS_ITEM_GROUP_RULEVERTICAL_ADS_ITEM_GROUP_RULE_LISTVIDEO_LINEUPWEBPAGEWEBPAGE_LISTYOUTUBE_CHANNELYOUTUBE_VIDEO",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "customer.currency_code": {
+      "category": "ATTRIBUTE",
+      "data_type": "STRING",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "customer.id": {
+      "category": "ATTRIBUTE",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "customer.resource_name": {
+      "category": "ATTRIBUTE",
+      "data_type": "RESOURCE_NAME",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "False"
+    },
+    "customer.status": {
+      "category": "ATTRIBUTE",
+      "data_type": "ENUM\n              CANCELEDCLOSEDENABLEDSUSPENDEDUNKNOWNUNSPECIFIED",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "customer.test_account": {
+      "category": "ATTRIBUTE",
+      "data_type": "BOOLEAN",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "customer.time_zone": {
+      "category": "ATTRIBUTE",
+      "data_type": "STRING",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.all_conversions": {
+      "category": "METRIC",
+      "data_type": "DOUBLE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.all_conversions_value": {
+      "category": "METRIC",
+      "data_type": "DOUBLE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.clicks": {
+      "category": "METRIC",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.conversions": {
+      "category": "METRIC",
+      "data_type": "DOUBLE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.conversions_value": {
+      "category": "METRIC",
+      "data_type": "DOUBLE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.cost_micros": {
+      "category": "METRIC",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "metrics.impressions": {
+      "category": "METRIC",
+      "data_type": "INT64",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    },
+    "segments.date": {
+      "category": "SEGMENT",
+      "data_type": "DATE",
+      "filterable": "True",
+      "repeated": "False",
+      "selectable": "True",
+      "sortable": "True"
+    }
+  },
+  "sources": [
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "b5ad4295a6359684d56e9b53579757e314697375eda0f9502cad8cde19ef5cfc",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/ad_group"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "4f567e52b6f396d6df6bc9199477eaf2d753ce9507a83a6c2343933f30b5469f",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/ad_group_ad"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "dcb8a5384bfa5e50ce6f916c23ff75a92751f80e9d47fbecdd8563990f603c64",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/ad_group_criterion"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "6e3c9a3ef591137a51739e39200ac6714277bdc8538d968e51468fc1fde299e1",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/campaign"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "c888969b06416b18a0670309a3f3b289b0e6f8b4e379441baf43af5819fdef51",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/campaign_budget"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "80e1ed1c8ff3e2de8f1e887d0813f5df37db21babe2cdc795faa207ba54d819b",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/campaign_criterion"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "3634ded83497751f81c0de77e06985e16aafdd8664eb0160bd940f526cfb4364",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/customer"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "b3b8128b4f1a4c06b11e4cc9f57229c3a11e1378dd34ec53d9fbb1c10d68dfa1",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/metrics"
+    },
+    {
+      "fetched_on": "2026-10-12",
+      "sha256": "6c2a4095ca151c2108d13c441e044cee3154fdd7ac7501c4e1ac3b1c9c78075d",
+      "url": "https://developers.google.com/google-ads/api/fields/v25/segments"
+    }
+  ]
+}

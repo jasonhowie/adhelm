@@ -4,7 +4,7 @@ All notable changes to AdHelm are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.1] - Unreleased
 
 ### Removed
 
@@ -32,12 +32,32 @@ All notable changes to AdHelm are recorded here. The format follows
   verification). `AUTHORIZATION_ERROR` is reported as `GOOGLE_ADS_AUTHORIZATION_ERROR`
   and cites Google's documented known issue for projects upgraded after 2026-09-09.
   For a `401` or `403` only, the shared transport now scans a body of at most 64 KiB
-  for one of those two codes and stores nothing else from it.
+  for one of those two codes. Screened diagnostic codes and request IDs are extracted
+  only from bodies within 16 KiB; provider prose is never retained.
 - The Google Ads setup guide follows the Cloud Console flow.
 
 ### Fixed
 
 - Google Ads reads work for a user who has no developer token.
+- Google Ads v25 inventory uses the current campaign date-time fields and
+  preserves account-local time precision. A pinned official field inventory
+  checks field names across read and unreleased planning paths.
+- Google Ads reports request conversions, conversion value, all conversions and
+  all-conversion value. Exact fractional counts and source values survive local
+  history and deterministic exports; attribution remains explicitly unknown.
+- Opt-in campaign names make Google Ads report rows recognizable without
+  reversing opaque references. Default exports continue to pseudonymize names.
+- Interactive Google, LinkedIn and Reddit enrollment prints a local browser URL,
+  bounded callback wait and cancellation instructions to stderr. `--no-browser`
+  supports manual navigation on the same machine. JSON stdout stays unchanged.
+- Provider HTTP errors retain bounded codes and request identifiers where the
+  provider exposes a reviewed shape. Raw error prose and payloads remain private.
+- Built wheel and sdist checks reject inconsistent package versions and a stale
+  release state. Google OAuth guidance describes Cloud-project API access after
+  the developer-token sunset.
+
+Remote writes remain unreleased, all providers remain `EXPERIMENTAL`, and no new
+live-validation or named-agent compatibility claim is made.
 
 ### Upgrading from 0.1.0
 

@@ -132,7 +132,8 @@ def test_creative_version_csv_uses_the_retained_serving_manifest_digest(tmp_path
     output = tmp_path / "export"
     manifest = export_verified(ledger, output, opaque_key=b"k" * 32)
 
-    assert manifest["projection_version"] == 2
+    # Version 3 adds exact conversion columns; creative projections retain their contract.
+    assert manifest["projection_version"] == 3
 
     rows = list(csv.DictReader((output / "creative-versions.csv").read_text().splitlines()))
     assert rows == [

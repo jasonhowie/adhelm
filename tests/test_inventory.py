@@ -78,8 +78,8 @@ def _google_handler(status: str = "PAUSED") -> ResponseHandler:
                                 "id": "11",
                                 "status": status,
                                 "advertisingChannelType": "SEARCH",
-                                "startDate": "2026-01-01",
-                                "endDate": "",
+                                "startDateTime": "2026-01-01 00:00:00",
+                                "endDateTime": "",
                                 "biddingStrategyType": "MANUAL_CPC",
                             },
                             "campaignBudget": {"amountMicros": "1000000"},
@@ -152,7 +152,7 @@ def test_google_inventory_normalizes_complete_reads_and_records_unknown_remote_c
         # snapshot so a later reader can tell a retention change from a change
         # at Google.  It lives here, never in `normalized_state`, so recording
         # it creates no drift of its own.
-        "GOOGLE_ADS_STATE_SHAPE_2026-09-09.1",
+        "GOOGLE_ADS_STATE_SHAPE_2026-10-12.1",
         "GOOGLE_ADS_CREATIVE_TEXT_NOT_RETAINED",
         "GOOGLE_ADS_RESPONSIVE_SEARCH_AD_NOT_RETURNED",
         "GOOGLE_ADS_FINAL_URL_ABSENT",

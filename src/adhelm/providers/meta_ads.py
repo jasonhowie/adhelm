@@ -18,7 +18,7 @@ import httpx
 from pydantic import Field, model_validator
 
 from adhelm.canonical import parse_json
-from adhelm.errors import AdhelmError, ExitCode
+from adhelm.errors import AdhelmError, ExitCode, copy_provider_diagnostics
 from adhelm.models import Currency, Money, SafeRef, StrictModel
 from adhelm.privacy import validate_data
 from adhelm.reporting import NormalizedReport, PerformanceRow, QualityStatus, ReportEnvelope
@@ -451,7 +451,10 @@ def _json(response: httpx.Response, context: str) -> dict[str, Any]:
         # read, logged, or interpolated into a diagnostic.
         envelope = value.get("error")
         code = envelope.get("code") if isinstance(envelope, dict) else None
-        raise classify_meta_ads_graph_error(code)
+        diagnostic = classify_meta_ads_graph_error(code)
+        if type(code) is int and 0 <= code <= 2_147_483_647:
+            diagnostic.provider_code = str(code)
+        raise diagnostic
     try:
         # The creative's three value-bearing fields are removed before the
         # whole-read screen and screened individually in `_creative_presence`.
@@ -1454,7 +1457,9 @@ class MetaAdsClient:
             # response body here, so a Meta-typed rate-limit or credential
             # diagnostic can never disclose one, and an unclassified status is
             # re-raised unchanged rather than relabelled.
-            raise classify_meta_ads_transport_error(error) from None
+            raise copy_provider_diagnostics(
+                error, classify_meta_ads_transport_error(error)
+            ) from None
 
     def _identity_matches(self, account_ref: str, identity: MetaAdsIdentity) -> str:
         # Typed identities may be supplied directly; SafeRef is not an account-path type.

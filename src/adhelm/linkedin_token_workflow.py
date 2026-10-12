@@ -90,6 +90,7 @@ def enroll_linkedin_token(
     redirect_port: int,
     scopes: tuple[str, ...] | None = None,
     interactive: bool = False,
+    no_browser: bool = False,
 ) -> LinkedInTokenLifecycleResult:
     """Authorize one configured LinkedIn Ads profile through the local browser."""
     _require_interactive(interactive)
@@ -119,7 +120,12 @@ def enroll_linkedin_token(
                 "application's Auth tab."
             ),
         ) from None
-    grant = _browser_grant(target, redirect_port=port, client_secret=client_secret)
+    grant = _browser_grant(
+        target,
+        redirect_port=port,
+        client_secret=client_secret,
+        **({"no_browser": True} if no_browser else {}),
+    )
     identity = _verify_identity(profile, grant.access_token, grant.granted_scopes)
     salt = new_identity_salt()
     pseudonym = linkedin_account_pseudonym(salt, identity.account_client_ref)
@@ -189,11 +195,18 @@ def _refresh_made_no_egress(failure: BaseException) -> bool:
 
 
 def _browser_grant(
-    target: OAuthAuthorizationTarget, *, redirect_port: int, client_secret: str
+    target: OAuthAuthorizationTarget,
+    *,
+    redirect_port: int,
+    client_secret: str,
+    no_browser: bool = False,
 ) -> OAuthInitialGrant:
     with LoopbackRedirectReceiver(port=redirect_port, path=LINKEDIN_CALLBACK_PATH) as receiver:
         attempt = start_authorization(target, receiver.redirect_uri)
-        open_system_browser(attempt)
+        if no_browser:
+            open_system_browser(attempt, no_browser=True)
+        else:
+            open_system_browser(attempt)
         raw_query = receiver.receive_query()
         receiver.require_unexpired()
         callback = consume_callback(attempt, raw_query)
