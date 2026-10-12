@@ -122,6 +122,6 @@ def test_cli_discovery_independent_of_optional_accounts(tmp_path: Path) -> None:
         check=True,
     )
     data = json.loads(result.stdout)["data"]
-    assert data["release_state"] == "READY_FOR_USER_AUTHORIZATION"
+    assert data["release_state"] == "RELEASED_0_1_0"
     assert len(data["providers"]) == 11
     assert not (tmp_path / "empty").exists()

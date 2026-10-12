@@ -11,10 +11,9 @@ __version__ = "0.1.0"
 #: development-evidence scripts (`validate_development`, `validate_native_approval`,
 #: `traceability`) report the v1.0.0 definition-of-done state and do not follow this constant.
 #:
-#: Lifecycle: the build session sets `READY_FOR_USER_AUTHORIZATION` and stops there. That is the
-#: value in the tree the owner exports. In the commit the owner tags as `v0.1.0` (owner action 6
-#: in `docs/implementation/oss-0.1.0-plan.md`) they set this to `RELEASED_0_1_0`, so the wheel
-#: published to PyPI reports the released state and not a pre-release one. Doing so changes two
-#: pins to `RELEASED_0_1_0`: `test_the_build_reports_the_state_it_stops_at` in
+#: Lifecycle: the 0.1.0 build stopped at `READY_FOR_USER_AUTHORIZATION`, and the published 0.1.0
+#: wheel still reports that value because the flip to `RELEASED_0_1_0` was missed before the
+#: tag. 0.1.0 was published to PyPI on 2026-10-12, so the tree now reports `RELEASED_0_1_0`.
+#: Two tests pin it: `test_the_tree_reports_the_released_state` in
 #: `tests/test_release_state.py` and the `release_state` assertion in `tests/test_core.py`.
-RELEASE_STATE: Final = "READY_FOR_USER_AUTHORIZATION"
+RELEASE_STATE: Final = "RELEASED_0_1_0"

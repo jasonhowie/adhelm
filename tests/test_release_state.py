@@ -58,9 +58,9 @@ def test_the_release_document_defines_the_three_gate_states_in_order() -> None:
     ]
 
 
-def test_the_build_reports_the_state_it_stops_at() -> None:
-    # The build session never reaches RELEASED_0_1_0: the owner pushes, tags and publishes.
-    assert adhelm.RELEASE_STATE == "READY_FOR_USER_AUTHORIZATION"
+def test_the_tree_reports_the_released_state() -> None:
+    # 0.1.0 was published to PyPI on 2026-10-12, so the tree reports the final gate state.
+    assert adhelm.RELEASE_STATE == "RELEASED_0_1_0"
     assert adhelm.RELEASE_STATE in _defined_gate_states()
 
 
