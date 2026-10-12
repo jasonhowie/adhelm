@@ -207,7 +207,7 @@ def test_reconnect_cannot_resurrect_a_locally_removed_bundle(setup, monkeypatch)
     workflow.enroll_google_oauth(directory, draft, client, interactive=True)
 
     def interrupted(*_):
-        credential_setup.local_remove(load_configuration(directory), "ga4-read", "PRIMARY")
+        credential_setup.local_remove(load_configuration(directory), "ga4-read")
         return grant()
 
     monkeypatch.setattr(workflow, "_browser_grant", interrupted)

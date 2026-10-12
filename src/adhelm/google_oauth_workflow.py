@@ -68,14 +68,10 @@ def _check_new_profile(configuration: Configuration, draft: GoogleOAuthProfileDr
             next_action="Use reconnect for an existing Google OAuth profile or select a new ID.",
         )
     references = {draft.credential_ref.casefold()}
-    if draft.secondary_credential_ref:
-        references.add(draft.secondary_credential_ref.casefold())
     for profile in configuration.profiles:
         if profile.credential_source not in {"OS_STORE", "OS_OAUTH_GOOGLE"}:
             continue
         existing = {profile.credential_ref.casefold()}
-        if isinstance(profile, Profile) and profile.secondary_credential_ref:
-            existing.add(profile.secondary_credential_ref.casefold())
         if existing & references:
             raise AdhelmError(
                 "CREDENTIAL_REFERENCE_ALIAS",
@@ -119,14 +115,7 @@ def _result(profile: Profile, *, operation: str) -> dict[str, object]:
         "operation": operation,
         "profile_configuration_digest": digest(profile),
         "credential_slot": "PRIMARY",
-        "credential_state": (
-            "PRIMARY_OAUTH_READY_SECONDARY_UNVERIFIED"
-            if profile.provider == "google_ads"
-            else "READY"
-        ),
-        "secondary_credential_status": (
-            "REQUIRED_NOT_EVALUATED" if profile.provider == "google_ads" else "NOT_APPLICABLE"
-        ),
+        "credential_state": "READY",
         "oidc_identity_verification": "VERIFIED_DURING_THIS_AUTHORIZATION",
         "resource_access_verified": False,
         "execution_authority": False,
@@ -150,9 +139,14 @@ _PROVIDER_SIDE_GUIDANCE: tuple[str, ...] = (
     "services, open the app you enrolled, then remove its access.",
     "Provider-side reference: https://support.google.com/accounts/answer/13533235",
 )
-_DEVELOPER_TOKEN_GUIDANCE = (
-    "Provider-side: a Google Ads developer token is separate from this OAuth grant and is "
-    "managed in the API Center of the manager account that owns it."
+# Google retired developer tokens on 2026-09-09; access now belongs to the Cloud
+# project that owns the OAuth client.  Source:
+#   https://developers.google.com/google-ads/api/docs/api-policy/developer-token
+#   (fetched 2026-10-12, page last updated 2026-10-07)
+_CLOUD_PROJECT_ACCESS_GUIDANCE = (
+    "Provider-side: Google Ads API access belongs to the Google Cloud project that owns the "
+    "OAuth client, not to this grant. Revoking the grant leaves the project's access level in "
+    "place, and the project's access level is managed on its Google Ads API Overview page."
 )
 _GTM_PERMISSION_GUIDANCE = (
     "Provider-side: Tag Manager account and container access is granted to the Google user in "
@@ -177,7 +171,7 @@ def google_oauth_revocation_guidance(provider: GoogleOAuthProvider) -> tuple[str
     extra: tuple[str, ...]
     match provider:
         case "google_ads":
-            extra = (_DEVELOPER_TOKEN_GUIDANCE,)
+            extra = (_CLOUD_PROJECT_ACCESS_GUIDANCE,)
         case "gtm":
             extra = (_GTM_PERMISSION_GUIDANCE,)
         case "ga4" | "ga4_admin":

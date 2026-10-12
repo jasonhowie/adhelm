@@ -122,3 +122,17 @@ note.
   from the public tree; the customer-hosted track stays.
 - HubSpot owner action #3 closes as deferred with CRM; F03 research stays in the
   private repository.
+
+## Dated note (2026-10-12)
+
+The context above names "Google Basic developer-token access" as one of the
+longest-lead provider approvals. Google retired Google Ads developer tokens on
+2026-09-09: API access now belongs to the Google Cloud project that owns the
+OAuth client, at Test, Explorer, Basic or Standard, and users apply on the Google
+Ads API Overview page in Cloud Console (source: the Developer token page,
+fetched 2026-10-12, page last updated 2026-10-07). The decision is unchanged.
+Every user still carries their own provider onboarding; for Google Ads that is
+Explorer or higher access (AdHelm recommends Basic) for their own Cloud project,
+not a developer token. AdHelm no
+longer stores or sends a developer token. See the
+[Google Ads setup guide](../setup/google_ads.md).

@@ -28,7 +28,7 @@ currency, timezone, v25 label, ENABLED baseline, PAUSED configuration-only
 postcondition, `NOT_PREDICTED` delivery status, bounded read interval, zero
 incremental spend, expiry, and fixed recovery limits.
 
-The view excludes the action ID, principal reference, OAuth/developer-token
+The view excludes the action ID, principal reference, OAuth
 binding, configuration and profile digests, requested scope, tokens, raw
 credential slots, provider responses, and reusable approval material.  A
 review at or after expiry remains historical evidence only and continues to

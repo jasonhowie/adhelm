@@ -379,9 +379,8 @@ def test_account_key_credential_ci_alias_reserved_and_secondary_boundaries(
         "_backend",
         lambda: pytest.fail("account-key secondary lookup opened the credential store"),
     )
-    with pytest.raises(AdhelmError) as secondary:
-        credentials.credential(key_profile, secondary=True)
-    assert secondary.value.code == "SECONDARY_CREDENTIAL_UNSUPPORTED"
+    with pytest.raises(TypeError):
+        credentials.credential(key_profile, secondary=True)  # type: ignore[call-arg]
 
     ci_profile = _account_key_profile(
         credential_source="EXPLICIT_CI", credential_ref="OPENAI_ACCOUNT_KEY_CI"
@@ -413,11 +412,12 @@ def test_account_key_credential_ci_alias_reserved_and_secondary_boundaries(
         "prompt_secret_from_terminal",
         lambda: pytest.fail("account-key secondary setup prompted for a secret"),
     )
-    with pytest.raises(AdhelmError) as setup_secondary:
-        credential_setup.store_interactive(
-            Configuration(profiles=[key_profile]), key_profile.profile_id, "SECONDARY"
+    with pytest.raises(TypeError):
+        credential_setup.store_interactive(  # type: ignore[call-arg]
+            Configuration(profiles=[key_profile]),
+            key_profile.profile_id,
+            "SECONDARY",
         )
-    assert setup_secondary.value.code == "SECONDARY_CREDENTIAL_UNSUPPORTED"
 
     reserved = OpenAIAccountKeyProfile.model_construct(
         **{

@@ -12,17 +12,17 @@ The yielded `GoogleAdsEditSession` exposes a detached `identity` and only
 body, token, transport, plan, retention, CLI, or serialization interface.
 
 The factory first validates its local arguments and configuration/profile, then
-resolves the sealed OAuth bundle and separately locked developer-token slot.
+resolves the sealed OAuth bundle.
 Both profile values must describe `google_ads`, `EDIT`,
 `OS_OAUTH_GOOGLE`, the exact `adwords` scope, a 10-digit target customer,
-explicit declared currency and IANA timezone, and a separate developer-token
-reference. The initial session stores only a keyed continuity marker and
-nonsecret target facts. It never retains either credential as session state.
+explicit declared currency and IANA timezone. The initial session stores only a
+keyed continuity marker and nonsecret target facts. It never retains the
+credential as session state.
 
 Immediately before every fixed v25 `googleAds:search` POST, the session rereads
-configuration and both protected values under configuration-then-credential
+configuration and the protected value under configuration-then-credential
 locks. It compares the configuration/profile/target/login customer/app/
-principal/scope/bearer/developer-token/expiry marker and rejects drift,
+principal/scope/bearer/expiry marker and rejects drift,
 expiry, or clock rollback before the POST. The configuration and credential
 locks are released before resource HTTP;
 the session’s private lock may serialize its own fixed reads. The client has

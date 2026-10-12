@@ -3,7 +3,7 @@
 
 `test_pilot_run.py` proves the command's rules on Reddit, GA4 and GTM. This module
 runs the other five advertising providers through the same command, each with the
-profile and credential type it really uses (a Google developer token, a Meta account
+profile and credential type it really uses (a Google OAuth grant, a Meta account
 token bundle, an OpenAI account key), and then holds all eight to the same guarantees.
 Every request is served by `httpx.MockTransport`; every credential and the Meta
 protected bundle are fixtures. Nothing reaches a provider, the operating-system
@@ -111,7 +111,7 @@ def _report_query(account: str, **extra: Any) -> dict[str, Any]:
     }
 
 
-# --- Google Ads: OAuth token plus a separate developer token ------------------------------
+# --- Google Ads: OAuth token only (developer tokens were retired 2026-09-09) ------------------------------
 
 
 def _google_handler(request: httpx.Request) -> httpx.Response:
@@ -200,7 +200,6 @@ def google_ads(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Environment:
     profile = _profile(
         "google_ads",
         "1234567890",
-        secondary_credential_ref="pilot-fixture-developer-token",
         login_customer_ref="0987654321",
     )
     return _prepare(
@@ -210,7 +209,7 @@ def google_ads(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Environment:
         profile,
         _report_query("1234567890"),
         _google_handler,
-        ["1234567890", "0987654321", "pilot-fixture-developer-token"],
+        ["1234567890", "0987654321"],
     )
 
 
@@ -775,20 +774,6 @@ def test_a_linkedin_profile_that_is_not_utc_is_refused_before_any_step(
     _untouched(linkedin_ads)
 
 
-def test_a_google_ads_profile_without_a_developer_token_reference_is_refused_before_any_step(
-    google_ads: Environment, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    _replace_profile(google_ads, secondary_credential_ref=None)
-    forbid_provider_access(monkeypatch)
-
-    code, envelope = google_ads.run()
-
-    assert code == 4
-    assert envelope["diagnostics"][0]["code"] == "SECONDARY_CREDENTIAL_REQUIRED"
-    assert google_ads.requests == [] and google_ads.credential_reads == []
-    _untouched(google_ads)
-
-
 def test_a_bad_window_is_refused_before_a_linkedin_timezone_mismatch(
     linkedin_ads: Environment, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -805,10 +790,9 @@ def test_a_bad_window_is_refused_before_a_linkedin_timezone_mismatch(
     _untouched(linkedin_ads)
 
 
-def test_a_bad_window_is_refused_before_a_google_ads_missing_developer_token(
+def test_a_bad_window_is_refused_for_a_google_ads_pilot_before_any_access(
     google_ads: Environment, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _replace_profile(google_ads, secondary_credential_ref=None)
     _edit_report_input(google_ads, window_end="2026-09-08")
     forbid_provider_access(monkeypatch)
 

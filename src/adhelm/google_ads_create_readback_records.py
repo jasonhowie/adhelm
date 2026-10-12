@@ -6,7 +6,7 @@ observed customer status, the member count the readback projected, the two
 provider-chosen geo-target-type values the candidate never requested, and the
 ordered result kinds the single ``googleAds:mutate`` acknowledgement carried.
 
-No request body, response body, bearer, developer token, or provider diagnostic
+No request body, response body, bearer, or provider diagnostic
 is retained, and the record asserts no acknowledgement, conditional-write,
 idempotency, delivery, or spend semantics.
 

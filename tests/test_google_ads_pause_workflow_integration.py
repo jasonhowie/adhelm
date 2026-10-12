@@ -12,7 +12,6 @@ import pytest
 from test_google_ads_campaign_state import _campaign_response, _identity_response
 from test_google_ads_pause_credentials import (
     _ACCESS,
-    _DEVELOPER,
     _GENERIC_SERVICE,
     _installed,
 )
@@ -22,11 +21,12 @@ from adhelm import google_ads_pause_workflow as workflow
 from adhelm.config import save_configuration
 from adhelm.errors import AdhelmError
 from adhelm.google_ads_pause_plan_views import review_google_ads_campaign_pause_plan
+from adhelm.google_oauth_credentials import GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE
 from adhelm.ledger import Ledger
 from adhelm.models import Configuration
 
 
-@pytest.mark.parametrize("change", ["none", "developer-after-pair", "config-at-append"])
+@pytest.mark.parametrize("change", ["none", "key-after-pair", "config-at-append"])
 def test_complete_planning_composition_with_final_drift_checks(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -45,7 +45,7 @@ def test_complete_planning_composition_with_final_drift_checks(
         )
         assert request.method == "POST"
         assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == profile.login_customer_ref
         body = json.loads(request.content)
         assert body["searchSettings"] == {"returnTotalResultsCount": True}
@@ -55,9 +55,8 @@ def test_complete_planning_composition_with_final_drift_checks(
             return httpx.Response(200, json=_identity_response())
         assert "WHERE campaign.id = 42" in body["query"]
         calls.append("campaign")
-        if change == "developer-after-pair":
-            assert profile.secondary_credential_ref is not None
-            store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = "rotated-developer"
+        if change == "key-after-pair":
+            store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "c" * 64
         return httpx.Response(200, json=_campaign_response())
 
     monkeypatch.setattr(
@@ -106,7 +105,6 @@ def test_complete_planning_composition_with_final_drift_checks(
         raw = json.dumps(plans[0])
         for secret in (
             _ACCESS,
-            _DEVELOPER,
             "m56-google-ads-refresh-token",
             "m56-google-client-secret",
         ):
@@ -125,7 +123,7 @@ def test_complete_planning_composition_with_final_drift_checks(
         assert (
             raised.value.code
             == {
-                "developer-after-pair": "GOOGLE_ADS_PAUSE_CREDENTIAL_CHANGED",
+                "key-after-pair": "GOOGLE_ADS_PAUSE_CREDENTIAL_CHANGED",
                 "config-at-append": "CONFIGURATION_CHANGED",
             }[change]
         )

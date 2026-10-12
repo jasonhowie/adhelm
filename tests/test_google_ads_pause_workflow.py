@@ -49,7 +49,6 @@ def _profile() -> Profile:
         timezone="UTC",
         credential_source="OS_OAUTH_GOOGLE",
         credential_ref="test-primary",
-        secondary_credential_ref="test-developer",
         login_customer_ref="0987654321",
     )
 

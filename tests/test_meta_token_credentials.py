@@ -206,7 +206,6 @@ def test_stale_configuration_or_bundle_blocks_before_a_new_bundle_write(
         client_ref="client",
         scopes=["read"],
         credential_ref="other-primary",
-        secondary_credential_ref="other-secondary",
     )
     save_configuration(tmp_path, Configuration(profiles=[existing]), replace=True)
     with pytest.raises(AdhelmError) as changed:

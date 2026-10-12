@@ -30,7 +30,7 @@ digests, scalar aliases, noncanonical UTC spelling, incomplete members, and a
 plan that is not exactly reconstructed from the four bindings.
 
 The action binds a local workspace; the v25 customer baseline; a declared,
-nonsecret Google OAuth/developer-token association; and one sequential
+nonsecret Google OAuth association; and one sequential
 customer/campaign observation.  Customer references use
 `google_ads.customer.{ten-digit-id}`. Campaign references use
 `google_ads.campaign.{customer-id}.{positive-signed-int64-id}`. An optional
@@ -48,9 +48,8 @@ The execution binding contains only profile, installed client, derived OIDC
 principal, the exact `https://www.googleapis.com/auth/adwords` scope, optional
 login customer, a nonsecret credential-binding digest, configuration digests,
 and the finite resolved/expiry interval. Its fixed status is
-`LOCAL_OAUTH_AND_DEVELOPER_TOKEN_ASSOCIATION_ONLY`; it does not assert a
-provider permission or write authority. It contains no OAuth bearer, developer
-token, protected-slot reference, session HMAC marker, raw response, or generic
+`LOCAL_OAUTH_ASSOCIATION_ONLY`; it does not assert a
+provider permission or write authority. It contains no OAuth bearer, protected-slot reference, session HMAC marker, raw response, or generic
 credential handle.
 
 The plan has one `google_ads` `PAUSE` subplan, no provider revision,

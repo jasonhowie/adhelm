@@ -26,7 +26,7 @@ or retry of an ambiguous operation.
 
 Receipt and historical output contain only digests, expiry, fixed capability and
 zero-incremental-spend facts, and HMAC-redacted review references. Profile,
-customer and campaign identifiers, principal, OAuth/developer-token binding,
+customer and campaign identifiers, principal, OAuth binding,
 configuration digests, raw provider responses, and reusable authority material
 are excluded. `catalog` reads verified local history only. `show` first proves a
 complete synthetic-key review fits the saved output limit, then obtains the

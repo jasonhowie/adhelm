@@ -43,19 +43,19 @@ the configured customer and requested ID exactly.
 ## Authentication and local association
 
 [Google's authorization/header documentation](https://developers.google.com/google-ads/api/rest/auth?hl=en)
-requires the `https://www.googleapis.com/auth/adwords` OAuth scope and a
-`developer-token` header on every API call. A manager-to-client call also uses
+required the `https://www.googleapis.com/auth/adwords` OAuth scope and, until Google
+retired developer tokens on 2026-09-09, a `developer-token` header on every API call;
+the header is now ignored and AdHelm never sends it. A manager-to-client call also uses
 `login-customer-id`; the same source says it is omitted for direct customer
 access. M54 therefore binds the configured target customer, optional manager
 login customer, installed client, derived OIDC principal, the adwords scope,
-OAuth bearer, developer token, and finite bearer expiry into a private
+OAuth bearer, and finite bearer expiry into a private
 per-session HMAC marker.
 
 Google Ads uses the same adwords scope for local READ and EDIT profiles. The
 purpose separation in this repository is a local contract boundary; it does
 not assert provider-enforced OAuth least privilege. The protected OAuth bundle
-and developer token stay in separate OS-store services and are read under
-configuration-then-credential lock ordering. The session exposes neither raw
+is read under configuration-then-credential lock ordering. The session exposes neither raw
 value nor a generic credential resolver.
 
 ## Deliberate limits and uncertainty

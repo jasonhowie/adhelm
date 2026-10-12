@@ -34,7 +34,6 @@ _LOGIN = "0987654321"
 _CLIENT = "fixture-google-ads.apps.googleusercontent.com"
 _SUBJECT = "fixture-google-subject"
 _ACCESS = "fixture-google-ads-edit-access-token"
-_DEVELOPER = "fixture-google-ads-developer-token"
 
 
 @dataclass
@@ -67,7 +66,6 @@ def _profile(**updates: object) -> Profile:
         "timezone": "UTC",
         "credential_source": "OS_OAUTH_GOOGLE",
         "credential_ref": "google-ads-edit-oauth",
-        "secondary_credential_ref": "google-ads-edit-developer",
         "login_customer_ref": _LOGIN,
     }
     data.update(updates)
@@ -123,8 +121,6 @@ def _configured(
         client_secret=None,
         expected_slot=slot,
     )
-    assert selected.secondary_credential_ref is not None
-    store.values[(credentials._SERVICE, selected.secondary_credential_ref)] = _DEVELOPER
     return store, selected, digest(load_configuration(root))
 
 
@@ -173,7 +169,7 @@ def _install_http(monkeypatch: pytest.MonkeyPatch, requests: list[httpx.Request]
             assert request.method == "POST"
             assert request.url.path == f"/v25/customers/{_CUSTOMER}/googleAds:search"
             assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-            assert request.headers["developer-token"] == _DEVELOPER
+            assert "developer-token" not in request.headers
             assert request.headers["login-customer-id"] == _LOGIN
             body = json.loads(request.content)
             assert body["searchSettings"] == {"returnTotalResultsCount": True}
@@ -207,9 +203,8 @@ def test_session_proves_fixed_identity_then_reads_one_campaign_without_generic_c
         observed = active.read_campaign_state("42")
         assert observed.status == "PAUSED"
         assert _ACCESS not in repr(active)
-        assert _DEVELOPER not in repr(active)
         assert "_bearer" not in active.__slots__
-        assert "_developer" not in active.__slots__
+        assert not [name for name in active.__slots__ if "developer" in name.lower()]
         assert not hasattr(active, "mutate_campaign")
 
     assert len(requests) == 2
@@ -240,25 +235,6 @@ def test_stale_or_malformed_expected_configuration_fails_before_store_or_http(
     assert malformed.value.code == "GOOGLE_ADS_EDIT_SESSION_INVALID"
     assert len(store.reads) == reads_before
     assert requests == []
-
-
-def test_developer_slot_drift_stops_before_subsequent_campaign_post(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    store, profile, expected = _configured(tmp_path, monkeypatch)
-    requests: list[httpx.Request] = []
-    _install_http(monkeypatch, requests)
-    assert profile.secondary_credential_ref is not None
-
-    with edit_session.configured_google_ads_edit_session(
-        tmp_path, profile.profile_id, expected
-    ) as active:
-        store.values[(credentials._SERVICE, profile.secondary_credential_ref)] = "rotated-developer"
-        with pytest.raises(AdhelmError) as raised:
-            active.read_campaign_state("42")
-
-    assert raised.value.code == "GOOGLE_ADS_EDIT_CREDENTIAL_CHANGED"
-    assert len(requests) == 1
 
 
 def test_configuration_drift_stops_before_subsequent_campaign_post(
@@ -315,22 +291,10 @@ def test_expiry_and_clock_rollback_stop_before_subsequent_campaign_post(
     assert len(requests) == 1
 
 
-def test_missing_developer_slot_and_read_profile_fail_before_http(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    store, profile, expected = _configured(tmp_path, monkeypatch)
-    assert profile.secondary_credential_ref is not None
-    del store.values[(credentials._SERVICE, profile.secondary_credential_ref)]
+def test_read_profile_fails_before_http(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _store, profile, expected = _configured(tmp_path, monkeypatch)
     requests: list[httpx.Request] = []
     _install_http(monkeypatch, requests)
-
-    with pytest.raises(AdhelmError) as missing:
-        with edit_session.configured_google_ads_edit_session(
-            tmp_path, profile.profile_id, expected
-        ):
-            pytest.fail("missing developer token must reject")
-    assert missing.value.code == "GOOGLE_ADS_DEVELOPER_TOKEN_REQUIRED"
-    assert requests == []
 
     read_profile = _profile(
         profile_id="google-ads-read",

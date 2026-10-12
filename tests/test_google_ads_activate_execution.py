@@ -36,7 +36,6 @@ from test_generic_execution_route import _FakeCompositeBridge, _install
 from test_google_ads_compiler import _brief as _compiler_brief
 from test_google_ads_pause_credentials import (
     _ACCESS,
-    _DEVELOPER,
     _installed,
     _MemoryStore,
 )
@@ -185,7 +184,7 @@ class _FakeGoogleAds:
         self.clock[0] += timedelta(seconds=1)
         assert request.method == "POST"
         assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         body = json.loads(request.content)
         if str(request.url) == _SEARCH_URL:
             assert body["searchSettings"] == {"returnTotalResultsCount": True}
@@ -1103,7 +1102,7 @@ def test_no_token_customer_id_or_native_identifier_reaches_the_readback(
     _execute(prepared, retained, monkeypatch)
     payload = _readbacks(tmp_path)[0]["payload"]
     rendered = _non_digest_text(payload)
-    for secret in (_ACCESS, _DEVELOPER, _CAMPAIGN_ID, _AD_GROUP_ID, _BUDGET_ID):
+    for secret in (_ACCESS, _CAMPAIGN_ID, _AD_GROUP_ID, _BUDGET_ID):
         assert secret not in rendered
     assert "customers/" not in rendered
     assert payload["account_ref"] == _ACCOUNT_REF

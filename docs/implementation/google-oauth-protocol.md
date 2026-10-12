@@ -143,7 +143,7 @@ pinning, and sanitized dispatch classification.
 
 The protocol was designed from Google's [desktop OAuth guidance](https://developers.google.com/identity/protocols/oauth2/native-app), [OpenID Connect guidance](https://developers.google.com/identity/openid-connect/openid-connect), and the maintained [`google-auth` ID-token verifier documentation](https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.id_token.html).
 
-It does not prove Google account ownership, provider role, developer-token
-validity, API enablement, resource access, or app-review eligibility. Each
+It does not prove Google account ownership, provider role, Cloud project
+access level, API enablement, resource access, or app-review eligibility. Each
 provider workflow must still perform its existing fixed identity/resource read
 under the fresh in-memory token before it can claim current account access.

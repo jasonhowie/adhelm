@@ -51,7 +51,6 @@ def _client(
             sleep=lambda _: None,
         ),
         lambda: "access-fixture-token",
-        lambda: "developer-fixture-token",
         now=clock if clock is not None else (lambda: now),
     )
 
@@ -172,7 +171,7 @@ def test_the_configured_login_customer_header_is_sent_only_when_configured() -> 
     client.discover_identity(CONFIG)
     assert seen[0]["login-customer-id"] == "0987654321"
     assert "login-customer-id" not in seen[1]
-    assert all(h["developer-token"] == "developer-fixture-token" for h in seen)
+    assert all("developer-token" not in h for h in seen)
 
 
 def test_a_customer_other_than_the_configured_one_is_refused_before_any_further_read() -> None:

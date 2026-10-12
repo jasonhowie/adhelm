@@ -1,4 +1,4 @@
-"""Fake-only tests for Google Ads PAUSE three-slot planning continuity."""
+"""Fake-only tests for Google Ads PAUSE two-slot planning continuity."""
 
 from __future__ import annotations
 
@@ -35,7 +35,6 @@ _LOGIN = "0987654321"
 _CLIENT = "m56-google-ads.apps.googleusercontent.com"
 _SUBJECT = "m56-google-ads-subject"
 _ACCESS = "m56-google-ads-access-token"
-_DEVELOPER = "m56-google-ads-developer-token"
 _CONFIGURATION_DIGEST = "a" * 64
 _GENERIC_SERVICE = "fake-generic-service"
 
@@ -72,7 +71,6 @@ def _profile(**updates: object) -> Profile:
         "timezone": "UTC",
         "credential_source": "OS_OAUTH_GOOGLE",
         "credential_ref": "google-ads-pause-oauth",
-        "secondary_credential_ref": "google-ads-pause-developer",
         "login_customer_ref": _LOGIN,
     }
     values.update(updates)
@@ -131,8 +129,6 @@ def _installed(
         client_secret="m56-google-client-secret",
         expected_slot=slot,
     )
-    assert profile.secondary_credential_ref is not None
-    store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = _DEVELOPER
     store.reads.clear()
     store.writes.clear()
     return store, profile, current
@@ -160,7 +156,7 @@ def test_prepare_uses_dedicated_key_and_exposes_only_detached_nonsecret_facts(
     assert snapshot.credential_binding_ref.startswith("credential-binding:sha256:")
     assert store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] == "b" * 64
     rendered = repr(snapshot)
-    for secret in (_ACCESS, _DEVELOPER, "m56-google-ads-refresh-token", "m56-google-client-secret"):
+    for secret in (_ACCESS, "m56-google-ads-refresh-token", "m56-google-client-secret"):
         assert secret not in rendered
     with pytest.raises(TypeError):
         pickle.dumps(snapshot)
@@ -224,28 +220,20 @@ def test_complete_canonical_oauth_bundle_drift_changes_the_pause_binding(
     assert replacement not in str(raised.value)
 
 
-def test_developer_or_key_rotation_is_detected_without_repair_write(
+def test_key_rotation_is_detected_without_repair_write(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     store, profile, _current = _installed(monkeypatch)
     expected = _prepare(profile)
-    assert profile.secondary_credential_ref is not None
 
-    for reference, replacement in (
-        (profile.secondary_credential_ref, "m56-rotated-developer"),
-        (GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE, "c" * 64),
-    ):
-        store.values[(_GENERIC_SERVICE, reference)] = replacement
-        writes_before = len(store.writes)
-        with pytest.raises(AdhelmError) as raised:
-            oauth_credentials._current_google_ads_pause_protected_snapshot(
-                profile, _CONFIGURATION_DIGEST, expected
-            )
-        assert raised.value.code == "GOOGLE_ADS_PAUSE_CREDENTIAL_CHANGED"
-        assert len(store.writes) == writes_before
-        store.values[(_GENERIC_SERVICE, reference)] = (
-            _DEVELOPER if reference == profile.secondary_credential_ref else "b" * 64
+    store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "c" * 64
+    writes_before = len(store.writes)
+    with pytest.raises(AdhelmError) as raised:
+        oauth_credentials._current_google_ads_pause_protected_snapshot(
+            profile, _CONFIGURATION_DIGEST, expected
         )
+    assert raised.value.code == "GOOGLE_ADS_PAUSE_CREDENTIAL_CHANGED"
+    assert len(store.writes) == writes_before
 
 
 def test_current_refuses_expired_bundle_without_refresh_or_write(
@@ -329,7 +317,7 @@ def test_invalid_or_mismatched_expected_binding_stops_before_slot_reads(
     assert len(store.reads) == reads_before
 
 
-def test_retention_holds_sorted_three_slots_and_callback_rereads_each_held_slot(
+def test_retention_holds_sorted_two_slots_and_callback_rereads_each_held_slot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     store, profile, _current = _installed(monkeypatch)
@@ -350,12 +338,11 @@ def test_retention_holds_sorted_three_slots_and_callback_rereads_each_held_slot(
         reads_before = len(store.reads)
         recheck()
         recheck()
-        assert len(store.reads) == reads_before + 6
+        assert len(store.reads) == reads_before + 4
 
     assert acquired == sorted(acquired, key=str.casefold)
     assert acquired == [
         GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE,
-        profile.secondary_credential_ref,
         profile.credential_ref,
     ]
     assert callable(escaped[0])
@@ -369,7 +356,6 @@ def test_retention_callback_rereads_captured_handles_and_rejects_late_slot_drift
 ) -> None:
     store, profile, _current = _installed(monkeypatch)
     expected = _prepare(profile)
-    assert profile.secondary_credential_ref is not None
     writes_before = len(store.writes)
 
     with oauth_credentials._google_ads_pause_retention_recheck(
@@ -388,9 +374,7 @@ def test_retention_callback_rereads_captured_handles_and_rejects_late_slot_drift
             lambda: pytest.fail("retention callback acquired a generic backend"),
         )
         recheck()
-        store.values[(_GENERIC_SERVICE, profile.secondary_credential_ref)] = (
-            "m56-late-rotated-developer"
-        )
+        store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "c" * 64
         with pytest.raises(AdhelmError) as drift:
             recheck()
 

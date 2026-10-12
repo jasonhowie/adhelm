@@ -1,5 +1,7 @@
 # Google Ads EDIT observation ultra review
 
+> Note (2026-10-12): Google retired Google Ads developer tokens on 2026-09-09, and AdHelm no longer stores or sends one (G1). The developer-token text below is a historical record of the state when it was written.
+
 Reviewed on 2026-09-06 against the private M54 profile, credential-lifecycle,
 session, and fixed v25 state-reader boundary. All exercises used fake local
 credential stores, temporary configurations, and `httpx.MockTransport`; they

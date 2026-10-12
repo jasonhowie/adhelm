@@ -31,7 +31,6 @@ def _profile(provider: str, account_ref: str, *, google: bool = False) -> Profil
         currency="USD",
         timezone="UTC",
         credential_ref="primary-fixture",
-        secondary_credential_ref="developer-fixture" if google else None,
         login_customer_ref="0987654321" if google else None,
     )
 
@@ -45,11 +44,10 @@ def _patch_runtime(
         lambda **kwargs: _REAL_HTTP_CLIENT(transport=httpx.MockTransport(handler), **kwargs),
     )
 
-    def credential_fixture(
-        profile: Profile, *, ci_enabled: bool = False, secondary: bool = False
-    ) -> str:
-        calls.append((profile.profile_id, secondary))
-        return "developer-fixture" if secondary else "primary-fixture"
+    def credential_fixture(profile: Profile, *, ci_enabled: bool = False) -> str:
+        # `credential` takes no `secondary=` argument: there is no second credential.
+        calls.append((profile.profile_id, False))
+        return "primary-fixture"
 
     monkeypatch.setattr(inventory, "credential", credential_fixture)
     monkeypatch.setattr(inventory, "export_key", lambda: b"i" * 32)
@@ -65,7 +63,7 @@ def _google_handler(status: str = "PAUSED") -> ResponseHandler:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/v25/customers/1234567890/googleAds:search"
         assert request.headers["authorization"] == "Bearer primary-fixture"
-        assert request.headers["developer-token"] == "developer-fixture"
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == "0987654321"
         query = json.loads(request.content)["query"]
         if "customer.currency_code" in query:
@@ -142,7 +140,7 @@ def test_google_inventory_normalizes_complete_reads_and_records_unknown_remote_c
     assert first["account_ref"].startswith("opaque:")
     assert "1234567890" not in json.dumps(first)
     assert first["change_record_digests"] == []
-    assert any(secondary for _, secondary in credential_calls)
+    assert credential_calls and not any(secondary for _, secondary in credential_calls)
     # The ad snapshot keeps `CREATIVE_NOT_EXPOSED` and adds the read-boundary
     # and presence facts the shared closed state model has no field for.  The
     # fixture ad returned no responsive-search creative, no final URL and no

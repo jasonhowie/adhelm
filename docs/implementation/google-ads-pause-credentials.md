@@ -8,13 +8,14 @@ provider request, plan, ledger record, mutation, or CLI route.
 The root-owned reserved credential reference
 `google-ads-pause-credential-binding-v1` selects one fixed 32-byte hex key in
 the ordinary local credential-store service.  It cannot be configured as a
-profile primary or secondary reference.  It is separate from the OAuth bundle
-service and from the developer-token reference.  The three slots are always
-locked in casefold-sorted order:
+profile credential reference.  It is separate from the OAuth bundle service.
+The two slots are always locked in casefold-sorted order:
 
-1. the configured Google OAuth bundle reference;
-2. the configured Google Ads developer-token reference; and
-3. the fixed PAUSE binding-key reference.
+1. the configured Google OAuth bundle reference; and
+2. the fixed PAUSE binding-key reference.
+
+Google retired developer tokens on 2026-09-09, so there is no third slot (AdHelm 0.1.0
+locked a developer-token reference as well).
 
 The private initial helper is:
 
@@ -24,18 +25,17 @@ _prepare_google_ads_pause_protected_snapshot(profile, configuration_digest)
 
 It is called while the caller owns its configuration transaction.  It validates
 the exact configured Google Ads `EDIT` OAuth profile, may use the existing
-refresh-capable bundle resolver, reads the developer token, and creates the
+refresh-capable bundle resolver and creates the
 fixed key only when absent with exact readback.  It returns a module-issued,
 immutable, nonserializable `_GoogleAdsPauseProtectedSnapshot`.  The snapshot
 has only the detached nonsecret M55 execution facts needed by the sealed
-planning facade, plus private bearer and developer values for its fixed header
-construction.
+planning facade, plus a private bearer for its fixed header construction.
 
 `credential_binding_ref` is a `credential-binding:sha256:` HMAC.  Its
 domain-separated canonical input includes the exact configuration/profile,
 target customer, optional login customer, declared currency/timezone, client,
-derived principal, exact `adwords` scope, configured slot associations,
-developer token, and the complete canonical protected OAuth bundle.  The
+derived principal, exact `adwords` scope, configured slot association,
+and the complete canonical protected OAuth bundle.  The
 bundle contribution includes refresh material, client secret, lifecycle state,
 and expiry provenance privately.  The key is the HMAC key, so key rotation also
 changes the resulting reference.  The ref deliberately excludes only the

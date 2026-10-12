@@ -27,13 +27,16 @@ def test_account_key_profile_is_closed_and_preserves_legacy_profile_serializatio
     assert legacy.model_dump(mode="json") == Profile.model_validate(
         legacy.model_dump(mode="json")
     ).model_dump(mode="json")
-    # Computed from the installed wheel of exact passing M11 source 2d679cb.
-    assert digest(legacy) == "b876da947bcacbc17ca3306a6fe58de1e24bb519b65711458bf220ff1c353bc1"
-    # Recomputed when O3.2 removed the `edition` field from Configuration; the
-    # profile digest above is unchanged.
+    # Recomputed when the retired `secondary_credential_ref` field (the Google Ads
+    # developer-token reference) was removed from Profile: a profile no longer serializes
+    # that null, so every profile digest changed once, and Google OAuth grants sealed by
+    # AdHelm 0.1.0 must be reconnected. Before that this digest was b876da947bca...
+    assert digest(legacy) == "eaa7a8f572bc2b5868cbf0ccd75f805176e364927211c0058f1d1059caeaa047"
+    # Recomputed when O3.2 removed the `edition` field from Configuration, and again for
+    # the profile change above.
     assert (
         digest(Configuration(profiles=[legacy]))
-        == "d95ae3099b93dc80cba350dd9f9b7e6a69ef9b08f7981cc8e6ad650a86a006b6"
+        == "3e3f9c15552b2e04cd2448cb32c39bf3a87d95c9a433bfd0594e63b6e332e6c8"
     )
     account_key = OpenAIAccountKeyProfile(
         profile_kind="OPENAI_ADS_ACCOUNT_KEY",

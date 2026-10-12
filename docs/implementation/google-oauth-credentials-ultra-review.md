@@ -1,5 +1,7 @@
 # Google OAuth protected credential lifecycle: independent review
 
+> Note (2026-10-12): Google retired Google Ads developer tokens on 2026-09-09, and AdHelm no longer stores or sends one (G1). The developer-token text below is a historical record of the state when it was written.
+
 This review exercised the protected Google OAuth bundle lifecycle with
 in-memory, service-aware fake stores only. It did not open a browser, contact
 Google, access an OS credential store, or use a real credential.

@@ -7,7 +7,7 @@ spend exposure the activation authorized, the precomputed recovery pause
 proposal digest, and the ordered result kinds the single ``googleAds:mutate``
 acknowledgement carried.
 
-No request body, response body, bearer, developer token, or provider diagnostic
+No request body, response body, bearer, or provider diagnostic
 is retained, and the record asserts no acknowledgement, conditional-write,
 idempotency, delivery, or spend *outcome* semantics.  It says what was
 configured and what the bounded readback observed, and nothing about serving.

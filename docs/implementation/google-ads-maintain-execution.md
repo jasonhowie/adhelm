@@ -399,7 +399,7 @@ acknowledgement result kinds.
 `previous_value == new_value` is refused: a maintenance operation must change
 the value it addresses. `campaign_resource_ref` is a keyless SHA-256 reference
 over the exact resource path under a domain separator of its own. No request
-body, response body, bearer, developer token, or provider diagnostic is
+body, response body, bearer, or provider diagnostic is
 retained.
 
 `validate_google_ads_maintain_readback_history` runs on append **and on scan**,

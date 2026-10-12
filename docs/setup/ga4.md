@@ -29,7 +29,8 @@ later release can authorize editing without widening the reporting profile.
 You need a Google Cloud project that you control, one OAuth client in it, and a Google
 user with access to the property. If you already created the client for
 [Google Ads](google_ads.md#create-the-developer-app), reuse it and only add the scope
-below under **Data Access**.
+below under **Data Access**. The Google Ads access level shown on that project's Overview
+page applies to the Google Ads API only; GA4 needs no application for access.
 
 1. Select or create a Google Cloud project and enable both the **Google Analytics Data
    API** and the **Google Analytics Admin API**.

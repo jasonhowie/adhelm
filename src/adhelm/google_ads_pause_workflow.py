@@ -143,7 +143,7 @@ def _configuration_and_profile(
             "GOOGLE_ADS_EDIT_PROFILE_REQUIRED",
             "Google Ads PAUSE planning requires a configured local OAuth EDIT profile.",
             exit_code=ExitCode.AUTHORIZATION,
-            next_action="Configure the Google Ads EDIT profile and its separate developer token.",
+            next_action="Configure the Google Ads EDIT profile.",
         )
     return configuration, captured, profiles[0]
 

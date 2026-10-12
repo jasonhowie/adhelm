@@ -252,7 +252,13 @@ def test_tampered_sealed_bundle_never_issues_an_execution_binding(
     with pytest.raises(AdhelmError) as raised:
         execution_binding.resolve_ga4_admin_edit_execution_binding(profile)
 
-    assert raised.value.code == "GOOGLE_OAUTH_CREDENTIAL_INVALID"
+    # A bundle that differs only in its profile digest is the specific, actionable
+    # "reconnect" refusal; any other tampering stays the generic refusal.
+    assert raised.value.code == (
+        "GOOGLE_OAUTH_PROFILE_BINDING_STALE"
+        if field == "profile_digest"
+        else "GOOGLE_OAUTH_CREDENTIAL_INVALID"
+    )
     _assert_redacted(raised.value)
 
 

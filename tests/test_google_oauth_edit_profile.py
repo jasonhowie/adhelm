@@ -183,19 +183,13 @@ def test_google_oauth_draft_rejects_unsupported_edit_or_higher_targets(
 
 
 @pytest.mark.parametrize(
-    ("provider", "purpose", "scope", "account_ref", "secondary_credential_ref"),
+    ("provider", "purpose", "scope", "account_ref"),
     [
-        ("ga4", "EDIT", _EDIT_SCOPE, "12345", None),
-        (
-            "google_ads",
-            "ACTIVATE",
-            "https://www.googleapis.com/auth/adwords",
-            "1234567890",
-            "ads-dev",
-        ),
-        ("gtm", "EDIT", "https://www.googleapis.com/auth/tagmanager.readonly", "12345", None),
-        ("ga4_admin", "ACTIVATE", _EDIT_SCOPE, "12345", None),
-        ("ga4_admin", "PUBLISH", _EDIT_SCOPE, "12345", None),
+        ("ga4", "EDIT", _EDIT_SCOPE, "12345"),
+        ("google_ads", "ACTIVATE", "https://www.googleapis.com/auth/adwords", "1234567890"),
+        ("gtm", "EDIT", "https://www.googleapis.com/auth/tagmanager.readonly", "12345"),
+        ("ga4_admin", "ACTIVATE", _EDIT_SCOPE, "12345"),
+        ("ga4_admin", "PUBLISH", _EDIT_SCOPE, "12345"),
     ],
 )
 def test_google_oauth_profile_rejects_unsupported_edit_or_higher_targets(
@@ -203,7 +197,6 @@ def test_google_oauth_profile_rejects_unsupported_edit_or_higher_targets(
     purpose: str,
     scope: str,
     account_ref: str,
-    secondary_credential_ref: str | None,
 ) -> None:
     raw = _profile("EDIT").model_dump(mode="python")
     raw.update(
@@ -212,7 +205,6 @@ def test_google_oauth_profile_rejects_unsupported_edit_or_higher_targets(
             "purpose": purpose,
             "scopes": [scope],
             "account_ref": account_ref,
-            "secondary_credential_ref": secondary_credential_ref,
         }
     )
     with pytest.raises(ValidationError):

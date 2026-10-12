@@ -1,7 +1,6 @@
 """Explicit local terminal credential handoff and bounded non-secret status."""
 
 from dataclasses import asdict
-from enum import StrEnum
 from typing import Annotated
 
 import typer
@@ -13,11 +12,6 @@ from adhelm.errors import AdhelmError
 from adhelm.models import ConfiguredProfile
 
 app = typer.Typer(no_args_is_help=True)
-
-
-class Slot(StrEnum):
-    PRIMARY = "PRIMARY"
-    SECONDARY = "SECONDARY"
 
 
 def _selected(profiles: list[ConfiguredProfile], profile_id: str) -> ConfiguredProfile:
@@ -71,7 +65,6 @@ def status(
 def _mutate(
     ctx: typer.Context,
     profile_id: str,
-    slot: Slot,
     operation: str,
     interactive: bool,
 ) -> None:
@@ -91,19 +84,16 @@ def _mutate(
             )
         configuration = load_configuration(root(ctx))
         profile = _selected(configuration.profiles, profile_id)
-        selected_slot: credential_setup.CredentialSlot = (
-            "PRIMARY" if slot is Slot.PRIMARY else "SECONDARY"
-        )
         try:
             if operation == "remove-local":
-                result = credential_setup.local_remove(configuration, profile_id, selected_slot)
+                result = credential_setup.local_remove(configuration, profile_id)
             else:
                 action = (
                     credential_setup.rotate_interactive
                     if operation == "rotate"
                     else credential_setup.store_interactive
                 )
-                result = action(configuration, profile_id, selected_slot)
+                result = action(configuration, profile_id)
         except AdhelmError as error:
             if error.code != "CREDENTIAL_LOCAL_CHANGE_UNVERIFIED":
                 raise
@@ -112,7 +102,7 @@ def _mutate(
                 {
                     "profile_configuration_digest": digest(profile),
                     "provider": profile.provider,
-                    "slot": selected_slot,
+                    "slot": "PRIMARY",
                     "local_only": True,
                     "local_state": "UNVERIFIED",
                     "failure_code": error.code,
@@ -136,29 +126,26 @@ def _mutate(
 def store(
     ctx: typer.Context,
     profile_id: Annotated[str, typer.Option("--profile")],
-    slot: Annotated[Slot, typer.Option("--slot")] = Slot.PRIMARY,
     interactive: Annotated[bool, typer.Option("--interactive")] = False,
 ) -> None:
     """Store a missing local secret through an explicitly selected hidden terminal prompt."""
-    _mutate(ctx, profile_id, slot, "store", interactive)
+    _mutate(ctx, profile_id, "store", interactive)
 
 
 @app.command("rotate")
 def rotate(
     ctx: typer.Context,
     profile_id: Annotated[str, typer.Option("--profile")],
-    slot: Annotated[Slot, typer.Option("--slot")] = Slot.PRIMARY,
     interactive: Annotated[bool, typer.Option("--interactive")] = False,
 ) -> None:
     """Explicitly replace a local secret; this does not rotate or revoke it at the provider."""
-    _mutate(ctx, profile_id, slot, "rotate", interactive)
+    _mutate(ctx, profile_id, "rotate", interactive)
 
 
 @app.command("remove-local")
 def remove_local(
     ctx: typer.Context,
     profile_id: Annotated[str, typer.Option("--profile")],
-    slot: Annotated[Slot, typer.Option("--slot")] = Slot.PRIMARY,
 ) -> None:
     """Remove the selected local entry; provider revocation remains unverified."""
-    _mutate(ctx, profile_id, slot, "remove-local", False)
+    _mutate(ctx, profile_id, "remove-local", False)

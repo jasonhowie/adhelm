@@ -79,7 +79,6 @@ def _legacy_profile(**changes: object) -> Profile:
         "scopes": ["read"],
         "credential_source": "OS_STORE",
         "credential_ref": "legacy-primary-slot",
-        "secondary_credential_ref": "legacy-secondary-slot",
     }
     values.update(changes)
     return Profile.model_validate(values)
@@ -243,12 +242,11 @@ def test_binding_key_ci_path_never_reads_an_ambient_environment_or_os_store(
 
 @pytest.mark.parametrize("reference", (OPENAI_PAUSE_BINDING_KEY_REFERENCE,))
 @pytest.mark.parametrize("source", ("OS_STORE", "EXPLICIT_CI"))
-@pytest.mark.parametrize("slot", ("credential_ref", "secondary_credential_ref"))
-def test_binding_reference_is_reserved_in_primary_secondary_and_ci_profile_slots(
-    reference: str, source: str, slot: str
+def test_binding_reference_is_reserved_in_primary_and_ci_profile_slots(
+    reference: str, source: str
 ) -> None:
     values = _legacy_profile(credential_source=source).model_dump()
-    values[slot] = reference.upper()
+    values["credential_ref"] = reference.upper()
     with pytest.raises(ValidationError):
         Profile.model_validate(values)
 

@@ -41,8 +41,8 @@ from adhelm.providers.google_ads import (
     GOOGLE_ADS_BUDGET_RETURNED,
     GOOGLE_ADS_BUDGET_TYPE_NOT_RETURNED,
     GOOGLE_ADS_BUDGET_TYPE_RETURNED,
+    GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE,
     GOOGLE_ADS_CREATIVE_TEXT_NOT_RETAINED,
-    GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED,
     GOOGLE_ADS_FINAL_URL_ABSENT,
     GOOGLE_ADS_FINAL_URL_PRESENT,
     GOOGLE_ADS_GEO_TARGET_TYPE_NOT_RETURNED,
@@ -82,7 +82,7 @@ AD = "google_ads.ad.31"
 
 HEALTHY_ACCOUNT_QUALITY = (
     GOOGLE_ADS_PAGINATION_TOTAL_DECLARED,
-    GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED,
+    GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE,
     GOOGLE_ADS_PRODUCTION_ACCOUNT_DECLARED,
 )
 HEALTHY_CAMPAIGN_QUALITY = (
@@ -413,7 +413,7 @@ def test_a_healthy_account_reports_only_read_boundary_findings() -> None:
         "GA_TRACKING_TEMPLATE_AND_PARAMETERS_NOT_READ",
         "GA_NATIVE_CONVERSION_NOT_READ",
         "GA_BROWSER_NOT_APPLICABLE",
-        "GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED",
+        "GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE",
         "GA_POLICY_ACCOUNT_STATUS_NOT_READ",
     } <= fired
 
@@ -481,7 +481,7 @@ def test_an_unproven_inventory_pagination_is_reported_and_lowers_structure_cover
     records = _healthy_records(
         account_quality=(
             GOOGLE_ADS_PAGINATION_TOTAL_NOT_DECLARED,
-            GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED,
+            GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE,
             GOOGLE_ADS_PRODUCTION_ACCOUNT_DECLARED,
         )
     )
@@ -681,7 +681,7 @@ def test_a_declared_test_account_is_reported_as_no_evidence_of_live_performance(
                     _healthy_records(
                         account_quality=(
                             GOOGLE_ADS_PAGINATION_TOTAL_DECLARED,
-                            GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED,
+                            GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE,
                             GOOGLE_ADS_TEST_ACCOUNT_DECLARED,
                         )
                     )
@@ -1045,7 +1045,7 @@ def test_an_inventory_with_no_account_snapshot_keeps_every_read_contract_disclos
         "GA_TRACKING_TEMPLATE_AND_PARAMETERS_NOT_READ",
         "GA_NATIVE_CONVERSION_NOT_READ",
         "GA_BROWSER_NOT_APPLICABLE",
-        "GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED",
+        "GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE",
         "GA_POLICY_ACCOUNT_STATUS_NOT_READ",
         # An unrecorded pagination total is not a proven one.
         "GA_STRUCTURE_INVENTORY_PAGINATION_NOT_PROVEN",
@@ -1483,7 +1483,7 @@ def _all_fixture_sections() -> list[ProviderAuditSections]:
             resource_ref=ACCOUNT,
             quality=(
                 GOOGLE_ADS_PAGINATION_TOTAL_NOT_DECLARED,
-                GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED,
+                GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE,
                 GOOGLE_ADS_TEST_ACCOUNT_DECLARED,
             ),
         ),

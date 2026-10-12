@@ -37,7 +37,6 @@ from test_generic_execution_route import _FakeCompositeBridge, _install
 from test_google_ads_compiler import _brief as _compiler_brief
 from test_google_ads_pause_credentials import (
     _ACCESS,
-    _DEVELOPER,
     _GENERIC_SERVICE,
     _installed,
     _MemoryStore,
@@ -163,7 +162,7 @@ class _FakeGoogleAds:
         self.clock[0] += timedelta(seconds=1)
         assert request.method == "POST"
         assert request.headers["authorization"] == f"Bearer {_ACCESS}"
-        assert request.headers["developer-token"] == _DEVELOPER
+        assert "developer-token" not in request.headers
         body = json.loads(request.content)
         if str(request.url) == _SEARCH_URL:
             query = body["query"]
@@ -910,7 +909,7 @@ def test_no_token_customer_id_or_native_identifier_reaches_the_readback(
     _execute(prepared, retained, monkeypatch)
     payload = _readbacks(tmp_path)[0]["payload"]
     rendered = _non_digest_text(payload)
-    for secret in (_ACCESS, _DEVELOPER, _CAMPAIGN_ID, _AD_GROUP_ID, _BUDGET_ID):
+    for secret in (_ACCESS, _CAMPAIGN_ID, _AD_GROUP_ID, _BUDGET_ID):
         assert secret not in rendered
     assert "customers/" not in rendered
     # The pseudonymized references are the only thing standing in for the
@@ -1401,24 +1400,15 @@ def test_the_projection_refuses_the_same_tampered_candidate() -> None:
 # --- credential continuity between plan and execute -------------------------
 
 
-@pytest.mark.parametrize("slot", ["developer_token", "binding_key"])
-def test_rotated_google_ads_credentials_refuse_before_egress(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, slot: str
+def test_rotated_google_ads_binding_key_refuses_before_egress(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A rotated developer token or binding key breaks the approved association."""
+    """A rotated binding key breaks the approved association."""
 
     prepared = _prepare(tmp_path, monkeypatch)
     retained = _plan(prepared)
     searches = len(prepared.google.searches)
-    profile = load_configuration(tmp_path).profiles[0]
-    assert profile.secondary_credential_ref is not None
-    reference = (
-        profile.secondary_credential_ref
-        if slot == "developer_token"
-        else GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE
-    )
-    replacement = "p04-rotated-developer-token" if slot == "developer_token" else "d" * 64
-    prepared.store.values[(_GENERIC_SERVICE, reference)] = replacement
+    prepared.store.values[(_GENERIC_SERVICE, GOOGLE_ADS_PAUSE_BINDING_KEY_REFERENCE)] = "d" * 64
 
     with pytest.raises(AdhelmError) as refused:
         _execute(prepared, retained, monkeypatch)

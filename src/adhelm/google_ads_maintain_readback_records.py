@@ -10,7 +10,7 @@ automatically.  A budget, bid, or schedule change is undone by compiling a new
 plan with the recorded previous value and authorizing it; an archive is not
 undone at all, and the record says so.
 
-No request body, response body, bearer, developer token, or provider diagnostic
+No request body, response body, bearer, or provider diagnostic
 is retained, and the record asserts no acknowledgement, conditional-write,
 idempotency, delivery, or spend semantics.  Native resource names are
 pseudonymized exactly as they are in the P04 CREATE readback.

@@ -333,7 +333,7 @@ observation facts: the bounded interval, the observed member count, the observed
 customer status, the ordered acknowledged result kinds, the provider-chosen geo
 target types, the observed campaign asset-automation settings, and the fixed
 `NOT_PREDICTED` / `False` control values for delivery, conditional-write proof,
-and idempotency proof. No request body, response body, bearer, developer token,
+and idempotency proof. No request body, response body, bearer,
 or provider diagnostic is retained.
 
 `validate_google_ads_create_readback_history` requires every readback to name a
@@ -353,7 +353,7 @@ attempt is refused.
 | candidate not fully paused | `GOOGLE_ADS_CREATE_CANDIDATE_NOT_PAUSED` | planner, before configuration or any credential |
 | supplied brief does not recompile to the retained candidate | `GOOGLE_ADS_CREATE_CANDIDATE_DIGEST_MISMATCH` | planner |
 | `resource_ref` names another retained candidate | `INVALID_GOOGLE_ADS_CREATE_EXECUTION_SELECTION` | planner |
-| developer-token / OAuth / binding-key continuity broken | `GOOGLE_ADS_CREATE_EXECUTION_BINDING_DRIFT`, or the sealed session's own `CONFIGURATION_CHANGED` / credential refusals | factory admission |
+| OAuth / binding-key continuity broken | `GOOGLE_ADS_CREATE_EXECUTION_BINDING_DRIFT`, or the sealed session's own `CONFIGURATION_CHANGED` / credential refusals | factory admission |
 | local fingerprint key changed | `GOOGLE_ADS_CREATE_FINGERPRINT_KEY_CHANGED` | adapter, before its first read |
 | the ledger does not register a P04 record kind | `GOOGLE_ADS_CREATE_RECORD_KIND_NOT_INSTALLED` (plan) / `GOOGLE_ADS_CREATE_READBACK_RECORD_KIND_NOT_INSTALLED` (execute) | before any credential |
 | plan expired | `PLAN_EXPIRED` | factory and adapter |

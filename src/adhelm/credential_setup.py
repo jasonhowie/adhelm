@@ -22,10 +22,7 @@ from adhelm.models import (
     validate_configured_profile,
 )
 
-CredentialSlot = Literal["PRIMARY", "SECONDARY"]
-CredentialState = Literal[
-    "PRESENT", "MISSING", "CI_MANAGED", "LOCAL_REMOVED", "REQUIRED_REFERENCE_MISSING"
-]
+CredentialState = Literal["PRESENT", "MISSING", "CI_MANAGED", "LOCAL_REMOVED"]
 CredentialOperation = Literal["STATUS", "STORE", "ROTATE", "LOCAL_REMOVE_ONLY"]
 CredentialPrompt = Literal["Credential secret: ", "Meta USER token: ", "Meta inspector token: "]
 _SERVICE = "adhelm"
@@ -45,7 +42,9 @@ class _CredentialStore(Protocol):
 class CredentialSetupResult:
     profile_id: str
     provider: str
-    slot: CredentialSlot
+    # Every profile has exactly one local credential slot; the field stays in the result
+    # so that `auth status` and the other credential commands keep their output shape.
+    slot: Literal["PRIMARY"]
     credential_ref: str | None
     state: CredentialState
     operation: CredentialOperation
@@ -103,16 +102,15 @@ def credential_status(
     _require_generic_credential_profile(profile)
     _validate_all_references(validated.profiles)
     if profile.credential_source == "EXPLICIT_CI":
-        return tuple(
+        return (
             CredentialSetupResult(
                 profile_id=profile.profile_id,
                 provider=profile.provider,
-                slot=slot,
-                credential_ref=_reference_or_none(profile, slot),
+                slot="PRIMARY",
+                credential_ref=profile.credential_ref,
                 state="CI_MANAGED",
                 operation="STATUS",
-            )
-            for slot in _profile_slots(profile)
+            ),
         )
     if isinstance(profile, Profile) and profile.credential_source == "OS_OAUTH_GOOGLE":
         # OAuth primary state is intentionally stored under a separate fixed
@@ -120,62 +118,41 @@ def credential_status(
         # and accidentally classify a raw generic secret as a bundle.
         from adhelm.google_oauth_credentials import google_oauth_bundle_present
 
-        results: list[CredentialSetupResult] = []
-        for slot in _profile_slots(profile):
-            if slot == "PRIMARY":
-                results.append(
-                    CredentialSetupResult(
-                        profile_id=profile.profile_id,
-                        provider=profile.provider,
-                        slot="PRIMARY",
-                        credential_ref=profile.credential_ref,
-                        state="PRESENT" if google_oauth_bundle_present(profile) else "MISSING",
-                        operation="STATUS",
-                    )
-                )
-            else:
-                results.append(_status_for(profile, slot, _backend_or_error()))
-        return tuple(results)
+        return (
+            CredentialSetupResult(
+                profile_id=profile.profile_id,
+                provider=profile.provider,
+                slot="PRIMARY",
+                credential_ref=profile.credential_ref,
+                state="PRESENT" if google_oauth_bundle_present(profile) else "MISSING",
+                operation="STATUS",
+            ),
+        )
     backend = _backend_or_error()
-    return tuple(_status_for(profile, slot, backend) for slot in _profile_slots(profile))
+    return (_status_for(profile, backend),)
 
 
-def store_interactive(
-    configuration: Configuration,
-    profile_id: str,
-    slot: CredentialSlot,
-) -> CredentialSetupResult:
+def store_interactive(configuration: Configuration, profile_id: str) -> CredentialSetupResult:
     """Store a prompted secret without replacing an existing entry."""
     return _write_interactive(
-        configuration, profile_id, slot, prompt=prompt_secret_from_terminal, replace=False
+        configuration, profile_id, prompt=prompt_secret_from_terminal, replace=False
     )
 
 
-def rotate_interactive(
-    configuration: Configuration,
-    profile_id: str,
-    slot: CredentialSlot,
-) -> CredentialSetupResult:
+def rotate_interactive(configuration: Configuration, profile_id: str) -> CredentialSetupResult:
     """Explicitly replace one local credential after a hidden prompt."""
     return _write_interactive(
-        configuration, profile_id, slot, prompt=prompt_secret_from_terminal, replace=True
+        configuration, profile_id, prompt=prompt_secret_from_terminal, replace=True
     )
 
 
-def local_remove(
-    configuration: Configuration, profile_id: str, slot: CredentialSlot
-) -> CredentialSetupResult:
+def local_remove(configuration: Configuration, profile_id: str) -> CredentialSetupResult:
     """Remove only one local entry; this does not claim remote revocation."""
     validated = _validated_configuration(configuration)
     profile = _profile(validated.profiles, profile_id)
     _require_generic_credential_profile(profile)
     _validate_all_references(validated.profiles)
-    _validate_slot(slot)
-    if (
-        isinstance(profile, Profile)
-        and profile.credential_source == "OS_OAUTH_GOOGLE"
-        and slot == "PRIMARY"
-    ):
+    if isinstance(profile, Profile) and profile.credential_source == "OS_OAUTH_GOOGLE":
         # OAuth primary state is a sealed bundle, not a generic prompt/store
         # secret.  Its source-aware removal holds the same slot lock and proves
         # deletion by exact local readback.
@@ -185,12 +162,12 @@ def local_remove(
         return CredentialSetupResult(
             profile_id=profile.profile_id,
             provider=profile.provider,
-            slot=slot,
+            slot="PRIMARY",
             credential_ref=profile.credential_ref,
             state="LOCAL_REMOVED",
             operation="LOCAL_REMOVE_ONLY",
         )
-    reference = _setup_reference(profile, slot)
+    reference = _setup_reference(profile)
     with credential_mutation_lock(reference):
         backend = _backend_or_error()
         try:
@@ -198,7 +175,7 @@ def local_remove(
         except Exception:
             pass
         _verify_removed(backend, reference)
-        if isinstance(profile, OpenAIAccountKeyProfile) and slot == "PRIMARY":
+        if isinstance(profile, OpenAIAccountKeyProfile):
             # The OpenAI account-key lifecycle keeps a separate non-secret
             # verification record derived from this profile.  Removing the key
             # while leaving that record would leave a masked identity and a
@@ -211,7 +188,7 @@ def local_remove(
         return CredentialSetupResult(
             profile_id=profile.profile_id,
             provider=profile.provider,
-            slot=slot,
+            slot="PRIMARY",
             credential_ref=reference,
             state="LOCAL_REMOVED",
             operation="LOCAL_REMOVE_ONLY",
@@ -221,7 +198,6 @@ def local_remove(
 def _write_interactive(
     configuration: Configuration,
     profile_id: str,
-    slot: CredentialSlot,
     *,
     prompt: Callable[[], str],
     replace: bool,
@@ -230,7 +206,7 @@ def _write_interactive(
     profile = _profile(validated.profiles, profile_id)
     _require_generic_credential_profile(profile)
     _validate_all_references(validated.profiles)
-    reference = _setup_reference(profile, slot)
+    reference = _setup_reference(profile)
     with credential_mutation_lock(reference):
         backend = _backend_or_error()
         existing = _read_before_change(backend, reference)
@@ -255,7 +231,7 @@ def _write_interactive(
         return CredentialSetupResult(
             profile_id=profile.profile_id,
             provider=profile.provider,
-            slot=slot,
+            slot="PRIMARY",
             credential_ref=reference,
             state="PRESENT",
             operation="ROTATE" if replace else "STORE",
@@ -283,10 +259,6 @@ def _profile(profiles: Sequence[ConfiguredProfile], profile_id: str) -> Configur
     return validate_configured_profile(matches[0])
 
 
-def _profile_slots(profile: ConfiguredProfile) -> tuple[CredentialSlot, ...]:
-    return ("PRIMARY", "SECONDARY") if profile.provider == "google_ads" else ("PRIMARY",)
-
-
 def _require_generic_credential_profile(profile: ConfiguredProfile) -> None:
     """Keep protected Meta bundles out of the generic single-secret commands."""
     if isinstance(profile, MetaAccountTokenProfile):
@@ -301,42 +273,20 @@ def _require_generic_credential_profile(profile: ConfiguredProfile) -> None:
         )
 
 
-def _reference_or_none(profile: ConfiguredProfile, slot: CredentialSlot) -> str | None:
-    return (
-        profile.credential_ref
-        if slot == "PRIMARY"
-        else (profile.secondary_credential_ref if isinstance(profile, Profile) else None)
-    )
-
-
-def _setup_reference(profile: ConfiguredProfile, slot: CredentialSlot) -> str:
-    _validate_slot(slot)
+def _setup_reference(profile: ConfiguredProfile) -> str:
     if profile.credential_source == "EXPLICIT_CI":
         raise AdhelmError(
             "CI_CREDENTIAL_SETUP_UNSUPPORTED",
             "OS-store setup is unavailable for an explicit-CI profile.",
             next_action="Configure this credential through the explicitly enabled CI environment.",
         )
-    if profile.credential_source == "OS_OAUTH_GOOGLE" and slot == "PRIMARY":
+    if profile.credential_source == "OS_OAUTH_GOOGLE":
         raise AdhelmError(
             "GOOGLE_OAUTH_INTERACTIVE_SETUP_UNSUPPORTED",
             "Google OAuth primary credentials require the supported local browser flow.",
             next_action="Use the installed Google OAuth enrollment command for this profile.",
         )
-    if slot == "PRIMARY":
-        return profile.credential_ref
-    if profile.provider != "google_ads":
-        raise AdhelmError(
-            "SECONDARY_CREDENTIAL_UNSUPPORTED",
-            "A secondary credential is supported only for Google Ads profiles.",
-        )
-    if profile.secondary_credential_ref is None:
-        raise AdhelmError(
-            "SECONDARY_CREDENTIAL_REFERENCE_REQUIRED",
-            "Google Ads secondary setup requires a configured reference.",
-            next_action="Configure the Google Ads developer-token reference before setup.",
-        )
-    return profile.secondary_credential_ref
+    return profile.credential_ref
 
 
 def _validate_all_references(profiles: Sequence[ConfiguredProfile]) -> None:
@@ -347,41 +297,28 @@ def _validate_all_references(profiles: Sequence[ConfiguredProfile]) -> None:
             # at its model boundary.  Generic slot setup must never probe or
             # mutate that dedicated service/slot.
             continue
-        for reference in (profile.credential_ref, _reference_or_none(profile, "SECONDARY")):
-            if reference is None:
-                continue
-            normalized_reference = reference.casefold()
-            if is_reserved_credential_reference(normalized_reference):
-                raise AdhelmError(
-                    "RESERVED_CREDENTIAL_REFERENCE",
-                    "The configured credential reference is reserved for internal key protection.",
-                )
-            if (
-                profile.credential_source in {"OS_STORE", "OS_OAUTH_GOOGLE"}
-                and normalized_reference in os_store_references
-            ):
-                raise AdhelmError(
-                    "CREDENTIAL_REFERENCE_ALIAS",
-                    "Credential references must be unique across configured profile slots.",
-                    next_action="Configure a distinct reference for each credential slot.",
-                )
-            if profile.credential_source in {"OS_STORE", "OS_OAUTH_GOOGLE"}:
-                os_store_references.add(normalized_reference)
+        reference = profile.credential_ref
+        normalized_reference = reference.casefold()
+        if is_reserved_credential_reference(normalized_reference):
+            raise AdhelmError(
+                "RESERVED_CREDENTIAL_REFERENCE",
+                "The configured credential reference is reserved for internal key protection.",
+            )
+        if (
+            profile.credential_source in {"OS_STORE", "OS_OAUTH_GOOGLE"}
+            and normalized_reference in os_store_references
+        ):
+            raise AdhelmError(
+                "CREDENTIAL_REFERENCE_ALIAS",
+                "Credential references must be unique across configured profile slots.",
+                next_action="Configure a distinct reference for each credential slot.",
+            )
+        if profile.credential_source in {"OS_STORE", "OS_OAUTH_GOOGLE"}:
+            os_store_references.add(normalized_reference)
 
 
-def _status_for(
-    profile: ConfiguredProfile, slot: CredentialSlot, backend: _CredentialStore
-) -> CredentialSetupResult:
-    reference = _reference_or_none(profile, slot)
-    if reference is None:
-        return CredentialSetupResult(
-            profile_id=profile.profile_id,
-            provider=profile.provider,
-            slot=slot,
-            credential_ref=None,
-            state="REQUIRED_REFERENCE_MISSING",
-            operation="STATUS",
-        )
+def _status_for(profile: ConfiguredProfile, backend: _CredentialStore) -> CredentialSetupResult:
+    reference = profile.credential_ref
     try:
         present = bool(backend.get_password(_SERVICE, reference))
     except Exception:
@@ -393,7 +330,7 @@ def _status_for(
     return CredentialSetupResult(
         profile_id=profile.profile_id,
         provider=profile.provider,
-        slot=slot,
+        slot="PRIMARY",
         credential_ref=reference,
         state="PRESENT" if present else "MISSING",
         operation="STATUS",
@@ -411,15 +348,6 @@ def _backend_or_error() -> _CredentialStore:
             "The OS credential store is unavailable.",
             next_action="Configure an approved operating-system credential store.",
         ) from None
-
-
-def _validate_slot(slot: CredentialSlot) -> CredentialSlot:
-    if slot not in {"PRIMARY", "SECONDARY"}:
-        raise AdhelmError(
-            "INVALID_CREDENTIAL_SLOT",
-            "Credential setup requires a supported credential slot.",
-        )
-    return slot
 
 
 def _read_before_change(backend: _CredentialStore, reference: str) -> str | None:

@@ -5,7 +5,7 @@ One record describes exactly one post-acknowledgement observation of the fixed
 configured statuses, the observed customer status, the bounded observation
 interval, and the single fact the v25 ``campaigns:mutate`` acknowledgement
 carried -- its ``results[].resourceName``.  No request body, response body,
-bearer, developer token, or provider diagnostic is retained, and the record
+bearer, or provider diagnostic is retained, and the record
 asserts no acknowledgement, conditional-write, idempotency, delivery, or spend
 semantics.
 

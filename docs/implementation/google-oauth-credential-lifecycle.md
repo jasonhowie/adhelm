@@ -61,7 +61,8 @@ Bundles use the fixed OS credential-store service
 reference cannot receive bundle JSON as a bearer token. Both services use the
 same per-reference mutation lock and validation rejects case-folded aliases
 across both sources. OAuth-primary status and removal use the dedicated
-service; a Google Ads developer-token secondary stays an ordinary secret.
+service. Google Ads has no secondary credential: Google retired developer tokens
+on 2026-09-09.
 
 ## Local transitions and ambiguity
 
@@ -104,8 +105,7 @@ OAuth endpoint, or a provider resource endpoint.
 
 Google Ads and GA4 report reads acquire the primary credential once before
 identity discovery and retain that bearer through all provider requests. Google
-Ads also acquires its static secondary developer token once. Google Ads
-inventory has the same two-token snapshot. This prevents a protected refresh
+Ads inventory has the same single-bearer snapshot. This prevents a protected refresh
 from changing an identity/report binding within one sequential observation; it
 does not make the observation atomic or prove current provider authority.
 

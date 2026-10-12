@@ -4,7 +4,6 @@ import getpass
 import warnings
 from dataclasses import dataclass, field
 from io import StringIO
-from typing import cast
 
 import pytest
 
@@ -54,8 +53,6 @@ def _profile(
         "credential_source": source,
         "credential_ref": primary,
     }
-    if provider == "google_ads":
-        values["secondary_credential_ref"] = "secondary-reference"
     return Profile.model_validate(values)
 
 
@@ -75,41 +72,47 @@ def test_status_store_rotate_and_local_remove_bind_exact_profile(
     monkeypatch.setattr(setup, "prompt_secret_from_terminal", lambda: "secret-value")
     assert [
         item.state for item in setup.credential_status(configuration, "configured-profile")
-    ] == [
-        "MISSING",
-        "MISSING",
-    ]
-    stored = setup.store_interactive(configuration, "configured-profile", "PRIMARY")
+    ] == ["MISSING"]
+    stored = setup.store_interactive(configuration, "configured-profile")
     assert stored.operation == "STORE"
     assert store.values == {"primary-reference": "secret-value"}
     with pytest.raises(AdhelmError, match="already exists"):
-        setup.store_interactive(configuration, "configured-profile", "PRIMARY")
+        setup.store_interactive(configuration, "configured-profile")
     monkeypatch.setattr(setup, "prompt_secret_from_terminal", lambda: "different-secret")
-    rotated = setup.rotate_interactive(configuration, "configured-profile", "PRIMARY")
+    rotated = setup.rotate_interactive(configuration, "configured-profile")
     assert rotated.operation == "ROTATE"
     assert store.values["primary-reference"] == "different-secret"
-    removed = setup.local_remove(configuration, "configured-profile", "PRIMARY")
+    removed = setup.local_remove(configuration, "configured-profile")
     assert removed.operation == "LOCAL_REMOVE_ONLY"
     assert removed.remote_revocation_verified is False
     assert "primary-reference" not in store.values
 
 
-def test_google_secondary_and_ci_boundaries(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_there_is_no_secondary_slot_and_ci_boundaries_hold(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Google retired developer tokens on 2026-09-09, so no profile has a second slot."""
     store = FakeStore()
     monkeypatch.setattr(setup, "os_store_backend", lambda: store)
-    google = _profile()
-    monkeypatch.setattr(setup, "prompt_secret_from_terminal", lambda: "developer-token")
-    result = setup.store_interactive(_configuration(google), "configured-profile", "SECONDARY")
-    assert result.credential_ref == "secondary-reference"
-    meta = _profile(provider="meta_ads")
-    with pytest.raises(AdhelmError, match="only for Google"):
-        setup.store_interactive(_configuration(meta), "configured-profile", "SECONDARY")
+    monkeypatch.setattr(
+        setup, "prompt_secret_from_terminal", lambda: pytest.fail("no prompt for a retired slot")
+    )
+    for provider in ("google_ads", "meta_ads"):
+        profile = _profile(provider=provider)
+        assert [
+            item.slot
+            for item in setup.credential_status(_configuration(profile), "configured-profile")
+        ] == ["PRIMARY"]
+        # The commands take no slot at all: the only credential is the profile's own.
+        with pytest.raises(TypeError):
+            setup.store_interactive(  # type: ignore[call-arg]
+                _configuration(profile), "configured-profile", "SECONDARY"
+            )
+    assert store.values == {}
     ci = _profile(source="EXPLICIT_CI")
     assert (
         setup.credential_status(_configuration(ci), "configured-profile")[0].state == "CI_MANAGED"
     )
     with pytest.raises(AdhelmError, match="explicit-CI"):
-        setup.store_interactive(_configuration(ci), "configured-profile", "PRIMARY")
+        setup.store_interactive(_configuration(ci), "configured-profile")
 
 
 def test_reserved_or_aliased_references_fail_before_store_mutation(
@@ -126,7 +129,7 @@ def test_reserved_or_aliased_references_fail_before_store_mutation(
         update={"profile_id": "other-profile"}
     )
     with pytest.raises(AdhelmError, match="unique"):
-        setup.store_interactive(_configuration(first, second), "configured-profile", "PRIMARY")
+        setup.store_interactive(_configuration(first, second), "configured-profile")
     assert store.values == {}
 
 
@@ -139,7 +142,7 @@ def test_ci_references_have_a_separate_namespace(monkeypatch: pytest.MonkeyPatch
         lambda: pytest.fail("CI status must not open the OS credential store"),
     )
     result = setup.credential_status(_configuration(first, second), "configured-profile")
-    assert [item.state for item in result] == ["CI_MANAGED", "CI_MANAGED"]
+    assert [item.state for item in result] == ["CI_MANAGED"]
 
 
 def test_setup_detects_concurrent_change_and_unverified_write(
@@ -156,14 +159,14 @@ def test_setup_detects_concurrent_change_and_unverified_write(
 
     monkeypatch.setattr(setup, "prompt_secret_from_terminal", conflicting_prompt)
     with pytest.raises(AdhelmError, match="changed while waiting"):
-        setup.store_interactive(configuration, "configured-profile", "PRIMARY")
+        setup.store_interactive(configuration, "configured-profile")
     assert store.values["primary-reference"] == "other-local-value"
 
     store = FakeStore(drop_writes=True)
     monkeypatch.setattr(setup, "os_store_backend", lambda: store)
     monkeypatch.setattr(setup, "prompt_secret_from_terminal", lambda: "new-secret")
     with pytest.raises(AdhelmError) as failure:
-        setup.store_interactive(configuration, "configured-profile", "PRIMARY")
+        setup.store_interactive(configuration, "configured-profile")
     assert failure.value.code == "CREDENTIAL_LOCAL_CHANGE_UNVERIFIED"
     assert failure.value.exit_code == 6
     assert "new-secret" not in failure.value.message
@@ -171,7 +174,7 @@ def test_setup_detects_concurrent_change_and_unverified_write(
     store = FakeStore(values={"primary-reference": "old-secret"}, drop_deletes=True)
     monkeypatch.setattr(setup, "os_store_backend", lambda: store)
     with pytest.raises(AdhelmError) as removal:
-        setup.local_remove(configuration, "configured-profile", "PRIMARY")
+        setup.local_remove(configuration, "configured-profile")
     assert removal.value.code == "CREDENTIAL_LOCAL_CHANGE_UNVERIFIED"
     assert removal.value.exit_code == 6
 
@@ -219,9 +222,5 @@ def test_hidden_prompt_and_backend_errors_never_expose_secret_details(
     assert "private backend detail" not in failure.value.message
     with pytest.raises(AdhelmError) as invalid:
         monkeypatch.setattr(setup, "prompt_secret_from_terminal", lambda: "bad\nsecret")
-        setup.store_interactive(_configuration(_profile()), "configured-profile", "PRIMARY")
+        setup.store_interactive(_configuration(_profile()), "configured-profile")
     assert "bad" not in invalid.value.message
-    invalid_runtime_slot = cast(setup.CredentialSlot, "UNEXPECTED")
-    with pytest.raises(AdhelmError) as invalid_slot:
-        setup.local_remove(_configuration(_profile()), "configured-profile", invalid_runtime_slot)
-    assert invalid_slot.value.code == "INVALID_CREDENTIAL_SLOT"

@@ -32,11 +32,12 @@ def test_casefolded_export_key_reference_is_rejected_before_store_access(
     assert caught.value.code == "PROFILE_INVALID"
 
 
-def test_casefolded_primary_and_secondary_aliases_are_rejected() -> None:
+def test_the_retired_secondary_credential_reference_is_dropped_on_load() -> None:
+    """Google retired developer tokens on 2026-09-09; a 0.1.0 profile still loads."""
     data = _profile().model_dump()
     data["secondary_credential_ref"] = data["credential_ref"].upper()
-    with pytest.raises(ValidationError):
-        Profile.model_validate(data)
+    profile = Profile.model_validate(data)
+    assert "secondary_credential_ref" not in profile.model_dump()
 
 
 def test_casefolded_cross_profile_os_store_alias_fails_before_backend_use(
@@ -69,7 +70,7 @@ def test_store_refuses_an_existing_empty_slot_without_prompt_or_overwrite(
         lambda: pytest.fail("store must require explicit rotate for an existing slot"),
     )
     with pytest.raises(AdhelmError) as caught:
-        credential_setup.store_interactive(_configuration(profile), profile.profile_id, "PRIMARY")
+        credential_setup.store_interactive(_configuration(profile), profile.profile_id)
     assert caught.value.code == "CREDENTIAL_ALREADY_EXISTS"
     assert store.values == {profile.credential_ref: ""}
 

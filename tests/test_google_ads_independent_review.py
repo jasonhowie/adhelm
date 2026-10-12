@@ -15,9 +15,8 @@ The four findings, in the order they appear below:
    ad on the first audit after the upgrade, asserting that "the change occurred
    somewhere inside the recorded observation interval" when nothing changed at
    Google at all.
-2. `_google_ads_developer_token_slot_present` swallows every credential-store
-   failure and reports the slot as absent, so `developer_token_slot_present`
-   is `False` for a store that could not answer.
+2. (Retired: the developer-token slot this finding concerned no longer exists, because
+   Google retired developer tokens on 2026-09-09.)
 3. `ad_group_ad.policy_summary.review_status` is projected, parsed, bounded to
    an enum grammar, retained as a prefixed snapshot status, and declared
    `IMPLEMENTED_FIXED_READ` in `GOOGLE_ADS_READ_SURFACES` -- and then no rule
@@ -31,10 +30,8 @@ The four findings, in the order they appear below:
 
 from __future__ import annotations
 
-from contextlib import nullcontext
 from datetime import timedelta
 
-import pytest
 from test_google_ads_audit import (
     ACCOUNT,
     AD,
@@ -48,13 +45,9 @@ from test_google_ads_audit import (
     _record,
     _sections,
 )
-from test_google_oauth_status import _install, _MemoryStore, _profile
 
 from adhelm.audits import ProviderAuditEvidence
 from adhelm.audits.google_ads import RULES
-from adhelm.errors import AdhelmError
-from adhelm.google_oauth_credentials import google_oauth_local_status
-from adhelm.models import Configuration
 from adhelm.providers.google_ads import (
     GOOGLE_ADS_POLICY_REVIEW_PREFIX,
     GOOGLE_ADS_POLICY_REVIEW_STATUS_RETURNED,
@@ -187,58 +180,6 @@ def test_the_state_shape_change_is_disclosed_where_a_reader_would_look() -> None
     )
 
 
-# --- 2. a credential-store failure is not an absent developer-token slot ------
-
-
-class _UnavailableStore(_MemoryStore):
-    """A credential store that answers for the OAuth slot and fails for the token.
-
-    A real `keyring` backend can raise for one entry and answer for another --
-    a locked collection, a revoked D-Bus session, a Keychain prompt the user
-    dismissed.  Nothing about that means the developer token is absent.
-    """
-
-    def get_password(self, service_name: str, username: str) -> str | None:
-        if username.endswith("secondary"):
-            raise RuntimeError("credential store unavailable")
-        return self.values.get((service_name, username))
-
-
-def test_a_credential_store_failure_is_not_an_absent_developer_token_slot(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """`developer_token_slot_present` must never fabricate an absence.
-
-    `_google_ads_developer_token_slot_present`
-    (`src/adhelm/google_oauth_credentials.py:709-712`) wraps the backend read in
-    a bare `except Exception: return False`, so a store that could not answer
-    is reported exactly like an enrolment that never stored a token.  The
-    status document tells the reader the field means "whether that slot holds a
-    value".  `AGENTS.md` rule 20 forbids silent fallback behaviour, and rule 27
-    requires actionable diagnostics.
-
-    Expected: the status read fails explicitly for a credential store it could
-    not question, or reports the slot state as explicitly unknown.  Reporting
-    `False` is the one answer it may not give.
-    """
-    profile = _profile()
-    _install(monkeypatch, profile, store=_UnavailableStore())
-    monkeypatch.setattr(
-        "adhelm.google_oauth_credentials.credential_mutation_lock",
-        lambda _reference: nullcontext(),
-    )
-    configuration = Configuration.model_validate({"profiles": [profile.model_dump(mode="json")]})
-
-    try:
-        status = google_oauth_local_status(configuration, profile.profile_id)
-    except AdhelmError:
-        return
-    assert status.developer_token_slot_present is not False, (
-        "A credential store that raised was reported as an absent developer-token slot, "
-        "which is indistinguishable from an incomplete enrolment."
-    )
-
-
 # --- 3. an unreviewed policy review status is never reported ------------------
 
 
@@ -317,7 +258,7 @@ def test_an_inventory_without_an_account_snapshot_still_states_why_it_is_partial
     `_account_scoped_findings` (`src/adhelm/audits/google_ads.py:1372-1374`)
     returns `[]` when no `ACCOUNT` snapshot is retained, so
     `GA_STRUCTURE_INVENTORY_PAGINATION_NOT_PROVEN`,
-    `GA_POLICY_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED`, and every other
+    `GA_POLICY_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE`, and every other
     unread-surface disclosure disappear.  `_coverage_map` needs the same record
     to prove pagination, so `STRUCTURE` drops from `COVERED` to `PARTIAL`; but
     `_coverage` also gates its `_UNPROVEN_PAGINATION_RATIONALE` on that record,

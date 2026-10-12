@@ -44,8 +44,8 @@ from adhelm.providers.google_ads import (
     GOOGLE_ADS_BUDGET_SHARING_NOT_RETURNED,
     GOOGLE_ADS_BUDGET_TYPE_NOT_RETURNED,
     GOOGLE_ADS_BUDGET_TYPE_RETURNED,
+    GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE,
     GOOGLE_ADS_CREATIVE_TEXT_NOT_RETAINED,
-    GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED,
     GOOGLE_ADS_FINAL_URL_ABSENT,
     GOOGLE_ADS_FINAL_URL_PRESENT,
     GOOGLE_ADS_GEO_TARGET_TYPE_NOT_RETURNED,
@@ -231,14 +231,12 @@ def run_inventory(
                     before_append=recheck,
                     read_started_at=read_started_at,
                 )
-    # Hold one Google primary/developer-token snapshot across discovery and all
+    # Hold one Google primary-token snapshot across discovery and all
     # inventory pages.  A protected refresh therefore cannot change identity
     # binding partway through a sequential normalized observation.
     google_primary_token: str | None = None
-    google_developer_token: str | None = None
     if provider == "google_ads":
         google_primary_token = credential(profile, ci_enabled=ci_enabled)
-        google_developer_token = credential(profile, ci_enabled=ci_enabled, secondary=True)
 
     def token_getter() -> str:
         if google_primary_token is not None:
@@ -249,10 +247,7 @@ def run_inventory(
         if provider == "google_ads":
             assert isinstance(profile, Profile)
             assert google_primary_token is not None
-            assert google_developer_token is not None
-            snapshots, identity = _google_inventory(
-                client, profile, token_getter, google_developer_token, maximum_records
-            )
+            snapshots, identity = _google_inventory(client, profile, token_getter, maximum_records)
         elif provider == "meta_ads":
             assert isinstance(profile, Profile)
             snapshots, identity = _meta_inventory(client, profile, token_getter, maximum_records)
@@ -425,27 +420,14 @@ def _google_inventory(
     client: httpx.Client,
     profile: Profile,
     token_getter: Any,
-    developer_token: str,
     maximum_records: int,
 ) -> tuple[list[dict[str, Any]], IdentityOutput]:
-    if profile.secondary_credential_ref is None:
-        raise AdhelmError(
-            "SECONDARY_CREDENTIAL_REQUIRED",
-            "Google Ads requires a separate developer-token reference.",
-            exit_code=4,
-        )
-
-    def developer_token_getter() -> str:
-        return developer_token
-
     config = GoogleAdsReadConfig(
         account_ref=profile.account_ref,
         customer_client_ref=profile.account_ref,
         login_customer_client_ref=profile.login_customer_ref,
     )
-    adapter = GoogleAdsClient(
-        SafeHttpClient(client, {"googleads.googleapis.com"}), token_getter, developer_token_getter
-    )
+    adapter = GoogleAdsClient(SafeHttpClient(client, {"googleads.googleapis.com"}), token_getter)
     identity = adapter.discover_identity(config)
     _verify_identity(profile, identity.timezone, identity.currency)
     inventory = adapter.inventory(
@@ -634,8 +616,8 @@ def _google_account_quality(
 ) -> list[str]:
     """Account-level read facts an audit needs and cannot otherwise recover.
 
-    The developer token's Test/Basic/Standard access level is never returned by
-    a reviewed read, so its absence is recorded explicitly rather than left to
+    The Cloud project's Test/Explorer/Basic/Standard access level is never
+    returned by a reviewed read, so its absence is recorded explicitly rather than left to
     look like a healthy default.  `customer.test_account` is a property of the
     customer, and an account that returned no flag is neither test nor proven
     production.
@@ -644,9 +626,9 @@ def _google_account_quality(
         GOOGLE_ADS_PAGINATION_TOTAL_DECLARED
         if inventory.pagination_completeness == "PROVEN_COMPLETE"
         else GOOGLE_ADS_PAGINATION_TOTAL_NOT_DECLARED,
-        GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_LEVEL_NOT_DISCLOSED
-        if identity.developer_token_access_level == "NOT_DOCUMENTED_LOCALLY"
-        else f"GOOGLE_ADS_DEVELOPER_TOKEN_ACCESS_{identity.developer_token_access_level}",
+        GOOGLE_ADS_CLOUD_PROJECT_ACCESS_LEVEL_NOT_OBSERVABLE
+        if identity.cloud_project_access_level == "NOT_OBSERVABLE"
+        else f"GOOGLE_ADS_CLOUD_PROJECT_ACCESS_{identity.cloud_project_access_level}",
     ]
     if identity.test_account is None:
         quality.append(GOOGLE_ADS_TEST_ACCOUNT_FLAG_NOT_RETURNED)

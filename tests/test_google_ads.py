@@ -41,7 +41,6 @@ def _client(transport: httpx.BaseTransport, *, now: datetime | None = None) -> G
             sleep=lambda _: None,
         ),
         lambda: "access-fixture-token",
-        lambda: "developer-fixture-token",
         now=lambda: now or datetime(2026, 9, 4, 12, tzinfo=UTC),
     )
 
@@ -54,7 +53,7 @@ def test_fixed_identity_inventory_and_campaign_report_paginate() -> None:
         assert request.method == "POST"
         assert request.url.path == "/v25/customers/1234567890/googleAds:search"
         assert request.headers["authorization"] == "Bearer access-fixture-token"
-        assert request.headers["developer-token"] == "developer-fixture-token"
+        assert "developer-token" not in request.headers
         assert request.headers["login-customer-id"] == "0987654321"
         body = json.loads(request.content)
         gaql = body["query"]

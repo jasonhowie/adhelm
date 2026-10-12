@@ -106,7 +106,6 @@ def test_every_advertised_target_also_passes_runtime_draft_validation(
         }
     )
     if provider == "google_ads":
-        values["secondary_credential_ref"] = "google-ads-developer-token"
         if purpose == "EDIT":
             values["timezone"] = "UTC"
 
@@ -131,7 +130,6 @@ def test_draft_schema_version_is_exact(value: object) -> None:
         ("principal_ref", "invented-subject"),
         ("currency", None),
         ("timezone", "not/a-zone"),
-        ("secondary_credential_ref", "unexpected-slot"),
         ("credential_ref", "export-pseudonymization-v1"),
     ],
 )
@@ -218,3 +216,10 @@ def test_draft_symlink_is_rejected_and_regular_file_remains_usable(
     with pytest.raises(AdhelmError):
         read_google_oauth_draft(link)
     assert read_google_oauth_draft(path).profile_id == "ga4-read"
+
+
+def test_a_draft_written_for_0_1_0_names_a_retired_reference_that_is_dropped() -> None:
+    """Google retired developer tokens on 2026-09-09; the old draft field is ignored."""
+    values = {**draft_data(), "secondary_credential_ref": "google-ads-developer-token"}
+    draft = GoogleOAuthProfileDraft.model_validate(values)
+    assert "secondary_credential_ref" not in draft.model_dump()

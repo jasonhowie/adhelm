@@ -212,7 +212,6 @@ def fixture_report(data_dir: Path) -> None:
                     currency="USD",
                     timezone="UTC",
                     credential_ref="oauth.fixture",
-                    secondary_credential_ref="developer.fixture",
                     login_customer_ref="0987654321",
                 )
             ]
@@ -253,8 +252,8 @@ def fixture_report(data_dir: Path) -> None:
     def fake_client(**kwargs: Any) -> httpx.Client:
         return actual_client(transport=httpx.MockTransport(handler), **kwargs)
 
-    def fake_credential(*_: object, secondary: bool = False, **__: object) -> str:
-        return "developer-fixture" if secondary else "oauth-fixture"
+    def fake_credential(*_: object, **__: object) -> str:
+        return "oauth-fixture"
 
     with (
         _no_network(),

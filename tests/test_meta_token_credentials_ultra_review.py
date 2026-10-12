@@ -284,9 +284,9 @@ def test_generic_credential_operations_refuse_the_dedicated_bundle_before_side_e
     operations = (
         lambda: credentials.credential(profile),
         lambda: credential_setup.credential_status(configuration, profile.profile_id),
-        lambda: credential_setup.store_interactive(configuration, profile.profile_id, "PRIMARY"),
-        lambda: credential_setup.rotate_interactive(configuration, profile.profile_id, "PRIMARY"),
-        lambda: credential_setup.local_remove(configuration, profile.profile_id, "PRIMARY"),
+        lambda: credential_setup.store_interactive(configuration, profile.profile_id),
+        lambda: credential_setup.rotate_interactive(configuration, profile.profile_id),
+        lambda: credential_setup.local_remove(configuration, profile.profile_id),
     )
     for operation in operations:
         with pytest.raises(AdhelmError) as raised:

@@ -114,8 +114,8 @@ Order of events:
    aggregate discriminator); its account is the profile's; for LinkedIn the profile is
    an explicit UTC profile (`TIMEZONE_MISMATCH`); for GA4 the web-stream identity is
    present and the property is the profile's; for Google Ads the profile is a scoped
-   OAuth profile with a separate developer-token reference
-   (`SCOPED_PROFILE_REQUIRED`, `SECONDARY_CREDENTIAL_REQUIRED`); for a Meta token
+   OAuth profile
+   (`SCOPED_PROFILE_REQUIRED`); for a Meta token
    profile the query's source time zone and currency are the account declaration's
    (`IDENTITY_MISMATCH`); the pilot never passes `--ci`, so the Meta interactive-store
    refusal under `--ci` does not apply. The pilot adds its own rule that the window is
@@ -128,7 +128,7 @@ Order of events:
    report input. Refusals are `INVALID_PILOT_SELECTION` (exit 2), `INVALID_PILOT_WINDOW`
    (2), the shared input-file, schema, identity and precondition codes
    (`SCHEMA_VALIDATION_FAILED`, `IDENTITY_MISMATCH`, `TIMEZONE_MISMATCH`,
-   `SCOPED_PROFILE_REQUIRED`, `SECONDARY_CREDENTIAL_REQUIRED`), and
+   `SCOPED_PROFILE_REQUIRED`), and
    `READ_PROFILE_REQUIRED` (3). In each case there is no ledger, no output, no
    credential read, no provider request and no export-key read;
    `tests/test_pilot_run_providers.py` runs these with a guard that fails the test on

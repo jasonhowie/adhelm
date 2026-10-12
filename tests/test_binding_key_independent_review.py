@@ -9,13 +9,11 @@ from pathlib import Path
 import pytest
 
 import adhelm.credential_lock as credential_lock
-from adhelm import credential_setup, credentials
+from adhelm import credentials
 from adhelm.errors import AdhelmError
 from adhelm.models import (
     OPENAI_PAUSE_BINDING_KEY_REFERENCE,
-    Configuration,
     OpenAIAccountKeyProfile,
-    Profile,
 )
 
 _SERVICE = "adhelm"
@@ -176,32 +174,3 @@ def test_constructed_profile_with_private_object_fails_before_backend(
     assert failure.value.code == "PROFILE_INVALID"
     assert private_detail not in str(failure.value)
     assert private_detail not in rendered
-
-
-def test_reserved_binding_slot_in_constructed_secondary_profile_fails_before_setup_backend(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    legacy = Profile(
-        profile_id="legacy-profile",
-        provider="google_ads",
-        account_ref="account",
-        principal_ref="principal",
-        client_ref="client",
-        scopes=["read"],
-        credential_ref="legacy-primary",
-        secondary_credential_ref="legacy-secondary",
-    )
-    forged = legacy.model_copy(
-        update={"secondary_credential_ref": OPENAI_PAUSE_BINDING_KEY_REFERENCE.upper()}
-    )
-    configuration = Configuration.model_construct(profiles=[forged])
-    monkeypatch.setattr(
-        credential_setup,
-        "os_store_backend",
-        lambda: pytest.fail("reserved slot reached credential setup backend"),
-    )
-
-    with pytest.raises(AdhelmError) as failure:
-        credential_setup.credential_status(configuration, forged.profile_id)
-
-    assert failure.value.code == "PROFILE_CONFIGURATION_INVALID"

@@ -47,16 +47,16 @@ The harness fails a guide that:
 
 - shows an `adhelm` command that exits differently from what the guide says, or that
   uses a flag or file the command does not have;
-- prints a credential (access token, refresh token, client secret, developer token) in
+- prints a credential (access token, refresh token, client secret) in
   any command result, or leaves one in the data directory;
 - sends the fake provider a request a read-only guide must never send (a host outside
   the provider's API, a method other than `GET`, or a `POST` that is not a documented
   read-only query or the provider's token endpoint), or one the fake refuses: no
   credential the enrollment issued or the guide stored, a token granted for a different
   scope than the API needs, an authorization or token request for a client, redirect,
-  code or secret the reader did not enter, a code used twice, or a Google Ads request
-  whose `developer-token` header is not the value the guide stored (stricter than
-  Google, which ignores the header; it proves the stored slot is the one sent);
+  code or secret the reader did not enter, a code used twice, or a Google request
+  that carries a `developer-token` header (stricter than Google, which ignores the
+  header; it proves AdHelm never sends one);
 - runs a command outside the enroll-and-read allowlist (`GUIDE_COMMANDS`), including
   anything that plans, compiles, executes or recovers, or a command that is a declared
   remote mutation;

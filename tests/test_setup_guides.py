@@ -337,10 +337,10 @@ def test_the_meta_guide_reads_with_the_user_token_and_inspects_with_the_other(
         ),
         pytest.param(
             "google_ads",
-            "--slot SECONDARY --interactive",
-            "--interactive",
+            "adhelm auth remove-local --profile google-ads-read",
+            "adhelm auth remove-local --profile google-ads-read --slot SECONDARY",
             "exited",
-            id="google: the wrong slot",
+            id="google: the retired developer-token slot",
         ),
         pytest.param(
             "google_ads",

@@ -82,11 +82,11 @@ When preparing a Google Ads OAuth profile, inspect the installed
 `google-oauth-profile-draft` schema. READ and EDIT use Google's same `adwords`
 scope; a local EDIT purpose does not independently grant provider permissions
 or authorize a campaign change. A separate EDIT enrollment requires explicit
-account currency, IANA timezone, a ten-digit customer ID, and separate OAuth
-and developer-token references. Supply a ten-digit manager login only when
+account currency, IANA timezone, a ten-digit customer ID, and an OAuth
+credential reference. Supply a ten-digit manager login only when
 configured. Keep tokens and private client-file contents out of agent output.
-The user starts the explicit local browser handoff; enrollment leaves developer
-token and resource access unverified. Reconnect cannot promote a READ bundle
+The user starts the explicit local browser handoff; enrollment leaves resource
+access unverified. Reconnect cannot promote a READ bundle
 to EDIT. A private EDIT observer is not a discoverable execution capability;
 use only the installed commands and their evidenced statuses.
 
@@ -343,8 +343,8 @@ state that a configured `PAUSED` status does not predict effective delivery or
 prove zero residual spend, and that Google execution is unreleased.
 Opening or editing an artifact cannot refresh or authorize the plan. Identical
 requests reuse identical files rather than regenerating them. Do not expose
-customer, login-customer or campaign IDs, credential associations or OAuth and
-developer-token material in output.
+customer, login-customer or campaign IDs, credential associations or OAuth
+material in output.
 
 When discovery exposes `plan meta-campaign-pause create`, inspect
 `schema meta-campaign-pause-plan-request` and prepare a regular local request
