@@ -4,7 +4,7 @@ All notable changes to AdHelm are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - Unreleased
+## [0.1.1] - 2026-10-12
 
 ### Removed
 
@@ -67,7 +67,7 @@ developer-token entry in the OS credential store is inert and can be deleted. Th
 retired `secondary_credential_ref` in `config.json` is dropped on load. Until a profile
 is reconnected, its reads stop with `GOOGLE_OAUTH_PROFILE_BINDING_STALE`.
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-10-12
 
 The first public release. It is read-only: it makes no change to any advertising
 or analytics account. It is gated by the
